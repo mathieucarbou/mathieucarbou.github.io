@@ -1,0 +1,10 @@
+title: "OSS Projects"
+description: "by Mathieu Carbou"
+google_analytics: UA-5669052-12
+show_downloads: false
+github:
+  is_project_page: true
+  repository_url: https://github.com/mathieucarbou
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+  - jekyll-remote-theme
