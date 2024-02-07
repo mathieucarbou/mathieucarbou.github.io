@@ -19,6 +19,7 @@
 | [MycilaNTP](https://oss.carbou.me/MycilaNTP)                       |    ESP32     | A simple and efficient NTP library for ESP32 / Arduino                                           |
 | [MycilaRelay](https://oss.carbou.me/MycilaRelay)                   |    ESP32     | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
 | [MycilaTaskMonitor](https://oss.carbou.me/MycilaTaskMonitor)       |    ESP32     | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
+| [MycilaTrial](https://oss.carbou.me/MycilaTrial)                   |    ESP32     | Arduino / ESP32 library to add a trial duration in your app                                      |
 | [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)     |    ESP32     | Heat water with your Solar Production Excess!                                                    |
 
 ## Maintaining
