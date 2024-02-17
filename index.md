@@ -18,6 +18,7 @@
 | [MycilaMQTT](https://oss.carbou.me/MycilaMQTT)                     |    ESP32     | A simple and efficient MQTT helper for Arduino / ESP32 based on bertmelis/espMqttClient          |
 | [MycilaNTP](https://oss.carbou.me/MycilaNTP)                       |    ESP32     | A simple and efficient NTP library for ESP32 / Arduino                                           |
 | [MycilaRelay](https://oss.carbou.me/MycilaRelay)                   |    ESP32     | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
+| [MycilaTaskManager](https://oss.carbou.me/MycilaTaskManager)       |    ESP32     | Arduino / ESP32 Task Manager Library                                                             |
 | [MycilaTaskMonitor](https://oss.carbou.me/MycilaTaskMonitor)       |    ESP32     | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
 | [MycilaTrial](https://oss.carbou.me/MycilaTrial)                   |    ESP32     | Arduino / ESP32 library to add a trial duration in your app                                      |
 | [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)     |    ESP32     | Heat water with your Solar Production Excess!                                                    |
