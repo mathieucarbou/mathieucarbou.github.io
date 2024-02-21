@@ -17,7 +17,7 @@
 | [MycilaLogger](https://oss.carbou.me/MycilaLogger)                     |    ESP32     | A simple and efficient logging library for Arduino / ESP32                                       |
 | [MycilaMQTT](https://oss.carbou.me/MycilaMQTT)                         |    ESP32     | A simple and efficient MQTT helper for Arduino / ESP32 based on bertmelis/espMqttClient          |
 | [MycilaNTP](https://oss.carbou.me/MycilaNTP)                           |    ESP32     | A simple and efficient NTP library for ESP32 / Arduino                                           |
-| [MycilaMycilaPZEM004Tv3](https://oss.carbou.me/MycilaMycilaPZEM004Tv3) |    ESP32     | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
+| [MycilaPZEM004Tv3](https://oss.carbou.me/MycilaPZEM004Tv3)             |    ESP32     | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
 | [MycilaRelay](https://oss.carbou.me/MycilaRelay)                       |    ESP32     | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
 | [MycilaTaskManager](https://oss.carbou.me/MycilaTaskManager)           |    ESP32     | Arduino / ESP32 Task Manager Library                                                             |
 | [MycilaTaskMonitor](https://oss.carbou.me/MycilaTaskMonitor)           |    ESP32     | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
