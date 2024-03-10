@@ -2,33 +2,34 @@
 
 ## Created and maintained
 
-| **Project**                                                            | **Language** | **Description**                                                                                  |
-| :--------------------------------------------------------------------- | :----------: | :----------------------------------------------------------------------------------------------- |
-| [License Maven Plugin](https://oss.carbou.me/license-maven-plugin)     |    Maven     | Maven plugin which helps managing license headers in your project source files                   |
-| [Mycila Guice](https://oss.carbou.me/guice)                            |     Java     | Google Guice Extensions                                                                          |
-| [Mycila Pub Sub](https://oss.carbou.me/pubsub)                         |     Java     | In-JVM Event API                                                                                 |
-| [Mycila XML Tool](https://oss.carbou.me/xmltool)                       |     Java     | Manage XML document through a simple fluent API                                                  |
-| [Beelance](https://oss.carbou.me/Beelance)                             |    ESP32     | Autonomous and remotely connected weight scale for beehives 🐝                                   |
-| [MycilaHADiscovery](https://oss.carbou.me/MycilaHADiscovery)           |    ESP32     | Simple and efficient Home Assistant Discovery library for Arduino / ESP32                        |
-| [MycilaConfig](https://oss.carbou.me/MycilaConfig)                     |    ESP32     | A simple and efficient config library                                                            |
-| [MycilaEasyDisplay](https://oss.carbou.me/MycilaEasyDisplay)           |    ESP32     | Easy to use Arduino / ESP32 library for SH1106, SH1107, SSD1306 OLED I2C displays                |
-| [MycilaESPConnect](https://oss.carbou.me/MycilaESPConnect)             |    ESP32     | Simple & Easy WiFi Manager with Captive Portal for ESP32                                         |
-| [MycilaJSY](https://oss.carbou.me/MycilaJSY)                           |    ESP32     | Arduino / ESP32 library for the JSY-MK-194T single-phase two-way electric energy metering module |
-| [MycilaLogger](https://oss.carbou.me/MycilaLogger)                     |    ESP32     | A simple and efficient logging library for Arduino / ESP32                                       |
-| [MycilaMQTT](https://oss.carbou.me/MycilaMQTT)                         |    ESP32     | A simple and efficient MQTT helper for Arduino / ESP32 based on bertmelis/espMqttClient          |
-| [MycilaNTP](https://oss.carbou.me/MycilaNTP)                           |    ESP32     | A simple and efficient NTP library for ESP32 / Arduino                                           |
-| [MycilaPZEM004Tv3](https://oss.carbou.me/MycilaPZEM004Tv3)             |    ESP32     | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
-| [MycilaRelay](https://oss.carbou.me/MycilaRelay)                       |    ESP32     | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
-| [MycilaTaskManager](https://oss.carbou.me/MycilaTaskManager)           |    ESP32     | Arduino / ESP32 Task Manager Library                                                             |
-| [MycilaTaskMonitor](https://oss.carbou.me/MycilaTaskMonitor)           |    ESP32     | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
-| [MycilaTrial](https://oss.carbou.me/MycilaTrial)                       |    ESP32     | Arduino / ESP32 library to add a trial duration in your app                                      |
-| [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)         |    ESP32     | Heat water with your Solar Production Excess!                                                    |
+| **Project**                                                        | **Language** | **Description**                                                                                  |
+| :----------------------------------------------------------------- | :----------: | :----------------------------------------------------------------------------------------------- |
+| [License Maven Plugin](https://oss.carbou.me/license-maven-plugin) |    Maven     | Maven plugin which helps managing license headers in your project source files                   |
+| [Mycila Guice](https://oss.carbou.me/guice)                        |     Java     | Google Guice Extensions                                                                          |
+| [Mycila Pub Sub](https://oss.carbou.me/pubsub)                     |     Java     | In-JVM Event API                                                                                 |
+| [Mycila XML Tool](https://oss.carbou.me/xmltool)                   |     Java     | Manage XML document through a simple fluent API                                                  |
+| [Beelance](https://oss.carbou.me/Beelance)                         |    ESP32     | Autonomous and remotely connected weight scale for beehives 🐝                                   |
+| [MycilaHADiscovery](https://oss.carbou.me/MycilaHADiscovery)       |    ESP32     | Simple and efficient Home Assistant Discovery library for Arduino / ESP32                        |
+| [MycilaConfig](https://oss.carbou.me/MycilaConfig)                 |    ESP32     | A simple and efficient config library                                                            |
+| [MycilaEasyDisplay](https://oss.carbou.me/MycilaEasyDisplay)       |    ESP32     | Easy to use Arduino / ESP32 library for SH1106, SH1107, SSD1306 OLED I2C displays                |
+| [MycilaESPConnect](https://oss.carbou.me/MycilaESPConnect)         |    ESP32     | Simple & Easy WiFi Manager with Captive Portal for ESP32                                         |
+| [MycilaJSY](https://oss.carbou.me/MycilaJSY)                       |    ESP32     | Arduino / ESP32 library for the JSY-MK-194T single-phase two-way electric energy metering module |
+| [MycilaLogger](https://oss.carbou.me/MycilaLogger)                 |    ESP32     | A simple and efficient logging library for Arduino / ESP32                                       |
+| [MycilaMQTT](https://oss.carbou.me/MycilaMQTT)                     |    ESP32     | A simple and efficient MQTT helper for Arduino / ESP32 based on bertmelis/espMqttClient          |
+| [MycilaNTP](https://oss.carbou.me/MycilaNTP)                       |    ESP32     | A simple and efficient NTP library for ESP32 / Arduino                                           |
+| [MycilaPZEM004Tv3](https://oss.carbou.me/MycilaPZEM004Tv3)         |    ESP32     | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
+| [MycilaRelay](https://oss.carbou.me/MycilaRelay)                   |    ESP32     | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
+| [MycilaTaskManager](https://oss.carbou.me/MycilaTaskManager)       |    ESP32     | Arduino / ESP32 Task Manager Library                                                             |
+| [MycilaTaskMonitor](https://oss.carbou.me/MycilaTaskMonitor)       |    ESP32     | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
+| [MycilaTrial](https://oss.carbou.me/MycilaTrial)                   |    ESP32     | Arduino / ESP32 library to add a trial duration in your app                                      |
+| [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)      |    ESP32     | Heat water with your Solar Production Excess!                                                    |
 
 ## Maintaining
 
 | **Project**                                                  | **Language** | **Description**                                                                                                  |
 | :----------------------------------------------------------- | :----------: | :--------------------------------------------------------------------------------------------------------------- |
 | [ESPAsyncWebServer](https://oss.carbou.me/ESPAsyncWebServer) |    ESP32     | WebSocket, SSE, Authentication, Arduino Json 7, File Upload, Static File serving, URL Rewrite, URL Redirect, etc |
+| [StreamDebugger](https://oss.carbou.me/StreamDebugger)       |    ESP32     | StreamDebugger allows easier debugging of Serial-based communication on Arduino, like AT commands                |
 
 ## About Me
 
