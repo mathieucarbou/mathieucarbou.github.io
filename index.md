@@ -30,6 +30,7 @@
 | :----------------------------------------------------------- | :----------: | :--------------------------------------------------------------------------------------------------------------- |
 | [ESPAsyncWebServer](https://oss.carbou.me/ESPAsyncWebServer) |    ESP32     | WebSocket, SSE, Authentication, Arduino Json 7, File Upload, Static File serving, URL Rewrite, URL Redirect, etc |
 | [StreamDebugger](https://oss.carbou.me/StreamDebugger)       |    ESP32     | StreamDebugger allows easier debugging of Serial-based communication on Arduino, like AT commands                |
+| [WebSerialLite](https://oss.carbou.me/WebSerialLite)         |    ESP32     | WebSerial is a Serial Monitor for ESP32 that can be accessed remotely via a web browser                          |
 
 ## About Me
 
