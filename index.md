@@ -30,6 +30,7 @@
 | [MycilaNTP](https://oss.carbou.me/MycilaNTP)                       |    ESP32     | A simple and efficient NTP library for ESP32 / Arduino                                           |
 | [MycilaPZEM004Tv3](https://oss.carbou.me/MycilaPZEM004Tv3)         |    ESP32     | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
 | [MycilaRelay](https://oss.carbou.me/MycilaRelay)                   |    ESP32     | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
+| [MycilaSystem](https://oss.carbou.me/MycilaSystem)                 |    ESP32     | Arduino / ESP32 library for system-related tasks                                                 |
 | [MycilaTaskManager](https://oss.carbou.me/MycilaTaskManager)       |    ESP32     | Arduino / ESP32 Task Manager Library                                                             |
 | [MycilaTaskMonitor](https://oss.carbou.me/MycilaTaskMonitor)       |    ESP32     | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
 | [MycilaTrial](https://oss.carbou.me/MycilaTrial)                   |    ESP32     | Arduino / ESP32 library to add a trial duration in your app                                      |
