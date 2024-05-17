@@ -20,8 +20,8 @@
 
 | **Project**                                                        | **Language** | **Description**                                                                                  |
 | :----------------------------------------------------------------- | :----------: | :----------------------------------------------------------------------------------------------- |
-| [MycilaDS18](https://oss.carbou.me/MycilaDS18)                     |    ESP32     | ESP32 / Arduino Library for Dallas / Maxim Temperature Integrated Circuits                       |
 | [MycilaConfig](https://oss.carbou.me/MycilaConfig)                 |    ESP32     | A simple and efficient config library                                                            |
+| [MycilaDS18](https://oss.carbou.me/MycilaDS18)                     |    ESP32     | ESP32 / Arduino Library for Dallas / Maxim Temperature Integrated Circuits                       |
 | [MycilaEasyDisplay](https://oss.carbou.me/MycilaEasyDisplay)       |    ESP32     | Easy to use Arduino / ESP32 library for SH1106, SH1107, SSD1306 OLED I2C displays                |
 | [MycilaESPConnect](https://oss.carbou.me/MycilaESPConnect)         |    ESP32     | Simple & Easy WiFi Manager with Captive Portal for ESP32                                         |
 | [MycilaHADiscovery](https://oss.carbou.me/MycilaHADiscovery)       |    ESP32     | Simple and efficient Home Assistant Discovery library for Arduino / ESP32                        |
