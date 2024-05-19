@@ -34,6 +34,7 @@
 | [MycilaSystem](https://oss.carbou.me/MycilaSystem)                 |    ESP32     | Arduino / ESP32 library for system-related tasks                                                 |
 | [MycilaTaskManager](https://oss.carbou.me/MycilaTaskManager)       |    ESP32     | Arduino / ESP32 Task Manager Library                                                             |
 | [MycilaTaskMonitor](https://oss.carbou.me/MycilaTaskMonitor)       |    ESP32     | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
+| [MycilaTrafficLight](https://oss.carbou.me/MycilaTrafficLight)     |    ESP32     | ESP32 / Arduino Library for Traffic Light LEDs                                                   |
 | [MycilaTrial](https://oss.carbou.me/MycilaTrial)                   |    ESP32     | Arduino / ESP32 library to add a trial duration in your app                                      |
 
 ## Maintained Forks (ESP32)
