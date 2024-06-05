@@ -11,7 +11,7 @@ I was also part of the **[Devoxx4Kids Quebec](http://www.devoxx4kids.org/quebec/
 Also an enthusiast photographer, feel free to visit my **[Photography](https://www.mathieu.photography/)** website.
 You will find some articles about neutral density filters and infrared photography too.
 
-- [![](https://img.shields.io/badge/github-mathieucarbou-211F1F?logo=github&logoColor=white&style=flat-square)]([https://github.com/mathieucarbou/](https://oss.carbou.me))
+- [![](https://img.shields.io/badge/github-mathieucarbou-211F1F?logo=github&logoColor=white&style=flat-square)](https://oss.carbou.me)
 - [![](https://img.shields.io/badge/linkedin-mathieucarbou-0072B1?logo=linkedin&style=flat-square)](https://www.linkedin.com/in/mathieucarbou/)
 - [![](https://img.shields.io/badge/tumblr-mathieu.carbou.me-314d69?logo=tumblr&logoColor=white&style=flat-square)](https://mathieu.carbou.me/)
 - [![](https://img.shields.io/badge/website-mathieu.photography-1BC?logo=react&logoColor=white&style=flat-square)](https://www.mathieu.photography/)
