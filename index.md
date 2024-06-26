@@ -53,6 +53,7 @@ You will find some articles about neutral density filters and infrared photograp
 | [MycilaTaskMonitor](https://oss.carbou.me/MycilaTaskMonitor)       |    ESP32     | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
 | [MycilaTrafficLight](https://oss.carbou.me/MycilaTrafficLight)     |    ESP32     | ESP32 / Arduino Library for Traffic Light LEDs                                                   |
 | [MycilaTrial](https://oss.carbou.me/MycilaTrial)                   |    ESP32     | Arduino / ESP32 library to add a trial duration in your app                                      |
+| [MycilaUtilities](https://oss.carbou.me/MycilaUtilities)           |    ESP32     | Utils stuff for Arduino / ESP32 like Time, String functions, CircularBuffer, etc                 |
 
 ## Maintained Forks (ESP32)
 
