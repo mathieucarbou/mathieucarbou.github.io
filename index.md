@@ -46,6 +46,7 @@ You will find some articles about neutral density filters and infrared photograp
 | [MycilaLogger](https://oss.carbou.me/MycilaLogger)                 |    ESP32     | A simple and efficient logging library for Arduino / ESP32                                       |
 | [MycilaMQTT](https://oss.carbou.me/MycilaMQTT)                     |    ESP32     | A simple and efficient MQTT helper for Arduino / ESP32 based on bertmelis/espMqttClient          |
 | [MycilaNTP](https://oss.carbou.me/MycilaNTP)                       |    ESP32     | A simple and efficient NTP library for ESP32 / Arduino                                           |
+| [MycilaPulseAnalyser](https://oss.carbou.me/MycilaPulseAnalyser)   |    ESP32     | ESP32 / Arduino Library to analyse pulses from a Zero-Cross Detection circuit                    |
 | [MycilaPZEM004Tv3](https://oss.carbou.me/MycilaPZEM004Tv3)         |    ESP32     | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
 | [MycilaRelay](https://oss.carbou.me/MycilaRelay)                   |    ESP32     | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
 | [MycilaSystem](https://oss.carbou.me/MycilaSystem)                 |    ESP32     | Arduino / ESP32 library for system-related tasks                                                 |
