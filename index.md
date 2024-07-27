@@ -55,6 +55,7 @@ You will find some articles about neutral density filters and infrared photograp
 | [MycilaTrafficLight](https://oss.carbou.me/MycilaTrafficLight)     |    ESP32     | ESP32 / Arduino Library for Traffic Light LEDs                                                   |
 | [MycilaTrial](https://oss.carbou.me/MycilaTrial)                   |    ESP32     | Arduino / ESP32 library to add a trial duration in your app                                      |
 | [MycilaUtilities](https://oss.carbou.me/MycilaUtilities)           |    ESP32     | Utils stuff for Arduino / ESP32 like Time, String functions, CircularBuffer, etc                 |
+| [MycilaWebSerial](https://oss.carbou.me/MycilaWebSerial)           |    ESP32     | WebSerial is a Serial Monitor for ESP32 that can be accessed remotely via a web browser          |
 
 ## Maintained Forks (ESP32)
 
@@ -62,7 +63,6 @@ You will find some articles about neutral density filters and infrared photograp
 | :----------------------------------------------------------- | :----------: | :--------------------------------------------------------------------------------------------------------------- |
 | [ESPAsyncWebServer](https://oss.carbou.me/ESPAsyncWebServer) |    ESP32     | WebSocket, SSE, Authentication, Arduino Json 7, File Upload, Static File serving, URL Rewrite, URL Redirect, etc |
 | [StreamDebugger](https://oss.carbou.me/StreamDebugger)       |    ESP32     | StreamDebugger allows easier debugging of Serial-based communication on Arduino, like AT commands                |
-| [WebSerialLite](https://oss.carbou.me/WebSerialLite)         |    ESP32     | WebSerial is a Serial Monitor for ESP32 that can be accessed remotely via a web browser                          |
 
 ## Statistics
 
