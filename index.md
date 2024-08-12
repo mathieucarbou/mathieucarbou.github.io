@@ -49,6 +49,7 @@ You will find some articles about neutral density filters and infrared photograp
 | [MycilaPulseAnalyzer](https://oss.carbou.me/MycilaPulseAnalyzer)   |    ESP32     | ESP32 / Arduino Library to analyze pulses from a Zero-Cross Detection circuit                    |
 | [MycilaPZEM004Tv3](https://oss.carbou.me/MycilaPZEM004Tv3)         |    ESP32     | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
 | [MycilaRelay](https://oss.carbou.me/MycilaRelay)                   |    ESP32     | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
+| [MycilaSafeBoot](https://oss.carbou.me/MycilaSafeBoot)             |    ESP32     | MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino                               |
 | [MycilaSystem](https://oss.carbou.me/MycilaSystem)                 |    ESP32     | Arduino / ESP32 library for system-related tasks                                                 |
 | [MycilaTaskManager](https://oss.carbou.me/MycilaTaskManager)       |    ESP32     | Arduino / ESP32 Task Manager Library                                                             |
 | [MycilaTaskMonitor](https://oss.carbou.me/MycilaTaskMonitor)       |    ESP32     | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
