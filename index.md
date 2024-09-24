@@ -1,14 +1,14 @@
 I am a passionate developper with more than 20 years of XP in several languages, technologies and compagnies.
 
-I am currently working as a Lead Software Engineer, at **[Software AG](https://github.com/SoftwareAG)** in the **[Terracotta](https://github.com/Terracotta-OSS)** R&D team since 2015 with a lot of smart people.
-We develop and maintain Ehcache and Terracotta Store and provide clustering and management solutions for caching and storing huge amount of data efficiently with no downtime, low latency in a consistency or availability mode.
+I am currently working as a Lead Software Engineer, at **[IBM](https://www.ibm.com/)** in the **[Terracotta](https://www.terracotta.org)** R&D team since 2015 with a lot of smart people.
+We built Ehcache and Terracotta Store and provide clustering and management solutions for caching and storing huge amount of data efficiently with no downtime, low latency in a consistency or availability mode.
 
-I am also the creator and maintainer of several **[Open Source Projects](https://oss.carbou.me/)** that you will find below.
+I am also an Arduino / ESP32 developper, creator and maintainer of several **[Open Source Projects](https://oss.carbou.me/)** that you will find below.
 
-I've been involved during 10 years in the **[Montreal Java User Group](https://www.montreal-jug.org/)** that I've bootstrapped in 2010 with a friend. This is now one of the biggest JUG over the world.
+I've been involved during 10 years in the **[Montreal Java User Group](https://www.montreal-jug.org/)** that I've bootstrapped in 2010 with a friend (David). This is now one of the biggest JUG over the world.
 I was also part of the **[Devoxx4Kids Quebec](http://www.devoxx4kids.org/quebec/)** organization.
 
-Also an enthusiast photographer, feel free to visit my **[Photography](https://www.mathieu.photography/)** website.
+I'm also an enthusiast photographer: feel free to visit my **[Photography](https://www.mathieu.photography/)** website!
 You will find some articles about neutral density filters and infrared photography too.
 
 - [![](https://img.shields.io/badge/github-mathieucarbou-211F1F?logo=github&logoColor=white&style=flat-square)](https://oss.carbou.me)
@@ -19,11 +19,11 @@ You will find some articles about neutral density filters and infrared photograp
 
 ## Projects
 
-| **Project**                                                        | **Language** | **Description**                                                                                  |
+| **Big Project**                                                    | **Language** | **Description**                                                                                  |
 | :----------------------------------------------------------------- | :----------: | :----------------------------------------------------------------------------------------------- |
 | [License Maven Plugin](https://oss.carbou.me/license-maven-plugin) |    Maven     | Maven plugin which helps managing license headers in your project source files                   |
-| [MycilaSafeBoot](https://oss.carbou.me/MycilaSafeBoot)             |    ESP32     | MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino                               |
 | [Beelance](https://beelance.carbou.me)                             |    ESP32     | Autonomous and remotely connected weight scale for beehives 🐝                                   |
+| [MycilaSafeBoot](https://oss.carbou.me/MycilaSafeBoot)             |    ESP32     | MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino                               |
 | [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)     |    ESP32     | Heat water with your Solar Production Excess!                                                    |
 
 ## Libraries (Java)
