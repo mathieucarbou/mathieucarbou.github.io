@@ -1,6 +1,6 @@
 I am a passionate developper with more than 20 years of XP in several languages, technologies and compagnies.
 
-I am currently working as a Lead Software Engineer, at [IBM](https://www.ibm.com/) in the [Terracotta](https://www.terracotta.org) R&D team since 2015 with a lot of smart people.
+I am currently working as a Lead Software Engineer, at [IBM](https://www.ibm.com/) in the [Terracotta](https://www.terracotta.org) R&D team since 2015.
 We built Ehcache and Terracotta Store and provide clustering and management solutions for caching and storing huge amount of data efficiently with no downtime, low latency in a consistency or availability mode.
 
 I am also an Arduino / ESP32 developper, creator and maintainer of several [Open Source Projects](https://oss.carbou.me/) that you will find below.
