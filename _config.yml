@@ -1,10 +1,12 @@
 title: "Mathieu Carbou"
-description: "About Me"
-google_analytics: UA-5669052-12
+description: "Lead Software Engineer, Terracotta R&D, IBM"
+logo: https://avatars.githubusercontent.com/u/61346
 show_downloads: false
 github:
-  is_project_page: true
+  is_project_page: false
+  is_user_page: true
+  owner_url: https://github.com/mathieucarbou
   repository_url: https://github.com/mathieucarbou
-remote_theme: pages-themes/cayman@v0.2.0
+remote_theme: pages-themes/minimal@v0.2.0
 plugins:
   - jekyll-remote-theme
