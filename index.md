@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 Hello,
 
 I am a passionate developer with more than 20 years of XP in several languages, technologies and compagnies.
