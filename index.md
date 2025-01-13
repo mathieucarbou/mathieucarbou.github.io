@@ -22,6 +22,16 @@ You will find some articles about neutral density filters and infrared photograp
 [![](https://img.shields.io/badge/photography-mathieu.photography-1BC?logo=react&logoColor=white&style=flat-square)](https://www.mathieu.photography/)
 [![](https://img.shields.io/badge/flickr-mathieucarbou-ff69b4?logo=flickr&style=flat-square)](https://www.flickr.com/photos/mathieucarbou/)
 
+## Solar Routers / Diverter
+
+I am specialized in solar routing / diversion. I have crated many solar routeur and also libraries to help build solar routers.
+
+|                                                                                           |        |                                                                                                           |
+| :---------------------------------------------------------------------------------------- | :----: | :-------------------------------------------------------------------------------------------------------- |
+| [Shelly Pro Solar Router](https://yasolr.carbou.me/blog/2024-07-01_shelly_solar_diverter) | Shelly | Your Solar Router based on Shelly components and LSA dimmer                                               |
+| [Home Assistant Solar Router](https://yasolr.carbou.me/blog/2024-09-05_ha_diverter)       |   HA   | Solar Router controlled by Home Assistant and using a Shelly Dimmer Gen3 + LSA for the dimmer             |
+| [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)                            | ESP32  | Heat water with your Solar Production Excess with the more powerful and precise solar diverter out there! |
+
 ## My Open-Source applications
 
 |                                                                        |       |                                                                                                                |
@@ -29,37 +39,43 @@ You will find some articles about neutral density filters and infrared photograp
 | [Beelance](https://beelance.carbou.me)                                 | ESP32 | Autonomous and remotely connected weight scale for beehives 🐝                                                 |
 | [License Maven Plugin](https://mathieu.carbou.me/license-maven-plugin) | Maven | Maven plugin which helps managing license headers in your project source files                                 |
 | [MycilaSafeBoot](https://mathieu.carbou.me/MycilaSafeBoot)             | ESP32 | MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino allowing for a bigger application partition |
-| [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)         | ESP32 | Heat water with your Solar Production Excess!                                                                  |
 
 ## My Open-Source libraries for Arduino / ESP32
 
+**For electricity:**
+
 |                                                                      |       |                                                                                                  |
 | :------------------------------------------------------------------- | :---: | :----------------------------------------------------------------------------------------------- |
-| [MycilaConfig](https://mathieu.carbou.me/MycilaConfig)               | ESP32 | A simple and efficient config library                                                            |
-| [MycilaDS18](https://mathieu.carbou.me/MycilaDS18)                   | ESP32 | ESP32 / Arduino Library for Dallas / Maxim Temperature Integrated Circuits                       |
-| [MycilaEasyDisplay](https://mathieu.carbou.me/MycilaEasyDisplay)     | ESP32 | Easy to use Arduino / ESP32 library for SH1106, SH1107, SSD1306 OLED I2C displays                |
-| [MycilaESPConnect](https://mathieu.carbou.me/MycilaESPConnect)       | ESP32 | Simple & Easy Network Manager with Captive Portal for ESP32 supporting Ethernet                  |
-| [MycilaHADiscovery](https://mathieu.carbou.me/MycilaHADiscovery)     | ESP32 | Simple and efficient Home Assistant Discovery library for Arduino / ESP32                        |
 | [MycilaJSY](https://mathieu.carbou.me/MycilaJSY)                     | ESP32 | Arduino / ESP32 library for the JSY-MK-194T single-phase two-way electric energy metering module |
-| [MycilaLogger](https://mathieu.carbou.me/MycilaLogger)               | ESP32 | A simple and efficient logging library for Arduino / ESP32                                       |
-| [MycilaMQTT](https://mathieu.carbou.me/MycilaMQTT)                   | ESP32 | A simple and efficient MQTT/MQTTS client for Arduino / ESP32 based on Espressif API              |
-| [MycilaNTP](https://mathieu.carbou.me/MycilaNTP)                     | ESP32 | A simple and efficient NTP library for ESP32 / Arduino                                           |
 | [MycilaPulseAnalyzer](https://mathieu.carbou.me/MycilaPulseAnalyzer) | ESP32 | ESP32 / Arduino Library to analyze pulses from a Zero-Cross Detection circuit                    |
 | [MycilaPZEM004Tv3](https://mathieu.carbou.me/MycilaPZEM004Tv3)       | ESP32 | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
 | [MycilaRelay](https://mathieu.carbou.me/MycilaRelay)                 | ESP32 | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
-| [MycilaSystem](https://mathieu.carbou.me/MycilaSystem)               | ESP32 | Arduino / ESP32 library for system-related tasks                                                 |
-| [MycilaTaskManager](https://mathieu.carbou.me/MycilaTaskManager)     | ESP32 | Arduino / ESP32 Task Manager Library                                                             |
-| [MycilaTaskMonitor](https://mathieu.carbou.me/MycilaTaskMonitor)     | ESP32 | Arduino / ESP32 library to monitor task priority and stack high watermark                        |
-| [MycilaTrafficLight](https://mathieu.carbou.me/MycilaTrafficLight)   | ESP32 | ESP32 / Arduino Library for Traffic Light LEDs                                                   |
-| [MycilaTrial](https://mathieu.carbou.me/MycilaTrial)                 | ESP32 | Arduino / ESP32 library to add a trial duration in your app                                      |
-| [MycilaUtilities](https://mathieu.carbou.me/MycilaUtilities)         | ESP32 | Utils stuff for Arduino / ESP32 like Time, String functions, CircularBuffer, etc                 |
-| [MycilaWebSerial](https://mathieu.carbou.me/MycilaWebSerial)         | ESP32 | WebSerial is a Serial Monitor for ESP32 that can be accessed remotely via a web browser          |
+
+**Others:**
+
+|                                                                    |       |                                                                                         |
+| :----------------------------------------------------------------- | :---: | :-------------------------------------------------------------------------------------- |
+| [MycilaConfig](https://mathieu.carbou.me/MycilaConfig)             | ESP32 | A simple and efficient config library                                                   |
+| [MycilaDS18](https://mathieu.carbou.me/MycilaDS18)                 | ESP32 | ESP32 / Arduino Library for Dallas / Maxim Temperature Integrated Circuits              |
+| [MycilaEasyDisplay](https://mathieu.carbou.me/MycilaEasyDisplay)   | ESP32 | Easy to use Arduino / ESP32 library for SH1106, SH1107, SSD1306 OLED I2C displays       |
+| [MycilaESPConnect](https://mathieu.carbou.me/MycilaESPConnect)     | ESP32 | Simple & Easy Network Manager with Captive Portal for ESP32 supporting Ethernet         |
+| [MycilaHADiscovery](https://mathieu.carbou.me/MycilaHADiscovery)   | ESP32 | Simple and efficient Home Assistant Discovery library for Arduino / ESP32               |
+| [MycilaLogger](https://mathieu.carbou.me/MycilaLogger)             | ESP32 | A simple and efficient logging library for Arduino / ESP32                              |
+| [MycilaMQTT](https://mathieu.carbou.me/MycilaMQTT)                 | ESP32 | A simple and efficient MQTT/MQTTS client for Arduino / ESP32 based on Espressif API     |
+| [MycilaNTP](https://mathieu.carbou.me/MycilaNTP)                   | ESP32 | A simple and efficient NTP library for ESP32 / Arduino                                  |
+| [MycilaSystem](https://mathieu.carbou.me/MycilaSystem)             | ESP32 | Arduino / ESP32 library for system-related tasks                                        |
+| [MycilaTaskManager](https://mathieu.carbou.me/MycilaTaskManager)   | ESP32 | Arduino / ESP32 Task Manager Library                                                    |
+| [MycilaTaskMonitor](https://mathieu.carbou.me/MycilaTaskMonitor)   | ESP32 | Arduino / ESP32 library to monitor task priority and stack high watermark               |
+| [MycilaTrafficLight](https://mathieu.carbou.me/MycilaTrafficLight) | ESP32 | ESP32 / Arduino Library for Traffic Light LEDs                                          |
+| [MycilaTrial](https://mathieu.carbou.me/MycilaTrial)               | ESP32 | Arduino / ESP32 library to add a trial duration in your app                             |
+| [MycilaUtilities](https://mathieu.carbou.me/MycilaUtilities)       | ESP32 | Utils stuff for Arduino / ESP32 like Time, String functions, CircularBuffer, etc        |
+| [MycilaWebSerial](https://mathieu.carbou.me/MycilaWebSerial)       | ESP32 | WebSerial is a Serial Monitor for ESP32 that can be accessed remotely via a web browser |
 
 **I am actively maintaining these libraries**
 
 |                                                                                                                               |       |                                                                                                                  |
 | :---------------------------------------------------------------------------------------------------------------------------- | :---: | :--------------------------------------------------------------------------------------------------------------- |
-| [AsyncTCP](https://github.com/mathieucarbou/AsyncTCP) from [@me-no-dev](https://github.com/me-no-dev)                                | ESP32 | AsyncTCP is a library for ESP32 Arduino that facilitates the use of TCP connections in an asynchronous way       |
+| [AsyncTCP](https://github.com/mathieucarbou/AsyncTCP) from [@me-no-dev](https://github.com/me-no-dev)                         | ESP32 | AsyncTCP is a library for ESP32 Arduino that facilitates the use of TCP connections in an asynchronous way       |
 | [ESPAsyncWebServer](https://mathieu.carbou.me/ESPAsyncWebServer) from [@me-no-dev](https://github.com/me-no-dev)              | ESP32 | WebSocket, SSE, Authentication, Arduino Json 7, File Upload, Static File serving, URL Rewrite, URL Redirect, etc |
 | [StreamDebugger](https://mathieu.carbou.me/StreamDebugger) from [@vshymanskyy](https://github.com/vshymanskyy/StreamDebugger) | ESP32 | StreamDebugger allows easier debugging of Serial-based communication on Arduino, like AT commands                |
 
