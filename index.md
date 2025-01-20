@@ -46,10 +46,10 @@ I am specialized in solar routing / diversion. I have crated many solar routeur 
 
 I am actively maintaining these libraries wit help from the community.
 
-|                                                                                                                          |       |                                                                                                                  |
-| :----------------------------------------------------------------------------------------------------------------------- | :---: | :--------------------------------------------------------------------------------------------------------------- |
-| [AsyncTCP](https://github.com/mathieucarbou/AsyncTCP) from [@me-no-dev](https://github.com/me-no-dev)                    | ESP32 | AsyncTCP is a library for ESP32 Arduino that facilitates the use of TCP connections in an asynchronous way       |
-| [ESPAsyncWebServer](https://github.com/mathieucarbou/ESPAsyncWebServer>) from [@me-no-dev](https://github.com/me-no-dev) | ESP32 | WebSocket, SSE, Authentication, Arduino Json 7, File Upload, Static File serving, URL Rewrite, URL Redirect, etc |
+|                                                                                                                         |       |                                                                                                                  |
+| :---------------------------------------------------------------------------------------------------------------------- | :---: | :--------------------------------------------------------------------------------------------------------------- |
+| [AsyncTCP](https://github.com/mathieucarbou/AsyncTCP) from [@me-no-dev](https://github.com/me-no-dev)                   | ESP32 | AsyncTCP is a library for ESP32 Arduino that facilitates the use of TCP connections in an asynchronous way       |
+| [ESPAsyncWebServer](https://github.com/mathieucarbou/ESPAsyncWebServer) from [@me-no-dev](https://github.com/me-no-dev) | ESP32 | WebSocket, SSE, Authentication, Arduino Json 7, File Upload, Static File serving, URL Rewrite, URL Redirect, etc |
 
 **Electricity:**
 
