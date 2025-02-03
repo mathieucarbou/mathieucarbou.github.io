@@ -55,7 +55,7 @@ I am actively maintaining these libraries as part of [ESP32Async](https://github
 
 |                                                                      |       |                                                                                                  |
 | :------------------------------------------------------------------- | :---: | :----------------------------------------------------------------------------------------------- |
-| [MycilaJSY](https://mathieu.carbou.me/MycilaJSY)                     | ESP32 | Arduino / ESP32 library for the JSY-MK-194T single-phase two-way electric energy metering module |
+| [MycilaJSY](https://mathieu.carbou.me/MycilaJSY)                     | ESP32 | Arduino / ESP32 library for the JSY1031, JSY-MK-163, JSY-MK-193, JSY-MK-194, JSY-MK-227, JSY-MK-229, JSY-MK-333 families single-phase and three-phase AC bidirectional meters from Shenzhen Jiansiyan Technologies Co, Ltd. |
 | [MycilaPulseAnalyzer](https://mathieu.carbou.me/MycilaPulseAnalyzer) | ESP32 | ESP32 / Arduino Library to analyze pulses from a Zero-Cross Detection circuit                    |
 | [MycilaPZEM004Tv3](https://mathieu.carbou.me/MycilaPZEM004Tv3)       | ESP32 | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
 | [MycilaRelay](https://mathieu.carbou.me/MycilaRelay)                 | ESP32 | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
