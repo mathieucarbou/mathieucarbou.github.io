@@ -18,6 +18,36 @@ You will find some articles about neutral density filters and infrared photograp
 [![](https://img.shields.io/badge/photography-mathieu.photography-1BC?logo=react&logoColor=white&style=flat-square)](https://www.mathieu.photography/)
 [![](https://img.shields.io/badge/flickr-mathieucarbou-ff69b4?logo=flickr&style=flat-square)](https://www.flickr.com/photos/mathieucarbou/)
 
+## Articles
+
+**Solar diverters / routers**
+
+- [Shelly Solar Diverter / Router](https://yasolr.carbou.me/blog/2024-07-01_shelly_solar_diverter)
+- [Home Assistant Solar Diverter / Router](https://yasolr.carbou.me/blog/2024-09-05_ha_diverter)
+- [Zero-Cross Pulse Detection](https://yasolr.carbou.me/blog/2024-07-31_zero-cross_pulse_detection)
+- [The Importance of a good ZCD circuit for a solar router](https://yasolr.carbou.me/blog/2024-07-24_the_importance_of_a_good_zcd_circuit)
+
+**JSY**
+
+- [Everything on le JSY](https://yasolr.carbou.me/blog/2024-06-26_everything_on_the_jsy)
+- [The new JSY-MK-194G](https://yasolr.carbou.me/blog/2024-11-07_jsy_mk_194g)
+- [Remote JSY through UDP](https://yasolr.carbou.me/blog/2024-06-25_remote_jsy)
+
+**Home Assistant**
+
+- [Automatically limit inverter outputs based on grid excess with Home Assistant and OpenDTU](https://gist.github.com/mathieucarbou/382556f1279d612962e03232544692d1)
+- [Home Assistant Solar Diverter / Router](https://yasolr.carbou.me/blog/2024-09-05_ha_diverter)
+- [ESPHome with Dallas Temperature Sensor](https://gist.github.com/mathieucarbou/4706cfaa2562207fee1ea48012f4dc5f)
+- [Home Assistant H&T (Hygrostat & Thermostat)](https://gist.github.com/mathieucarbou/ebea1c204bbf88a3b35072f78b60875f)
+- [Home Assistant: % autoconsommation temps réel](https://gist.github.com/mathieucarbou/b841b9c1b7383bbda27569ebe17dad0e)
+- [Home Assistant + Shelly + EDF HP/HC](https://gist.github.com/mathieucarbou/51a4a99be64b11e042a597b8e43ddfb7)
+- [Home Assistant + RTE Tempo + Shelly](https://gist.github.com/mathieucarbou/e1667cd8e4acd93199b8c879b81aa787)
+- [Home Assistant OpenEVSE Integration backed by MQTT](https://gist.github.com/mathieucarbou/92a3d5e0dc38d6b68aa1bdaf153a80c5)
+- [Suivi énergétique](https://gist.github.com/mathieucarbou/290e26605437724d3b70332005e3def6)
+- [Linky Teleinformation (TIC) + ESPHome + Home Assistant](https://gist.github.com/mathieucarbou/886d2a6f5c0b51bb261d6a1329beb08d)
+- [OpenDTU + Home Assistant](https://gist.github.com/mathieucarbou/70539ced8f330be6205a91897ea1c639)
+- [Renault Zoé E-Tech R110 + Home Assistant + Charge auto avec le soleil](https://gist.github.com/mathieucarbou/e54c29c1f6b091c0e69ad1164550502e)
+
 ## Beelance
 
 |                                        |       |                                                                |
@@ -53,12 +83,12 @@ I am actively maintaining these libraries as part of [ESP32Async](https://github
 
 **Electricity:**
 
-|                                                                      |       |                                                                                                  |
-| :------------------------------------------------------------------- | :---: | :----------------------------------------------------------------------------------------------- |
+|                                                                      |       |                                                                                                                                                                                                                             |
+| :------------------------------------------------------------------- | :---: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [MycilaJSY](https://mathieu.carbou.me/MycilaJSY)                     | ESP32 | Arduino / ESP32 library for the JSY1031, JSY-MK-163, JSY-MK-193, JSY-MK-194, JSY-MK-227, JSY-MK-229, JSY-MK-333 families single-phase and three-phase AC bidirectional meters from Shenzhen Jiansiyan Technologies Co, Ltd. |
-| [MycilaPulseAnalyzer](https://mathieu.carbou.me/MycilaPulseAnalyzer) | ESP32 | ESP32 / Arduino Library to analyze pulses from a Zero-Cross Detection circuit                    |
-| [MycilaPZEM004Tv3](https://mathieu.carbou.me/MycilaPZEM004Tv3)       | ESP32 | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                            |
-| [MycilaRelay](https://mathieu.carbou.me/MycilaRelay)                 | ESP32 | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                        |
+| [MycilaPulseAnalyzer](https://mathieu.carbou.me/MycilaPulseAnalyzer) | ESP32 | ESP32 / Arduino Library to analyze pulses from a Zero-Cross Detection circuit                                                                                                                                               |
+| [MycilaPZEM004Tv3](https://mathieu.carbou.me/MycilaPZEM004Tv3)       | ESP32 | Arduino / ESP32 library for the PZEM-004T v3 Power and Energy monitor                                                                                                                                                       |
+| [MycilaRelay](https://mathieu.carbou.me/MycilaRelay)                 | ESP32 | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                                                                                                                                                   |
 
 **GPIO Components:**
 
