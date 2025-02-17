@@ -62,7 +62,7 @@ You will find some articles about neutral density filters and infrared photograp
 
 ## Solar Routers / Diverter
 
-I am specialized in solar routing / diversion. I have crated many solar routeur and also libraries to help build solar routers.
+I am specialized in solar routing / diversion. I have created many solar routers and also libraries to help build solar routers.
 
 |                                                                                           |        |                                                                                                           |
 | :---------------------------------------------------------------------------------------- | :----: | :-------------------------------------------------------------------------------------------------------- |
