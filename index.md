@@ -13,6 +13,16 @@ I was also part of the [Devoxx4Kids Quebec](http://www.devoxx4kids.org/quebec/) 
 I'm also an enthusiast photographer: feel free to visit my [Photography](https://www.mathieu.photography/) website!
 You will find some articles about neutral density filters and infrared photography too.
 
+- [Articles](#articles)
+- [Projects](#projects)
+  - [Solar Routers / Diverter](#solar-routers--diverter)
+  - [Beelance](#beelance)
+  - [License Maven Plugin](#license-maven-plugin)
+- [Arduino / ESP32 Libraries](#arduino--esp32-libraries)
+- [Java Libraries](#java-libraries)
+- [Contributing / collaborating to these projects](#contributing--collaborating-to-these-projects)
+- [Statistics](#statistics)
+
 [![](https://img.shields.io/badge/github-mathieucarbou-211F1F?logo=github&logoColor=white&style=flat-square)](https://github.com/mathieucarbou)
 [![](https://img.shields.io/badge/linkedin-mathieucarbou-0072B1?logo=linkedin&style=flat-square)](https://www.linkedin.com/in/mathieucarbou/)
 [![](https://img.shields.io/badge/photography-mathieu.photography-1BC?logo=react&logoColor=white&style=flat-square)](https://www.mathieu.photography/)
@@ -48,19 +58,9 @@ You will find some articles about neutral density filters and infrared photograp
 - [OpenDTU + Home Assistant](https://gist.github.com/mathieucarbou/70539ced8f330be6205a91897ea1c639)
 - [Renault Zoé E-Tech R110 + Home Assistant + Charge auto avec le soleil](https://gist.github.com/mathieucarbou/e54c29c1f6b091c0e69ad1164550502e)
 
-## Beelance
+## Projects
 
-|                                        |       |                                                                |
-| :------------------------------------- | :---: | :------------------------------------------------------------- |
-| [Beelance](https://beelance.carbou.me) | ESP32 | Autonomous and remotely connected weight scale for beehives 🐝 |
-
-## License Maven Plugin
-
-|                                                                        |       |                                                                                |
-| :--------------------------------------------------------------------- | :---: | :----------------------------------------------------------------------------- |
-| [License Maven Plugin](https://mathieu.carbou.me/license-maven-plugin) | Maven | Maven plugin which helps managing license headers in your project source files |
-
-## Solar Routers / Diverter
+### Solar Routers / Diverter
 
 I am specialized in solar routing / diversion. I have created many solar routers and also libraries to help build solar routers.
 
@@ -69,6 +69,18 @@ I am specialized in solar routing / diversion. I have created many solar routers
 | [Shelly Pro Solar Router](https://yasolr.carbou.me/blog/2024-07-01_shelly_solar_diverter) | Shelly | Your Solar Router based on Shelly components and LSA dimmer                                               |
 | [Home Assistant Solar Router](https://yasolr.carbou.me/blog/2024-09-05_ha_diverter)       |   HA   | Solar Router controlled by Home Assistant and using a Shelly Dimmer Gen3 + LSA for the dimmer             |
 | [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)                            | ESP32  | Heat water with your Solar Production Excess with the more powerful and precise solar diverter out there! |
+
+### Beelance
+
+|                                        |       |                                                                |
+| :------------------------------------- | :---: | :------------------------------------------------------------- |
+| [Beelance](https://beelance.carbou.me) | ESP32 | Autonomous and remotely connected weight scale for beehives 🐝 |
+
+### License Maven Plugin
+
+|                                                                        |       |                                                                                |
+| :--------------------------------------------------------------------- | :---: | :----------------------------------------------------------------------------- |
+| [License Maven Plugin](https://mathieu.carbou.me/license-maven-plugin) | Maven | Maven plugin which helps managing license headers in your project source files |
 
 ## Arduino / ESP32 Libraries
 
