@@ -132,8 +132,8 @@ I am actively maintaining these libraries as part of [ESP32Async](https://github
 |                                                                  |       |                                                                                                                |
 | :--------------------------------------------------------------- | :---: | :------------------------------------------------------------------------------------------------------------- |
 | [MycilaConfig](https://mathieu.carbou.me/MycilaConfig)           | ESP32 | A simple and efficient config library                                                                          |
+| [MycilaDataLogger](https://mathieu.carbou.me/MycilaDataLogger)   | ESP32 | ESP32 firmware to connect an ESP32 to an existing ESP32 to view the Serial logs including crashes and stack traces remotely through a web interface |
 | [MycilaLogger](https://mathieu.carbou.me/MycilaLogger)           | ESP32 | A simple and efficient logging library for Arduino / ESP32                                                     |
-| [MycilaLogger](https://mathieu.carbou.me/MycilaLogger)           | ESP32 | ESP32 firmware to connect an ESP32 to an existing ESP32 to view the Serial logs including crashes and stack traces remotely through a web interface |
 | [MycilaSafeBoot](https://mathieu.carbou.me/MycilaSafeBoot)       | ESP32 | MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino allowing for a bigger application partition |
 | [MycilaSystem](https://mathieu.carbou.me/MycilaSystem)           | ESP32 | Arduino / ESP32 library for system-related tasks                                                               |
 | [MycilaTaskManager](https://mathieu.carbou.me/MycilaTaskManager) | ESP32 | Arduino / ESP32 Task Manager Library                                                                           |
@@ -162,4 +162,3 @@ I am actively maintaining these libraries as part of [ESP32Async](https://github
 
 [![](https://github-readme-stats.vercel.app/api/top-langs/?username=mathieucarbou&layout=compact&show_icons=true&theme=dark#gh-dark-mode-only&count_private=true&include_all_commits=true)](https://github.com/mathieucarbou/)
 [![](https://github-readme-stats.vercel.app/api?username=mathieucarbou&show_icons=true&theme=dark#gh-dark-mode-only&count_private=true&include_all_commits=true)](https://github.com/mathieucarbou/)
-
