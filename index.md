@@ -70,11 +70,12 @@ I am specialized in solar routing / diversion. I have created many solar routers
 | [Home Assistant Solar Router](https://yasolr.carbou.me/blog/2024-09-05_ha_diverter)       |   HA   | Solar Router controlled by Home Assistant and using a Shelly Dimmer Gen3 + LSA for the dimmer             |
 | [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)                            | ESP32  | Heat water with your Solar Production Excess with the more powerful and precise solar diverter out there! |
 
-### Beelance
+Others
 
-|                                        |       |                                                                |
-| :------------------------------------- | :---: | :------------------------------------------------------------- |
-| [Beelance](https://beelance.carbou.me) | ESP32 | Autonomous and remotely connected weight scale for beehives 🐝 |
+|                                                                                |       |                                                                |
+| :----------------------------------------------------------------------------- | :---: | :------------------------------------------------------------- |
+| [Beelance](https://beelance.carbou.me)                                         | ESP32 | Autonomous and remotely connected weight scale for beehives 🐝 |
+| [MycilaShutterSpeedTester](https://mathieu.carbou.me/MycilaShutterSpeedTester) | ESP32 | ESP32 firmware to mesure camera shutter speeds                 |
 
 ### License Maven Plugin
 
@@ -98,10 +99,10 @@ I am actively maintaining these libraries as part of [ESP32Async](https://github
 |                                                                      |       |                                                                                                                                                                                                                             |
 | :------------------------------------------------------------------- | :---: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [MycilaJSY](https://mathieu.carbou.me/MycilaJSY)                     | ESP32 | Arduino / ESP32 library for the JSY1031, JSY-MK-163, JSY-MK-193, JSY-MK-194, JSY-MK-227, JSY-MK-229, JSY-MK-333 families single-phase and three-phase AC bidirectional meters from Shenzhen Jiansiyan Technologies Co, Ltd. |
-| [MycilaJSYApp](https://mathieu.carbou.me/MycilaJSYApp)                     | ESP32 | Arduino / ESP32 Web Application for JSY devices |
+| [MycilaJSYApp](https://mathieu.carbou.me/MycilaJSYApp)               | ESP32 | Arduino / ESP32 Web Application for JSY devices                                                                                                                                                                             |
 | [MycilaPulseAnalyzer](https://mathieu.carbou.me/MycilaPulseAnalyzer) | ESP32 | ESP32 / Arduino Library to analyze pulses from a Zero-Cross Detection circuit                                                                                                                                               |
 | [MycilaDimmer](https://mathieu.carbou.me/MycilaDimmer)               | ESP32 | ESP32 / Arduino Library to control TRIAC, Random SSR, Voltage Regulator with DfRobot DAC or PWM                                                                                                                             |
-| [MycilaPZEM](https://mathieu.carbou.me/MycilaPZEM)       | ESP32 | Arduino / ESP32 library for the PZEM-004T v3 and v4 Power and Energy monitor                                                                                                                                                       |
+| [MycilaPZEM](https://mathieu.carbou.me/MycilaPZEM)                   | ESP32 | Arduino / ESP32 library for the PZEM-004T v3 and v4 Power and Energy monitor                                                                                                                                                |
 | [MycilaRelay](https://mathieu.carbou.me/MycilaRelay)                 | ESP32 | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                                                                                                                                                   |
 
 **GPIO Components:**
@@ -129,17 +130,17 @@ I am actively maintaining these libraries as part of [ESP32Async](https://github
 
 **System:**
 
-|                                                                  |       |                                                                                                                |
-| :--------------------------------------------------------------- | :---: | :------------------------------------------------------------------------------------------------------------- |
-| [MycilaConfig](https://mathieu.carbou.me/MycilaConfig)           | ESP32 | A simple and efficient config library                                                                          |
+|                                                                  |       |                                                                                                                                                     |
+| :--------------------------------------------------------------- | :---: | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [MycilaConfig](https://mathieu.carbou.me/MycilaConfig)           | ESP32 | A simple and efficient config library                                                                                                               |
 | [MycilaDataLogger](https://mathieu.carbou.me/MycilaDataLogger)   | ESP32 | ESP32 firmware to connect an ESP32 to an existing ESP32 to view the Serial logs including crashes and stack traces remotely through a web interface |
-| [MycilaLogger](https://mathieu.carbou.me/MycilaLogger)           | ESP32 | A simple and efficient logging library for Arduino / ESP32                                                     |
-| [MycilaSafeBoot](https://mathieu.carbou.me/MycilaSafeBoot)       | ESP32 | MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino allowing for a bigger application partition |
-| [MycilaSystem](https://mathieu.carbou.me/MycilaSystem)           | ESP32 | Arduino / ESP32 library for system-related tasks                                                               |
-| [MycilaTaskManager](https://mathieu.carbou.me/MycilaTaskManager) | ESP32 | Arduino / ESP32 Task Manager Library                                                                           |
-| [MycilaTaskMonitor](https://mathieu.carbou.me/MycilaTaskMonitor) | ESP32 | Arduino / ESP32 library to monitor task priority and stack high watermark                                      |
-| [MycilaTrial](https://mathieu.carbou.me/MycilaTrial)             | ESP32 | Arduino / ESP32 library to add a trial duration in your app                                                    |
-| [MycilaUtilities](https://mathieu.carbou.me/MycilaUtilities)     | ESP32 | Utils stuff for Arduino / ESP32 like Time, String functions, CircularBuffer, etc                               |
+| [MycilaLogger](https://mathieu.carbou.me/MycilaLogger)           | ESP32 | A simple and efficient logging library for Arduino / ESP32                                                                                          |
+| [MycilaSafeBoot](https://mathieu.carbou.me/MycilaSafeBoot)       | ESP32 | MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino allowing for a bigger application partition                                      |
+| [MycilaSystem](https://mathieu.carbou.me/MycilaSystem)           | ESP32 | Arduino / ESP32 library for system-related tasks                                                                                                    |
+| [MycilaTaskManager](https://mathieu.carbou.me/MycilaTaskManager) | ESP32 | Arduino / ESP32 Task Manager Library                                                                                                                |
+| [MycilaTaskMonitor](https://mathieu.carbou.me/MycilaTaskMonitor) | ESP32 | Arduino / ESP32 library to monitor task priority and stack high watermark                                                                           |
+| [MycilaTrial](https://mathieu.carbou.me/MycilaTrial)             | ESP32 | Arduino / ESP32 library to add a trial duration in your app                                                                                         |
+| [MycilaUtilities](https://mathieu.carbou.me/MycilaUtilities)     | ESP32 | Utils stuff for Arduino / ESP32 like Time, String functions, CircularBuffer, etc                                                                    |
 
 ## Java Libraries
 
