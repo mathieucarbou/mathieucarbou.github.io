@@ -78,6 +78,8 @@ permalink: /prep/
   }
 
   #prep-plot .modebar {
+    top: 105px !important;
+    right: 8px !important;
     z-index: 20;
   }
 
@@ -126,7 +128,7 @@ permalink: /prep/
     }
 
     #prep-plot .modebar {
-      top: 168px !important;
+      top: 200px !important;
       right: 6px !important;
       transform: scale(0.9);
       transform-origin: top right;
