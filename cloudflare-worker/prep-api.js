@@ -1,5 +1,5 @@
 export default {
-  async fetch(request) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") {
@@ -8,7 +8,12 @@ export default {
 
     try {
       if (url.pathname === "/api/3erl") {
-        return proxyJson("https://3erl.fr/api.json");
+        return proxyJson("https://3erl.fr/api.json", {
+          request,
+          ctx,
+          ttlSeconds: 300,
+          staleOn429: true,
+        });
       }
 
       if (url.pathname === "/api/rte") {
@@ -75,16 +80,67 @@ function corsHeaders() {
   };
 }
 
-async function proxyJson(target) {
-  const upstream = await fetch(target, { method: "GET" });
+async function proxyJson(target, options) {
+  return proxyJsonWithOptions(target, options || {});
+}
+
+async function proxyJsonWithOptions(target, options) {
+  const request = options && options.request;
+  const ctx = options && options.ctx;
+  const ttlSeconds = (options && options.ttlSeconds) || 60;
+  const staleOn429 = !!(options && options.staleOn429);
+
+  var cache = null;
+  var cacheKey = null;
+  var cached = null;
+
+  if (request) {
+    cache = caches.default;
+    cacheKey = new Request(request.url, { method: "GET" });
+    cached = await cache.match(cacheKey);
+  }
+
+  const upstream = await fetch(target, {
+    method: "GET",
+    cf: {
+      cacheEverything: true,
+      cacheTtl: ttlSeconds,
+    },
+  });
+
+  if (staleOn429 && upstream.status === 429 && cached) {
+    return withCorsAndCacheHeaders(cached, "STALE-429");
+  }
+
   const text = await upstream.text();
-  return new Response(text, {
+  const response = new Response(text, {
     status: upstream.status,
     headers: {
       ...corsHeaders(),
       "Content-Type": upstream.headers.get("Content-Type") || "application/json",
-      "Cache-Control": "public, max-age=60",
+      "Cache-Control": "public, max-age=" + ttlSeconds,
+      "X-Proxy-Cache": cached ? "MISS" : "BYPASS",
     },
+  });
+
+  if (upstream.ok && cache && cacheKey) {
+    if (ctx && typeof ctx.waitUntil === "function") {
+      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    } else {
+      await cache.put(cacheKey, response.clone());
+    }
+  }
+
+  return response;
+}
+
+function withCorsAndCacheHeaders(response, cacheState) {
+  const headers = new Headers(response.headers);
+  Object.entries(corsHeaders()).forEach(([k, v]) => headers.set(k, v));
+  headers.set("X-Proxy-Cache", cacheState);
+  return new Response(response.body, {
+    status: response.status,
+    headers,
   });
 }
 

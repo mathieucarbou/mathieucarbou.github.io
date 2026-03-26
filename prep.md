@@ -156,6 +156,7 @@ permalink: /prep/
   (function () {
     var TIMEZONE = "Europe/Paris";
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
+    var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var CACHE_PREFIX = "prep_v1:";
     var API_BASE_URL = "https://prep-api.carbou.me/api";
     var resizeTimer = null;
@@ -172,6 +173,36 @@ permalink: /prep/
     function cacheSet(key, data) {
       try {
         localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(data));
+      } catch (e) {
+        // storage quota exceeded or unavailable — fail silently
+      }
+    }
+
+    function cacheGetTimed(key, maxAgeMs) {
+      try {
+        var raw = localStorage.getItem(CACHE_PREFIX + key);
+        if (!raw) {
+          return null;
+        }
+        var parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed.savedAt !== "number" || !Array.isArray(parsed.data)) {
+          return null;
+        }
+        if (Date.now() - parsed.savedAt > maxAgeMs) {
+          return null;
+        }
+        return parsed.data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function cacheSetTimed(key, data) {
+      try {
+        localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({
+          savedAt: Date.now(),
+          data: data,
+        }));
       } catch (e) {
         // storage quota exceeded or unavailable — fail silently
       }
@@ -345,7 +376,12 @@ permalink: /prep/
       var isToday = day === todayParis();
       var cacheKey = "prep:" + day;
 
-      if (!isToday) {
+      if (isToday) {
+        var cachedToday = cacheGetTimed("prep-live:" + day, PREP_TODAY_CACHE_MS);
+        if (cachedToday) {
+          return Promise.resolve({ data: cachedToday, fromCache: true });
+        }
+      } else {
         var cached = cacheGet(cacheKey);
         if (cached) {
           return Promise.resolve({ data: cached, fromCache: true });
@@ -375,7 +411,9 @@ permalink: /prep/
             .sort(function (a, b) {
               return new Date(a.d) - new Date(b.d);
             });
-          if (!isToday) {
+          if (isToday) {
+            cacheSetTimed("prep-live:" + day, result);
+          } else {
             cacheSet(cacheKey, result);
           }
           return { data: result, fromCache: false };
