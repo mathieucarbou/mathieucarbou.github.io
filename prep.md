@@ -701,6 +701,7 @@ permalink: /prep/
         responsive: true,
         displaylogo: false,
         displayModeBar: true,
+        displayModeBar: !isMobile,
       };
 
       Plotly.newPlot("prep-plot", traces, layout, config);
