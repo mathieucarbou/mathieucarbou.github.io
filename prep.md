@@ -11,11 +11,12 @@ permalink: /prep/
   }
 
   body.prep-page header {
-    width: 220px;
+    display: none;
   }
 
   body.prep-page section {
-    width: calc(100% - 255px);
+    width: 100%;
+    float: none;
   }
 
   #prep-page-title {
