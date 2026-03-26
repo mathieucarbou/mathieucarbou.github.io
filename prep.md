@@ -157,6 +157,7 @@ permalink: /prep/
 <script>
   (function () {
     var TIMEZONE = "Europe/Paris";
+    var LOOKBACK_DAYS = 30;
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var CACHE_PREFIX = "prep_v1:";
@@ -273,12 +274,25 @@ permalink: /prep/
       return !isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === day;
     }
 
-    function getInitialDay(maxDate) {
+    function clampDay(day, minDate, maxDate) {
+      if (!isValidDay(day)) {
+        return maxDate;
+      }
+      if (day < minDate) {
+        return minDate;
+      }
+      if (day > maxDate) {
+        return maxDate;
+      }
+      return day;
+    }
+
+    function getInitialDay(minDate, maxDate) {
       try {
         var url = new URL(window.location.href);
         var fromUrl = url.searchParams.get("day");
-        if (isValidDay(fromUrl) && fromUrl <= maxDate) {
-          return fromUrl;
+        if (isValidDay(fromUrl)) {
+          return clampDay(fromUrl, minDate, maxDate);
         }
       } catch (e) {
         // ignore malformed URL/context and fallback to today
@@ -303,8 +317,12 @@ permalink: /prep/
       var dayInput = document.getElementById("day");
       var current = dayInput.value || todayParis();
       var next = addDays(current, delta);
+      var minDate = dayInput.min || addDays(todayParis(), -LOOKBACK_DAYS);
       var maxDate = dayInput.max || todayParis();
 
+      if (next < minDate) {
+        next = minDate;
+      }
       if (next > maxDate) {
         next = maxDate;
       }
@@ -646,7 +664,11 @@ permalink: /prep/
     }
 
     function load() {
-      var day = document.getElementById("day").value;
+      var dayInput = document.getElementById("day");
+      var minDate = dayInput.min || addDays(todayParis(), -LOOKBACK_DAYS);
+      var maxDate = dayInput.max || todayParis();
+      var day = clampDay(dayInput.value, minDate, maxDate);
+      dayInput.value = day;
       var offsetDays = Number(document.getElementById("prd3-offset").value || -2);
       if (!day) {
         return;
@@ -686,8 +708,10 @@ permalink: /prep/
 
       var dayInput = document.getElementById("day");
       var maxDate = todayParis();
+      var minDate = addDays(maxDate, -LOOKBACK_DAYS);
+      dayInput.min = minDate;
       dayInput.max = maxDate;
-      dayInput.value = getInitialDay(maxDate);
+      dayInput.value = getInitialDay(minDate, maxDate);
 
       document.getElementById("today").addEventListener("click", function () {
         var dayInput = document.getElementById("day");
