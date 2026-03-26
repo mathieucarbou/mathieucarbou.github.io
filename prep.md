@@ -677,7 +677,7 @@ permalink: /prep/
           y: isMobile ? 1.05 : 1.12,
           yanchor: "top",
         },
-        margin: { t: isMobile ? 120 : 80, r: 60, l: 60, b: 60 },
+        margin: { t: 80, r: 60, l: 60, b: 60 },
         xaxis: {
           title: "Timeslot",
           type: "date",
