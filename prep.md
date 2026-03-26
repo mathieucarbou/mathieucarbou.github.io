@@ -172,7 +172,7 @@ permalink: /prep/
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var CACHE_PREFIX = "prep_v1:";
     var SIDEBAR_STATE_KEY = "prep_sidebar_hidden";
-    var API_BASE_URL = "https://prep-api.mathieu.carbou.me";
+    var API_BASE_URL = "https://prep-api.carbou.me/api";
     var resizeTimer = null;
 
     function applySidebarState(hidden) {
