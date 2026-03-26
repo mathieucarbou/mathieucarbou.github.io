@@ -151,7 +151,6 @@ permalink: /prep/
 <div id="prep-footer">
   <div id="prep-last-update">Dernière mise à jour: -</div>
   <div id="prep-timeslot-info"></div>
-  <div><button id="clear-cache" type="button">Vider le cache</button></div>
 </div>
 
 <script>
@@ -730,21 +729,6 @@ permalink: /prep/
         var dayInput = document.getElementById("day");
         dayInput.value = todayParis();
         load();
-      });
-      document.getElementById("clear-cache").addEventListener("click", function () {
-        try {
-          var keys = [];
-          for (var i = 0; i < localStorage.length; i++) {
-            var k = localStorage.key(i);
-            if (k && k.indexOf(CACHE_PREFIX) === 0) {
-              keys.push(k);
-            }
-          }
-          keys.forEach(function (k) { localStorage.removeItem(k); });
-          setStatus(keys.length + " entrée(s) de cache effacée(s).");
-        } catch (e) {
-          setStatus("Impossible d'effacer le cache.", true);
-        }
       });
       dayInput.addEventListener("change", load);
       document.getElementById("prd3-offset").addEventListener("change", load);
