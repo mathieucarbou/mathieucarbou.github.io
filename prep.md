@@ -139,18 +139,6 @@ permalink: /prep/
 
 <div class="prep-controls">
   <div class="prep-control-row">
-    <label for="prd3-offset">PRD3 profile day:</label>
-    <select id="prd3-offset">
-      <option value="-1">J-1</option>
-      <option value="-2" selected>J-2</option>
-      <option value="-3">J-3</option>
-      <option value="-4">J-4</option>
-      <option value="-5">J-5</option>
-      <option value="-6">J-6</option>
-      <option value="-7">J-7</option>
-    </select>
-  </div>
-  <div class="prep-control-row">
     <label for="day">Day:</label>
     <button id="prev-day" type="button" aria-label="Previous day">←</button>
     <input id="day" type="date" />
@@ -172,7 +160,7 @@ permalink: /prep/
     var LOOKBACK_DAYS = 30;
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
-    var CACHE_PREFIX = "prep_v1:";
+    var CACHE_PREFIX = "prep_v2:";
     var API_BASE_URL = "https://prep-api.carbou.me/api";
     var resizeTimer = null;
 
@@ -343,6 +331,30 @@ permalink: /prep/
       load();
     }
 
+    function getPrd3ProfileInfo(day) {
+      var today = todayParis();
+      var yesterday = addDays(today, -1);
+
+      if (day === today) {
+        return {
+          profileDay: addDays(day, -2),
+          profileLabel: "J-2"
+        };
+      }
+
+      if (day === yesterday) {
+        return {
+          profileDay: addDays(day, -1),
+          profileLabel: "J-1"
+        };
+      }
+
+      return {
+        profileDay: day,
+        profileLabel: "J0"
+      };
+    }
+
     function slotKey(isoDate) {
       var p = partsInParis(new Date(isoDate));
       return p.year + "-" + p.month + "-" + p.day + "T" + p.hour + ":" + p.minute;
@@ -388,13 +400,13 @@ permalink: /prep/
         "Last page update: " + p.hour + ":" + p.minute + ":" + p.second;
     }
 
-    function setTimeslotInfo(prepCount, prepFromCache, prd3Count, prd3FromCache, mergedCount, offsetDays) {
+    function setTimeslotInfo(prepCount, prepFromCache, prd3Count, prd3FromCache, mergedCount, profileLabel) {
       var cacheTag = " <span style=\"color:#2e7d32;font-weight:700;\">(cached)</span>";
       document.getElementById("prep-timeslot-info").innerHTML =
         mergedCount + " aligned timeslots" +
         "<br>PREP: " + prepCount + (prepFromCache ? cacheTag : "") +
         ", PRD3: " + prd3Count + (prd3FromCache ? cacheTag : "") +
-        ", J" + offsetDays;
+        ", " + profileLabel;
     }
 
     function fetch3ErlStatus() {
@@ -465,8 +477,7 @@ permalink: /prep/
         });
     }
 
-    function fetchPrd3(day, offsetDays) {
-      var profileDay = addDays(day, offsetDays);
+    function fetchPrd3(profileDay) {
       var cacheKey = "prd3:" + profileDay;
 
       var cached = cacheGet(cacheKey);
@@ -555,7 +566,7 @@ permalink: /prep/
       };
     }
 
-    function renderGraph(day, profileDay, offsetDays, merged, estimateSeriesEurPerMwh, estimateLastEurPerMwh) {
+    function renderGraph(day, profileDay, profileLabel, merged, estimateSeriesEurPerMwh, estimateLastEurPerMwh) {
       var x = merged.map(function (p) {
         return p.key;
       });
@@ -624,7 +635,7 @@ permalink: /prep/
 
       var layout = {
         title: {
-          text: "PRE+ (" + day + ") x PRD3 (" + profileDay + ")",
+          text: "PRE+ (" + day + ") x PRD3 " + profileLabel + " (" + profileDay + ")",
           x: 0.5,
           xanchor: "center",
           y: 0.995,
@@ -694,19 +705,20 @@ permalink: /prep/
       var maxDate = dayInput.max || todayParis();
       var day = clampDay(dayInput.value, minDate, maxDate);
       dayInput.value = day;
-      var offsetDays = Number(document.getElementById("prd3-offset").value || -2);
       if (!day) {
         return;
       }
 
       syncDayInUrl(day);
 
-      var profileDay = addDays(day, offsetDays);
+      var profileInfo = getPrd3ProfileInfo(day);
+      var profileDay = profileInfo.profileDay;
+      var profileLabel = profileInfo.profileLabel;
       var isToday = day === todayParis();
 
-      setStatus("Loading data for " + day + " with PRD3 profile J" + offsetDays + " (" + profileDay + ")...");
+      setStatus("Loading data for " + day + " with PRD3 profile " + profileLabel + " (" + profileDay + ")...");
 
-      var fetches = [fetchPrep(day), fetchPrd3(day, offsetDays)];
+      var fetches = [fetchPrep(day), fetchPrd3(profileDay)];
       if (isToday) {
         fetches.push(fetch3ErlStatus());
       }
@@ -718,9 +730,9 @@ permalink: /prep/
           var merged = mergeByTimeslot(day, prepResult.data, prd3Result.data);
           var estimate = estimateDailyPrepSeries(merged);
           setEstimationValue(estimate.last);
-          renderGraph(day, profileDay, offsetDays, merged, estimate.series, estimate.last);
+          renderGraph(day, profileDay, profileLabel, merged, estimate.series, estimate.last);
           setLastUpdateNow();
-          setTimeslotInfo(prepResult.data.length, prepResult.fromCache, prd3Result.data.length, prd3Result.fromCache, merged.length, offsetDays);
+          setTimeslotInfo(prepResult.data.length, prepResult.fromCache, prd3Result.data.length, prd3Result.fromCache, merged.length, profileLabel);
           setStatus("");
         })
         .catch(function (error) {
@@ -744,7 +756,6 @@ permalink: /prep/
         load();
       });
       dayInput.addEventListener("change", load);
-      document.getElementById("prd3-offset").addEventListener("change", load);
       document.getElementById("prev-day").addEventListener("click", function () {
         shiftDay(-1);
       });
