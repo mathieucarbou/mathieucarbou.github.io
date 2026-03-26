@@ -340,13 +340,13 @@ permalink: /prep/
     function setLastUpdateNow() {
       var p = partsInParis(new Date());
       document.getElementById("prep-last-update").textContent =
-        "Dernière mise à jour: " + p.hour + ":" + p.minute + ":" + p.second;
+        "Last page update: " + p.hour + ":" + p.minute + ":" + p.second;
     }
 
     function setTimeslotInfo(prepCount, prepFromCache, prd3Count, prd3FromCache, mergedCount, offsetDays) {
       var cacheTag = " <span style=\"color:#d32f2f;font-weight:700;\">✦ cache</span>";
       document.getElementById("prep-timeslot-info").innerHTML =
-        mergedCount + " timeslots alignés" +
+        mergedCount + " aligned timeslots" +
         " — PREP: " + prepCount + (prepFromCache ? cacheTag : "") +
         ", PRD3: " + prd3Count + (prd3FromCache ? cacheTag : "") +
         ", J" + offsetDays;
