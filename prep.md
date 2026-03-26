@@ -6,6 +6,31 @@ permalink: /prep/
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
 <style>
+  body.prep-page .wrapper {
+    width: min(1800px, 96vw);
+  }
+
+  body.prep-page header {
+    width: 220px;
+  }
+
+  body.prep-page section {
+    width: calc(100% - 255px);
+  }
+
+  body.prep-page.prep-hide-sidebar header {
+    display: none;
+  }
+
+  body.prep-page.prep-hide-sidebar section {
+    width: 100%;
+    float: none;
+  }
+
+  #prep-page-title {
+    text-align: center;
+  }
+
   .prep-controls {
     display: flex;
     flex-wrap: wrap;
@@ -75,9 +100,25 @@ permalink: /prep/
     cursor: pointer;
     opacity: 1;
   }
+
+  @media screen and (max-width: 960px) {
+    body.prep-page .wrapper {
+      width: 96vw;
+    }
+
+    body.prep-page header,
+    body.prep-page section {
+      width: 100%;
+      float: none;
+    }
+
+    #toggle-sidebar {
+      display: none;
+    }
+  }
 </style>
 
-<h2>PRE+ / PRD3 Daily View</h2>
+<h2 id="prep-page-title">PRE+ / PRD3 Daily View</h2>
 
 <div class="prep-controls">
   <label for="day">Day:</label>
@@ -95,6 +136,7 @@ permalink: /prep/
     <option value="-6">J-6</option>
     <option value="-7">J-7</option>
   </select>
+  <button id="toggle-sidebar" type="button">Masquer profil</button>
 </div>
 
 <div class="prep-meta">
@@ -129,7 +171,32 @@ permalink: /prep/
     var TIMEZONE = "Europe/Paris";
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var CACHE_PREFIX = "prep_v1:";
+    var SIDEBAR_STATE_KEY = "prep_sidebar_hidden";
     var resizeTimer = null;
+
+    function applySidebarState(hidden) {
+      document.body.classList.toggle("prep-hide-sidebar", !!hidden);
+      var button = document.getElementById("toggle-sidebar");
+      if (button) {
+        button.textContent = hidden ? "Afficher profil" : "Masquer profil";
+      }
+      resizeGraph();
+    }
+
+    function setupPrepLayout() {
+      document.body.classList.add("prep-page");
+      var saved = localStorage.getItem(SIDEBAR_STATE_KEY) === "1";
+      applySidebarState(saved);
+
+      var button = document.getElementById("toggle-sidebar");
+      if (button) {
+        button.addEventListener("click", function () {
+          var hidden = !document.body.classList.contains("prep-hide-sidebar");
+          applySidebarState(hidden);
+          localStorage.setItem(SIDEBAR_STATE_KEY, hidden ? "1" : "0");
+        });
+      }
+    }
 
     function cacheGet(key) {
       try {
@@ -506,10 +573,10 @@ permalink: /prep/
         barmode: "overlay",
         bargap: 0.15,
         legend: {
-          orientation: "h",
-          x: 0,
-          xanchor: "left",
-          y: 0.93,
+          orientation: "v",
+          x: 0.5,
+          xanchor: "center",
+          y: 1.12,
           yanchor: "top",
         },
         margin: { t: 90, r: 60, l: 60, b: 60 },
@@ -593,6 +660,8 @@ permalink: /prep/
     }
 
     function init() {
+      setupPrepLayout();
+
       var dayInput = document.getElementById("day");
       dayInput.value = todayParis();
 
