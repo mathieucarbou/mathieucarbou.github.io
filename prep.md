@@ -18,15 +18,6 @@ permalink: /prep/
     width: calc(100% - 255px);
   }
 
-  body.prep-page.prep-hide-sidebar header {
-    display: none;
-  }
-
-  body.prep-page.prep-hide-sidebar section {
-    width: 100%;
-    float: none;
-  }
-
   #prep-page-title {
     text-align: center;
   }
@@ -111,10 +102,6 @@ permalink: /prep/
       width: 100%;
       float: none;
     }
-
-    #toggle-sidebar {
-      display: none;
-    }
   }
 </style>
 
@@ -136,7 +123,6 @@ permalink: /prep/
     <option value="-6">J-6</option>
     <option value="-7">J-7</option>
   </select>
-  <button id="toggle-sidebar" type="button">Masquer profil</button>
 </div>
 
 <div class="prep-meta">
@@ -171,33 +157,8 @@ permalink: /prep/
     var TIMEZONE = "Europe/Paris";
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var CACHE_PREFIX = "prep_v1:";
-    var SIDEBAR_STATE_KEY = "prep_sidebar_hidden";
     var API_BASE_URL = "https://prep-api.carbou.me/api";
     var resizeTimer = null;
-
-    function applySidebarState(hidden) {
-      document.body.classList.toggle("prep-hide-sidebar", !!hidden);
-      var button = document.getElementById("toggle-sidebar");
-      if (button) {
-        button.textContent = hidden ? "Afficher profil" : "Masquer profil";
-      }
-      resizeGraph();
-    }
-
-    function setupPrepLayout() {
-      document.body.classList.add("prep-page");
-      var saved = localStorage.getItem(SIDEBAR_STATE_KEY) === "1";
-      applySidebarState(saved);
-
-      var button = document.getElementById("toggle-sidebar");
-      if (button) {
-        button.addEventListener("click", function () {
-          var hidden = !document.body.classList.contains("prep-hide-sidebar");
-          applySidebarState(hidden);
-          localStorage.setItem(SIDEBAR_STATE_KEY, hidden ? "1" : "0");
-        });
-      }
-    }
 
     function cacheGet(key) {
       try {
@@ -678,7 +639,7 @@ permalink: /prep/
     }
 
     function init() {
-      setupPrepLayout();
+      document.body.classList.add("prep-page");
 
       var dayInput = document.getElementById("day");
       var maxDate = todayParis();
