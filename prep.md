@@ -340,6 +340,19 @@ permalink: /prep/
       return prepEurPerMwh * 0.1;
     }
 
+    function sentimentBadge(score) {
+      if (typeof score !== "number") {
+        return "";
+      }
+      if (score > 0) {
+        return " 🙂";
+      }
+      if (score < 0) {
+        return " ⚠️";
+      }
+      return "";
+    }
+
     function formatTrend(profile) {
       if (profile === "3+") return "🟢🟢🟢";
       if (profile === "2+") return "🟢🟢";
@@ -364,7 +377,7 @@ permalink: /prep/
     }
 
     function setTimeslotInfo(prepCount, prepFromCache, prd3Count, prd3FromCache, mergedCount, offsetDays) {
-      var cacheTag = " <span style=\"color:#d32f2f;font-weight:700;\">✦ cache</span>";
+      var cacheTag = " <span style=\"color:#2e7d32;font-weight:700;\">(cached)</span>";
       document.getElementById("prep-timeslot-info").innerHTML =
         mergedCount + " aligned timeslots" +
         " — PREP: " + prepCount + (prepFromCache ? cacheTag : "") +
@@ -382,8 +395,8 @@ permalink: /prep/
         })
         .then(function (data) {
           document.getElementById("trend").textContent = formatTrend(data.PREP_Profile) + " (" + (data.PREP_Profile || "?") + ")";
-          document.getElementById("bridage").textContent = data.Bridage ? "ON ⚠️" : "OFF";
-          document.getElementById("bridage-cdc").textContent = data.Bridage_CDC ? "ON ⚠️" : "OFF";
+          document.getElementById("bridage").textContent = (data.Bridage ? "ON" : "OFF") + sentimentBadge(data.Bridage ? -1 : 1);
+          document.getElementById("bridage-cdc").textContent = (data.Bridage_CDC ? "ON" : "OFF") + sentimentBadge(data.Bridage_CDC ? -1 : 1);
         })
         .catch(function () {
           document.getElementById("trend").textContent = "Unavailable";
@@ -591,7 +604,7 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: estimateCentsSeries,
-          name: "Last PRE+ Daily Estimation" + " (" + estimateCents.toFixed(2) + " c€/kWh)" + (estimateCents < 0 ? " ⚠️" : ""),
+          name: "Last PRE+ Daily Estimation" + " (" + estimateCents.toFixed(2) + " c€/kWh)" + sentimentBadge(estimateCents),
           line: { color: "lightgreen", width: 2 },
           yaxis: "y",
         });
@@ -660,7 +673,7 @@ permalink: /prep/
         return;
       }
       var cents = toCentsPerKwh(estimateEurPerMwh);
-      node.textContent = cents.toFixed(2) + " c€/kWh" + (cents < 0 ? " ⚠️" : "");
+      node.textContent = cents.toFixed(2) + " c€/kWh" + sentimentBadge(cents);
     }
 
     function load() {
