@@ -25,15 +25,23 @@ permalink: /prep/
 
   .prep-controls {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    flex-direction: column;
     align-items: center;
+    gap: 0.75rem;
     margin-bottom: 1rem;
   }
 
-  .prep-controls input,
-  .prep-controls select,
-  .prep-controls button {
+  .prep-control-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .prep-control-row input,
+  .prep-control-row select,
+  .prep-control-row button {
     font: inherit;
     padding: 0.35rem 0.55rem;
   }
@@ -110,24 +118,6 @@ permalink: /prep/
 
 <h2 id="prep-page-title">PRE+ x PRD3 Daily View</h2>
 
-<div class="prep-controls">
-  <label for="day">Day:</label>
-  <button id="prev-day" type="button" aria-label="Previous day">←</button>
-  <input id="day" type="date" />
-  <button id="next-day" type="button" aria-label="Next day">→</button>
-  <button id="today" type="button">Today</button>
-  <label for="prd3-offset">PRD3 profile day:</label>
-  <select id="prd3-offset">
-    <option value="-1">J-1</option>
-    <option value="-2" selected>J-2</option>
-    <option value="-3">J-3</option>
-    <option value="-4">J-4</option>
-    <option value="-5">J-5</option>
-    <option value="-6">J-6</option>
-    <option value="-7">J-7</option>
-  </select>
-</div>
-
 <div class="prep-meta">
   <div class="prep-card">
     <div class="prep-label">3ERL Trend</div>
@@ -144,6 +134,28 @@ permalink: /prep/
   <div class="prep-card">
     <div class="prep-label">PRE+ Daily Estimation</div>
     <div id="prep-estimation" class="prep-value">-</div>
+  </div>
+</div>
+
+<div class="prep-controls">
+  <div class="prep-control-row">
+    <label for="prd3-offset">PRD3 profile day:</label>
+    <select id="prd3-offset">
+      <option value="-1">J-1</option>
+      <option value="-2" selected>J-2</option>
+      <option value="-3">J-3</option>
+      <option value="-4">J-4</option>
+      <option value="-5">J-5</option>
+      <option value="-6">J-6</option>
+      <option value="-7">J-7</option>
+    </select>
+  </div>
+  <div class="prep-control-row">
+    <label for="day">Day:</label>
+    <button id="prev-day" type="button" aria-label="Previous day">←</button>
+    <input id="day" type="date" />
+    <button id="next-day" type="button" aria-label="Next day">→</button>
+    <button id="today" type="button">Today</button>
   </div>
 </div>
 
@@ -380,7 +392,7 @@ permalink: /prep/
       var cacheTag = " <span style=\"color:#2e7d32;font-weight:700;\">(cached)</span>";
       document.getElementById("prep-timeslot-info").innerHTML =
         mergedCount + " aligned timeslots" +
-        " — PREP: " + prepCount + (prepFromCache ? cacheTag : "") +
+        "<br>PREP: " + prepCount + (prepFromCache ? cacheTag : "") +
         ", PRD3: " + prd3Count + (prd3FromCache ? cacheTag : "") +
         ", J" + offsetDays;
     }
