@@ -148,7 +148,9 @@ permalink: /prep/
 <div id="prep-plot"></div>
 <div id="prep-footer">
   <span id="prep-last-update">Dernière mise à jour: -</span>
+  <br/>
   <span id="prep-timeslot-info"></span>
+  <br/>
   <button id="clear-cache" type="button">Vider le cache</button>
 </div>
 
