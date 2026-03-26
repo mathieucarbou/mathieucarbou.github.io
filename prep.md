@@ -1,5 +1,5 @@
 ---
-title: PREP
+title: PRE+ x PRD3 Daily View
 permalink: /prep/
 ---
 
@@ -105,7 +105,7 @@ permalink: /prep/
   }
 </style>
 
-<h2 id="prep-page-title">PRE+ / PRD3 Daily View</h2>
+<h2 id="prep-page-title">PRE+ x PRD3 Daily View</h2>
 
 <div class="prep-controls">
   <label for="day">Day:</label>
@@ -542,7 +542,7 @@ permalink: /prep/
           type: "bar",
           x: x,
           y: prepPositive,
-          name: "Positive PRE+" + (typeof latestPositive === "number" ? " (" + latestPositive.toFixed(2) + " c€/kWh)" : ""),
+          name: "Last Positive PRE+" + (typeof latestPositive === "number" ? " (" + latestPositive.toFixed(2) + " c€/kWh)" : ""),
           marker: { color: "deepskyblue" },
           yaxis: "y",
         },
@@ -550,7 +550,7 @@ permalink: /prep/
           type: "bar",
           x: x,
           y: prepNegative,
-          name: "Negative PRE+" + (typeof latestNegative === "number" ? " (" + latestNegative.toFixed(2) + " c€/kWh)" : ""),
+          name: "Last Negative PRE+" + (typeof latestNegative === "number" ? " (" + latestNegative.toFixed(2) + " c€/kWh)" : ""),
           marker: { color: "red" },
           yaxis: "y",
         },
@@ -559,7 +559,7 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: prd3Values,
-          name: "PRD3 Profile" + (typeof latestPrd3 === "number" ? " (" + latestPrd3.toFixed(6) + ")" : ""),
+          name: "Last PRD3 Factor" + (typeof latestPrd3 === "number" ? " (" + latestPrd3.toFixed(6) + ")" : ""),
           line: { color: "orange", width: 2, shape: "hv" },
           yaxis: "y2",
         },
@@ -571,7 +571,7 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: estimateCentsSeries,
-          name: "PRE+ Daily Est" + " (" + estimateCents.toFixed(2) + " c€/kWh)" + (estimateCents < 0 ? " ⚠️" : ""),
+          name: "Last PRE+ Daily Estimation" + " (" + estimateCents.toFixed(2) + " c€/kWh)" + (estimateCents < 0 ? " ⚠️" : ""),
           line: { color: "lightgreen", width: 2 },
           yaxis: "y",
         });
