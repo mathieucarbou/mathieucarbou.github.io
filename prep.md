@@ -172,6 +172,7 @@ permalink: /prep/
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var CACHE_PREFIX = "prep_v1:";
     var SIDEBAR_STATE_KEY = "prep_sidebar_hidden";
+    var API_BASE_URL = "https://prep-api.mathieu.carbou.me";
     var resizeTimer = null;
 
     function applySidebarState(hidden) {
@@ -360,7 +361,7 @@ permalink: /prep/
     }
 
     function fetch3ErlStatus() {
-      return fetch("https://3erl.fr/api.json")
+      return fetch(API_BASE_URL + "/3erl")
         .then(function (response) {
           if (!response.ok) {
             throw new Error("3ERL API error: " + response.status);
@@ -390,7 +391,7 @@ permalink: /prep/
         }
       }
 
-      var url = "https://www.services-rte.com/cms/open_data/v1/price/table?startDate=" + dateForRte(day);
+      var url = API_BASE_URL + "/rte?day=" + encodeURIComponent(day);
       return fetch(url)
         .then(function (response) {
           if (!response.ok) {
@@ -429,28 +430,9 @@ permalink: /prep/
         return Promise.resolve({ data: cached, fromCache: true });
       }
 
-      // Profile day is always a past day (offset -1..-7), fetch full day.
-      var where = "(sous_profil='PRD3_BASE') AND horodate >= '" + profileDay + "T00:00:00' AND horodate <= '" + profileDay + "T23:59:59'";
-      var body = new URLSearchParams({
-        action: "exports",
-        output: "exportDirect",
-        format: "json",
-        dataset: "koumoul://7okolrt07nor9cv103spkfzc",
-        apikey: "false",
-        datefield: "horodate",
-        select: "horodate, coefficient_dynamique_j_1",
-        where: where,
-        group: "",
-        order: "horodate desc",
-      });
+      var url = API_BASE_URL + "/prd3?profileDay=" + encodeURIComponent(profileDay);
 
-      return fetch("https://openservices.enedis.fr/php/opendata.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-        },
-        body: body,
-      })
+      return fetch(url)
         .then(function (response) {
           if (!response.ok) {
             throw new Error("PRD3 API error: " + response.status);
