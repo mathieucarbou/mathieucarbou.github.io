@@ -579,7 +579,7 @@ permalink: /prep/
 
       var layout = {
         title: {
-          text: "PRE+ / PRD3 - " + day + " (PRD3 J" + offsetDays + ": " + profileDay + ")",
+          text: "PRE+ (" + day + ") x PRD3 (" + profileDay + ")",
           x: 0.5,
           xanchor: "center",
           y: 0.995,
