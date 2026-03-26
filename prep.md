@@ -270,6 +270,40 @@ permalink: /prep/
       return utc.toISOString().slice(0, 10);
     }
 
+    function isValidDay(day) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day || "")) {
+        return false;
+      }
+      var parsed = new Date(day + "T00:00:00Z");
+      return !isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === day;
+    }
+
+    function getInitialDay(maxDate) {
+      try {
+        var url = new URL(window.location.href);
+        var fromUrl = url.searchParams.get("day");
+        if (isValidDay(fromUrl) && fromUrl <= maxDate) {
+          return fromUrl;
+        }
+      } catch (e) {
+        // ignore malformed URL/context and fallback to today
+      }
+      return maxDate;
+    }
+
+    function syncDayInUrl(day) {
+      try {
+        var url = new URL(window.location.href);
+        if (url.searchParams.get("day") === day) {
+          return;
+        }
+        url.searchParams.set("day", day);
+        history.replaceState(null, "", url.pathname + "?" + url.searchParams.toString() + url.hash);
+      } catch (e) {
+        // ignore URL sync errors
+      }
+    }
+
     function shiftDay(delta) {
       var dayInput = document.getElementById("day");
       var current = dayInput.value || todayParis();
@@ -632,6 +666,8 @@ permalink: /prep/
         return;
       }
 
+      syncDayInUrl(day);
+
       var profileDay = addDays(day, offsetDays);
       var isToday = day === todayParis();
 
@@ -663,10 +699,9 @@ permalink: /prep/
       setupPrepLayout();
 
       var dayInput = document.getElementById("day");
-      dayInput.value = todayParis();
-
       var maxDate = todayParis();
       dayInput.max = maxDate;
+      dayInput.value = getInitialDay(maxDate);
 
       document.getElementById("today").addEventListener("click", function () {
         var dayInput = document.getElementById("day");
