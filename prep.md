@@ -44,14 +44,36 @@ permalink: /prep/
     margin-top: 0.2rem;
   }
 
-  #prep-status {
-    margin-bottom: 0.8rem;
-    min-height: 1.25rem;
-  }
-
   #prep-plot {
     width: 100%;
+    height: 520px;
     min-height: 520px;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  #prep-footer {
+    margin-top: 0.6rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    min-height: 1.2rem;
+    text-align: center;
+  }
+
+  #prep-footer span {
+    white-space: nowrap;
+  }
+
+  #prep-footer button {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.15rem 0.45rem;
+    cursor: pointer;
+    opacity: 1;
   }
 </style>
 
@@ -59,7 +81,10 @@ permalink: /prep/
 
 <div class="prep-controls">
   <label for="day">Day:</label>
+  <button id="prev-day" type="button" aria-label="Previous day">←</button>
   <input id="day" type="date" />
+  <button id="next-day" type="button" aria-label="Next day">→</button>
+  <button id="today" type="button">Today</button>
   <label for="prd3-offset">PRD3 profile day:</label>
   <select id="prd3-offset">
     <option value="-1">J-1</option>
@@ -70,7 +95,6 @@ permalink: /prep/
     <option value="-6">J-6</option>
     <option value="-7">J-7</option>
   </select>
-  <button id="reload" type="button">Reload</button>
 </div>
 
 <div class="prep-meta">
@@ -94,10 +118,35 @@ permalink: /prep/
 
 <div id="prep-status"></div>
 <div id="prep-plot"></div>
+<div id="prep-footer">
+  <span id="prep-last-update">Dernière mise à jour: -</span>
+  <span id="prep-timeslot-info"></span>
+  <button id="clear-cache" type="button">Vider le cache</button>
+</div>
 
 <script>
   (function () {
     var TIMEZONE = "Europe/Paris";
+    var AUTO_REFRESH_MS = 5 * 60 * 1000;
+    var CACHE_PREFIX = "prep_v1:";
+    var resizeTimer = null;
+
+    function cacheGet(key) {
+      try {
+        var raw = localStorage.getItem(CACHE_PREFIX + key);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function cacheSet(key, data) {
+      try {
+        localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(data));
+      } catch (e) {
+        // storage quota exceeded or unavailable — fail silently
+      }
+    }
 
     function partsInParis(date) {
       var formatter = new Intl.DateTimeFormat("en-CA", {
@@ -129,14 +178,6 @@ permalink: /prep/
       return parisDateString(new Date());
     }
 
-    function currentParisTimeslot() {
-      var p = partsInParis(new Date());
-      var minute = Number(p.minute);
-      var roundedMinute = Math.floor(minute / 15) * 15;
-      var minuteText = String(roundedMinute).padStart(2, "0");
-      return p.year + "-" + p.month + "-" + p.day + "T" + p.hour + ":" + minuteText + ":00";
-    }
-
     function dateForRte(day) {
       var tokens = day.split("-");
       return encodeURIComponent(tokens[2] + "/" + tokens[1] + "/" + tokens[0]);
@@ -162,11 +203,18 @@ permalink: /prep/
       return utc.toISOString().slice(0, 10);
     }
 
-    function currentParisTimeHHMM() {
-      var p = partsInParis(new Date());
-      var roundedMinute = Math.floor(Number(p.minute) / 15) * 15;
-      var minuteText = String(roundedMinute).padStart(2, "0");
-      return p.hour + ":" + minuteText;
+    function shiftDay(delta) {
+      var dayInput = document.getElementById("day");
+      var current = dayInput.value || todayParis();
+      var next = addDays(current, delta);
+      var maxDate = dayInput.max || todayParis();
+
+      if (next > maxDate) {
+        next = maxDate;
+      }
+
+      dayInput.value = next;
+      load();
     }
 
     function slotKey(isoDate) {
@@ -195,6 +243,21 @@ permalink: /prep/
       node.style.color = isError ? "#b00020" : "inherit";
     }
 
+    function setLastUpdateNow() {
+      var p = partsInParis(new Date());
+      document.getElementById("prep-last-update").textContent =
+        "Dernière mise à jour: " + p.hour + ":" + p.minute + ":" + p.second;
+    }
+
+    function setTimeslotInfo(prepCount, prepFromCache, prd3Count, prd3FromCache, mergedCount, offsetDays) {
+      var cacheTag = " <span style=\"color:#d32f2f;font-weight:700;\">✦ cache</span>";
+      document.getElementById("prep-timeslot-info").innerHTML =
+        mergedCount + " timeslots alignés" +
+        " — PREP: " + prepCount + (prepFromCache ? cacheTag : "") +
+        ", PRD3: " + prd3Count + (prd3FromCache ? cacheTag : "") +
+        ", J" + offsetDays;
+    }
+
     function fetch3ErlStatus() {
       return fetch("https://3erl.fr/api.json")
         .then(function (response) {
@@ -216,6 +279,16 @@ permalink: /prep/
     }
 
     function fetchPrep(day) {
+      var isToday = day === todayParis();
+      var cacheKey = "prep:" + day;
+
+      if (!isToday) {
+        var cached = cacheGet(cacheKey);
+        if (cached) {
+          return Promise.resolve({ data: cached, fromCache: true });
+        }
+      }
+
       var url = "https://www.services-rte.com/cms/open_data/v1/price/table?startDate=" + dateForRte(day);
       return fetch(url)
         .then(function (response) {
@@ -226,7 +299,7 @@ permalink: /prep/
         })
         .then(function (json) {
           var entries = Array.isArray(json.values) ? json.values : [];
-          return entries
+          var result = entries
             .map(function (entry) {
               return {
                 d: entry.date,
@@ -239,13 +312,24 @@ permalink: /prep/
             .sort(function (a, b) {
               return new Date(a.d) - new Date(b.d);
             });
+          if (!isToday) {
+            cacheSet(cacheKey, result);
+          }
+          return { data: result, fromCache: false };
         });
     }
 
     function fetchPrd3(day, offsetDays) {
       var profileDay = addDays(day, offsetDays);
-      var end = day === todayParis() ? profileDay + "T" + currentParisTimeHHMM() + ":00" : profileDay + "T23:59:59";
-      var where = "(sous_profil='PRD3_BASE') AND horodate >= '" + profileDay + "T00:00:00' AND horodate <= '" + end + "'";
+      var cacheKey = "prd3:" + profileDay;
+
+      var cached = cacheGet(cacheKey);
+      if (cached) {
+        return Promise.resolve({ data: cached, fromCache: true });
+      }
+
+      // Profile day is always a past day (offset -1..-7), fetch full day.
+      var where = "(sous_profil='PRD3_BASE') AND horodate >= '" + profileDay + "T00:00:00' AND horodate <= '" + profileDay + "T23:59:59'";
       var body = new URLSearchParams({
         action: "exports",
         output: "exportDirect",
@@ -274,7 +358,7 @@ permalink: /prep/
         })
         .then(function (rows) {
           var values = Array.isArray(rows) ? rows : [];
-          return values
+          var result = values
             .map(function (row) {
               return {
                 d: row.horodate,
@@ -284,6 +368,8 @@ permalink: /prep/
             .sort(function (a, b) {
               return new Date(a.d) - new Date(b.d);
             });
+          cacheSet(cacheKey, result);
+          return { data: result, fromCache: false };
         });
     }
 
@@ -298,7 +384,9 @@ permalink: /prep/
         prd3Map.set(slotTime(point.d), point);
       });
 
-      var keys = Array.from(new Set([].concat(Array.from(prepMap.keys()), Array.from(prd3Map.keys()))));
+      var keys = Array.from(prepMap.keys()).filter(function (time) {
+        return prd3Map.has(time);
+      });
       keys.sort();
 
       return keys.map(function (key) {
@@ -312,22 +400,35 @@ permalink: /prep/
       });
     }
 
-    function estimateDailyPrep(merged) {
+    function estimateDailyPrepSeries(merged) {
       var weighted = 0;
       var factors = 0;
-      merged.forEach(function (point) {
+      var series = merged.map(function (point) {
         if (typeof point.prep === "number" && typeof point.prd3 === "number") {
           weighted += point.prep * point.prd3;
           factors += point.prd3;
         }
+        if (!factors) {
+          return null;
+        }
+        return weighted / factors;
       });
-      if (!factors) {
-        return null;
+
+      var last = null;
+      for (var i = series.length - 1; i >= 0; i--) {
+        if (typeof series[i] === "number") {
+          last = series[i];
+          break;
+        }
       }
-      return weighted / factors;
+
+      return {
+        series: series,
+        last: last,
+      };
     }
 
-    function renderGraph(day, profileDay, offsetDays, merged, estimateEurPerMwh) {
+    function renderGraph(day, profileDay, offsetDays, merged, estimateSeriesEurPerMwh, estimateLastEurPerMwh) {
       var x = merged.map(function (p) {
         return p.key;
       });
@@ -349,11 +450,10 @@ permalink: /prep/
       var latestPositive = prepPositive.filter(function (v) { return typeof v === "number" && v > 0; }).slice(-1)[0];
       var latestNegative = prepNegative.filter(function (v) { return typeof v === "number" && v < 0; }).slice(-1)[0];
       var latestPrd3 = prd3Values.filter(function (v) { return typeof v === "number"; }).slice(-1)[0];
-      var estimateCents = typeof estimateEurPerMwh === "number" ? toCentsPerKwh(estimateEurPerMwh) : null;
-
-      var estimateLine = merged.map(function () {
-        return estimateCents;
+      var estimateCentsSeries = estimateSeriesEurPerMwh.map(function (value) {
+        return typeof value === "number" ? toCentsPerKwh(value) : null;
       });
+      var estimateCents = typeof estimateLastEurPerMwh === "number" ? toCentsPerKwh(estimateLastEurPerMwh) : null;
 
       var traces = [
         {
@@ -387,7 +487,7 @@ permalink: /prep/
           type: "scatter",
           mode: "lines",
           x: x,
-          y: estimateLine,
+          y: estimateCentsSeries,
           name: "PRE+ Daily Est" + " (" + estimateCents.toFixed(2) + " c€/kWh)" + (estimateCents < 0 ? " ⚠️" : ""),
           line: { color: "lightgreen", width: 2 },
           yaxis: "y",
@@ -395,11 +495,23 @@ permalink: /prep/
       }
 
       var layout = {
-        title: "PRE+ / PRD3 - " + day + " (PRD3 J" + offsetDays + ": " + profileDay + ")",
+        title: {
+          text: "PRE+ / PRD3 - " + day + " (PRD3 J" + offsetDays + ": " + profileDay + ")",
+          x: 0.5,
+          xanchor: "center",
+          y: 0.995,
+          yanchor: "top",
+        },
         barmode: "overlay",
         bargap: 0.15,
-        legend: { orientation: "h", x: 0, y: 1.12 },
-        margin: { t: 70, r: 60, l: 60, b: 60 },
+        legend: {
+          orientation: "h",
+          x: 0,
+          xanchor: "left",
+          y: 0.93,
+          yanchor: "top",
+        },
+        margin: { t: 90, r: 60, l: 60, b: 60 },
         xaxis: {
           title: "Timeslot",
           type: "date",
@@ -409,6 +521,7 @@ permalink: /prep/
           title: "PRE+ (c€/kWh)",
           zeroline: true,
           zerolinecolor: "#999",
+          domain: [0, 0.86],
         },
         yaxis2: {
           title: "PRD3 factor",
@@ -424,6 +537,14 @@ permalink: /prep/
       };
 
       Plotly.newPlot("prep-plot", traces, layout, config);
+    }
+
+    function resizeGraph() {
+      var plot = document.getElementById("prep-plot");
+      if (!plot || !plot.data) {
+        return;
+      }
+      Plotly.Plots.resize(plot);
     }
 
     function setEstimationValue(estimateEurPerMwh) {
@@ -444,18 +565,26 @@ permalink: /prep/
       }
 
       var profileDay = addDays(day, offsetDays);
+      var isToday = day === todayParis();
 
       setStatus("Loading data for " + day + " with PRD3 profile J" + offsetDays + " (" + profileDay + ")...");
 
-      Promise.all([fetchPrep(day), fetchPrd3(day, offsetDays), fetch3ErlStatus()])
+      var fetches = [fetchPrep(day), fetchPrd3(day, offsetDays)];
+      if (isToday) {
+        fetches.push(fetch3ErlStatus());
+      }
+
+      Promise.all(fetches)
         .then(function (results) {
-          var prep = results[0];
-          var prd3 = results[1];
-          var merged = mergeByTimeslot(day, prep, prd3);
-          var estimate = estimateDailyPrep(merged);
-          setEstimationValue(estimate);
-          renderGraph(day, profileDay, offsetDays, merged, estimate);
-          setStatus("Updated: " + merged.length + " timeslots (PRD3 J" + offsetDays + ").");
+          var prepResult = results[0];
+          var prd3Result = results[1];
+          var merged = mergeByTimeslot(day, prepResult.data, prd3Result.data);
+          var estimate = estimateDailyPrepSeries(merged);
+          setEstimationValue(estimate.last);
+          renderGraph(day, profileDay, offsetDays, merged, estimate.series, estimate.last);
+          setLastUpdateNow();
+          setTimeslotInfo(prepResult.data.length, prepResult.fromCache, prd3Result.data.length, prd3Result.fromCache, merged.length, offsetDays);
+          setStatus("");
         })
         .catch(function (error) {
           setStatus(error.message || "Failed to load data", true);
@@ -469,9 +598,42 @@ permalink: /prep/
       var maxDate = todayParis();
       dayInput.max = maxDate;
 
-      document.getElementById("reload").addEventListener("click", load);
+      document.getElementById("today").addEventListener("click", function () {
+        var dayInput = document.getElementById("day");
+        dayInput.value = todayParis();
+        load();
+      });
+      document.getElementById("clear-cache").addEventListener("click", function () {
+        try {
+          var keys = [];
+          for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (k && k.indexOf(CACHE_PREFIX) === 0) {
+              keys.push(k);
+            }
+          }
+          keys.forEach(function (k) { localStorage.removeItem(k); });
+          setStatus(keys.length + " entrée(s) de cache effacée(s).");
+        } catch (e) {
+          setStatus("Impossible d'effacer le cache.", true);
+        }
+      });
       dayInput.addEventListener("change", load);
       document.getElementById("prd3-offset").addEventListener("change", load);
+      document.getElementById("prev-day").addEventListener("click", function () {
+        shiftDay(-1);
+      });
+      document.getElementById("next-day").addEventListener("click", function () {
+        shiftDay(1);
+      });
+      window.addEventListener("resize", function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(resizeGraph, 120);
+      });
+
+      setInterval(function () {
+        load();
+      }, AUTO_REFRESH_MS);
 
       load();
     }
