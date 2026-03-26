@@ -172,6 +172,7 @@ permalink: /prep/
 <div id="prep-footer">
   <div id="prep-last-update">Dernière mise à jour: -</div>
   <div id="prep-timeslot-info"></div>
+  <div><button id="prep-clear-cache" type="button">Clear cache</button></div>
 </div>
 
 <script>
@@ -228,6 +229,23 @@ permalink: /prep/
         }));
       } catch (e) {
         // storage quota exceeded or unavailable — fail silently
+      }
+    }
+
+    function clearPrepCache() {
+      try {
+        var keysToRemove = [];
+        for (var i = 0; i < localStorage.length; i += 1) {
+          var key = localStorage.key(i);
+          if (key && key.indexOf(CACHE_PREFIX) === 0) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(function (key) {
+          localStorage.removeItem(key);
+        });
+      } catch (e) {
+        // localStorage unavailable — fail silently
       }
     }
 
@@ -787,6 +805,11 @@ permalink: /prep/
       });
       document.getElementById("next-day").addEventListener("click", function () {
         shiftDay(1);
+      });
+      document.getElementById("prep-clear-cache").addEventListener("click", function () {
+        clearPrepCache();
+        setStatus("Cache cleared. Reloading...");
+        load();
       });
       window.addEventListener("resize", function () {
         clearTimeout(resizeTimer);
