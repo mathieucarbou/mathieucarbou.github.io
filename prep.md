@@ -614,9 +614,12 @@ permalink: /prep/
         },
       };
 
+      var isMobile = window.matchMedia("(max-width: 640px)").matches;
+
       var config = {
         responsive: true,
         displaylogo: false,
+        displayModeBar: !isMobile,
       };
 
       Plotly.newPlot("prep-plot", traces, layout, config);
