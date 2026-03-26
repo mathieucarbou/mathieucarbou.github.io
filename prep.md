@@ -71,9 +71,11 @@ permalink: /prep/
   #prep-footer {
     margin-top: 0.6rem;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.35rem;
     font-size: 0.85rem;
     opacity: 0.8;
     min-height: 1.2rem;
@@ -147,11 +149,9 @@ permalink: /prep/
 <div id="prep-status"></div>
 <div id="prep-plot"></div>
 <div id="prep-footer">
-  <span id="prep-last-update">Dernière mise à jour: -</span>
-  <br/>
-  <span id="prep-timeslot-info"></span>
-  <br/>
-  <button id="clear-cache" type="button">Vider le cache</button>
+  <div id="prep-last-update">Dernière mise à jour: -</div>
+  <div id="prep-timeslot-info"></div>
+  <div><button id="clear-cache" type="button">Vider le cache</button></div>
 </div>
 
 <script>
