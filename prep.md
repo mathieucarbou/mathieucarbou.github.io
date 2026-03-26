@@ -593,6 +593,10 @@ permalink: /prep/
       });
       var estimateCents = typeof estimateLastEurPerMwh === "number" ? toCentsPerKwh(estimateLastEurPerMwh) : null;
 
+      function boldLabel(label) {
+        return "<b>" + label + "</b>";
+      }
+
       var traces = [
         {
           type: "bar",
@@ -627,7 +631,7 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: estimateCentsSeries,
-          name: "Last PRE+ Daily Estimation" + " (" + estimateCents.toFixed(2) + " c€/kWh)" + sentimentBadge(estimateCents),
+          name: boldLabel("Last PRE+ Daily Estimation" + " (" + estimateCents.toFixed(2) + " c€/kWh)" + sentimentBadge(estimateCents)),
           line: { color: "lightgreen", width: 2 },
           yaxis: "y",
         });
