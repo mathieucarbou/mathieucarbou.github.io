@@ -120,9 +120,16 @@ permalink: /prep/
   }
 
   @media screen and (max-width: 640px) {
+    #prep-plot {
+      height: 600px;
+      min-height: 600px;
+    }
+
     #prep-plot .modebar {
-      top: 78px !important;
+      top: 128px !important;
       right: 6px !important;
+      transform: scale(0.9);
+      transform-origin: top right;
     }
   }
 </style>
@@ -648,7 +655,10 @@ permalink: /prep/
         });
       }
 
+      var isMobile = window.matchMedia("(max-width: 640px)").matches;
+
       var layout = {
+
         title: {
           text: "PRE+ (" + day + ") x PRD3 " + profileLabel + " (" + profileDay + ")",
           x: 0.5,
@@ -662,10 +672,10 @@ permalink: /prep/
           orientation: "v",
           x: 0.5,
           xanchor: "center",
-          y: 1.12,
+          y: isMobile ? 1.16 : 1.12,
           yanchor: "top",
         },
-        margin: { t: 90, r: 60, l: 60, b: 60 },
+        margin: { t: isMobile ? 150 : 90, r: 60, l: 60, b: 60 },
         xaxis: {
           title: "Timeslot",
           type: "date",
