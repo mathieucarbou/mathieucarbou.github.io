@@ -30,7 +30,6 @@ export default {
           ctx,
           useCache: cachePastDay,
           ttlSeconds: 1 * 24 * 60 * 60,
-          cacheKeyUrl: `/api/rte?day=${day}`,
         });
       }
 
@@ -121,7 +120,6 @@ async function proxyJson(target, options) {
 async function proxyJsonWithOptions(target, options) {
   const request = options && options.request;
   const ctx = options && options.ctx;
-  const cacheKeyUrl = options && options.cacheKeyUrl;
   const useCache = !(options && options.useCache === false);
   const ttlSeconds = (options && options.ttlSeconds) || 60;
   const staleOn429 = !!(options && options.staleOn429);
@@ -132,7 +130,7 @@ async function proxyJsonWithOptions(target, options) {
 
   if (useCache && request) {
     cache = caches.default;
-    cacheKey = new Request(cacheKeyUrl || request.url, { method: "GET" });
+    cacheKey = new Request(request.url, { method: "GET" });
     cached = await cache.match(cacheKey);
   }
 
