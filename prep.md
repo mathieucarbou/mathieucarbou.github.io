@@ -473,11 +473,12 @@ permalink: /prep/
           yaxis: "y",
         },
         {
-          type: "bar",
+          type: "scatter",
+          mode: "lines",
           x: x,
           y: prd3Values,
           name: "PRD3 Profile" + (typeof latestPrd3 === "number" ? " (" + latestPrd3.toFixed(6) + ")" : ""),
-          marker: { color: "orange", opacity: 0.55 },
+          line: { color: "orange", width: 2, shape: "hv" },
           yaxis: "y2",
         },
       ];
