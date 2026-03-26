@@ -77,6 +77,10 @@ permalink: /prep/
     overflow: hidden;
   }
 
+  #prep-plot .modebar {
+    z-index: 20;
+  }
+
   #prep-footer {
     margin-top: 0.6rem;
     display: flex;
@@ -112,6 +116,13 @@ permalink: /prep/
     body.prep-page section {
       width: 100%;
       float: none;
+    }
+  }
+
+  @media screen and (max-width: 640px) {
+    #prep-plot .modebar {
+      top: 78px !important;
+      right: 6px !important;
     }
   }
 </style>
@@ -674,12 +685,10 @@ permalink: /prep/
         },
       };
 
-      var isMobile = window.matchMedia("(max-width: 640px)").matches;
-
       var config = {
         responsive: true,
         displaylogo: false,
-        displayModeBar: !isMobile,
+        displayModeBar: true,
       };
 
       Plotly.newPlot("prep-plot", traces, layout, config);
