@@ -121,12 +121,12 @@ permalink: /prep/
 
   @media screen and (max-width: 640px) {
     #prep-plot {
-      height: 600px;
-      min-height: 600px;
+      height: 640px;
+      min-height: 640px;
     }
 
     #prep-plot .modebar {
-      top: 128px !important;
+      top: 168px !important;
       right: 6px !important;
       transform: scale(0.9);
       transform-origin: top right;
@@ -672,10 +672,10 @@ permalink: /prep/
           orientation: "v",
           x: 0.5,
           xanchor: "center",
-          y: isMobile ? 1.16 : 1.12,
+          y: isMobile ? 1.22 : 1.12,
           yanchor: "top",
         },
-        margin: { t: isMobile ? 150 : 90, r: 60, l: 60, b: 60 },
+        margin: { t: isMobile ? 205 : 90, r: 60, l: 60, b: 60 },
         xaxis: {
           title: "Timeslot",
           type: "date",
