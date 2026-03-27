@@ -323,10 +323,12 @@ function normalizePrepPayload(day, text) {
 
   return values
     .map((entry) => ({
-      ts: entry && entry.date,
+      ts: toTimeSlot(entry && entry.date),
+      day: entry && entry.date,
       value: Number(entry && entry.pre && entry.pre.positive),
     }))
-    .filter((entry) => typeof entry.ts === "string" && entry.ts.slice(0, 10) === day && Number.isFinite(entry.value))
+    .filter((entry) => typeof entry.day === "string" && entry.day.slice(0, 10) === day && isTimeSlot(entry.ts) && Number.isFinite(entry.value))
+    .map((entry) => ({ ts: entry.ts, value: entry.value }))
     .sort(sortByTs);
 }
 
@@ -336,10 +338,10 @@ function normalizePrd3Payload(text) {
 
   return values
     .map((row) => ({
-      ts: row && row.horodate,
+      ts: toTimeSlot(row && row.horodate),
       value: Number(row && row.coefficient_dynamique_j_1),
     }))
-    .filter((entry) => typeof entry.ts === "string" && Number.isFinite(entry.value))
+    .filter((entry) => isTimeSlot(entry.ts) && Number.isFinite(entry.value))
     .sort(sortByTs);
 }
 
@@ -368,16 +370,32 @@ function parseFranceSpotXml(day, xml) {
   const stepMinutes = rawValues.some((entry) => entry.period > 23) ? 15 : 60;
 
   return rawValues.map((entry) => ({
-    ts: buildPeriodDate(day, entry.period, stepMinutes),
+    ts: buildPeriodDate(entry.period, stepMinutes),
     value: entry.value,
   })).sort(sortByTs);
 }
 
-function buildPeriodDate(day, period, stepMinutes) {
+function buildPeriodDate(period, stepMinutes) {
   const totalMinutes = period * stepMinutes;
   const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
   const minutes = String(totalMinutes % 60).padStart(2, "0");
-  return `${day}T${hours}:${minutes}:00`;
+  return `${hours}:${minutes}`;
+}
+
+function toTimeSlot(value) {
+  const text = String(value || "");
+  const match = text.match(/T(\d{2}:\d{2})/);
+  if (match) {
+    return match[1];
+  }
+  if (isTimeSlot(text)) {
+    return text;
+  }
+  return null;
+}
+
+function isTimeSlot(value) {
+  return /^\d{2}:\d{2}$/.test(String(value || ""));
 }
 
 function escapeRegExp(value) {
@@ -385,7 +403,7 @@ function escapeRegExp(value) {
 }
 
 function sortByTs(a, b) {
-  return new Date(a.ts) - new Date(b.ts);
+  return String(a.ts).localeCompare(String(b.ts));
 }
 
 function json(obj, status = 200, extraHeaders = {}) {

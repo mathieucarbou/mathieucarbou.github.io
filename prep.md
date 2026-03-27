@@ -182,8 +182,8 @@ permalink: /prep/
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
-    var CACHE_PREFIX = "prep_v5:";
-    var API_BASE_URL = "https://prep-api-2.carbou.me/api";
+    var CACHE_PREFIX = "prep_v6:";
+    var API_BASE_URL = "https://prep-api-1.carbou.me/api";
     var resizeTimer = null;
 
     function cacheGet(key) {
@@ -291,6 +291,9 @@ permalink: /prep/
     }
 
     function slotTime(isoDate) {
+      if (/^\d{2}:\d{2}$/.test(String(isoDate || ""))) {
+        return isoDate;
+      }
       var p = partsInParis(new Date(isoDate));
       return p.hour + ":" + p.minute;
     }
@@ -479,6 +482,11 @@ permalink: /prep/
     }
 
     function sortByTs(a, b) {
+      var aSlot = slotTime(a.ts || "");
+      var bSlot = slotTime(b.ts || "");
+      if (/^\d{2}:\d{2}$/.test(aSlot) && /^\d{2}:\d{2}$/.test(bSlot)) {
+        return aSlot.localeCompare(bSlot);
+      }
       return new Date(a.ts) - new Date(b.ts);
     }
 
