@@ -26,26 +26,26 @@ export default {
         if (cachePastDay && cache && cacheKey) {
           const cached = await cache.match(cacheKey);
           if (cached) {
-            // Patch source cache fields for bundles stored before the cache metadata was added
+            // Always parse + reconstruct to avoid body-consumed issues,
+            // and inject cache: "HIT" for bundles stored before this metadata was added.
+            let body = null;
             try {
-              const body = await cached.json();
-              let patched = false;
+              body = await cached.json();
+            } catch (_e) {
+              // JSON parse failed — fall through to re-fetch
+            }
+            if (body && typeof body === "object") {
               for (const key of ["prep", "spot", "prd3"]) {
                 if (body[key] && typeof body[key] === "object" && !body[key].cache) {
                   body[key] = { ...body[key], cache: "HIT" };
-                  patched = true;
                 }
               }
-              if (patched) {
-                return json(body, 200, {
-                  "Cache-Control": "public, max-age=86400",
-                  "X-Proxy-Cache": "HIT",
-                });
-              }
-            } catch (_e) {
-              // JSON parse failed, fall through to raw response
+              return json(body, 200, {
+                "Cache-Control": "public, max-age=86400",
+                "X-Proxy-Cache": "HIT",
+              });
             }
-            return withCorsAndCacheHeaders(cached, "HIT");
+            // body unreadable: fall through to re-fetch below
           }
         }
 
