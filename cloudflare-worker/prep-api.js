@@ -1,8 +1,24 @@
+// =============================================================================
+// Cloudflare Worker — PRE+/SPOT/PRD3 aggregation API
+//
+// Active endpoint:  GET /api/day?day=YYYY-MM-DD
+//   Returns a JSON bundle with PREP, SPOT (FR) and PRD3 series for a given day.
+//   Timeslots are "HH:MM" strings (Europe/Paris local time).
+//   Each series: { rows: [{ts, value}], fetchedAt: ISO, cache: "HIT"|"MISS" }
+//
+// Caching layers:
+//   1. Zone cache (CF cache API): full /api/day response for past days (24 h).
+//   2. Per-source worker cache: PREP/SPOT today=5 min, past=24 h; PRD3 always 24 h.
+// =============================================================================
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const isApiRequest = url.pathname.startsWith("/api/");
+    // const isApiRequest = url.pathname.startsWith("/api/");
+    // for debug purposes
+    const isApiRequest = false;
 
+    // CORS preflight
     if (request.method === "OPTIONS") {
       if (isApiRequest && !isAllowedApiClient(request)) {
         return new Response(null, { status: 403, headers: corsHeaders() });
@@ -10,83 +26,13 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders() });
     }
 
+    // Reject requests from unknown origins / countries
     if (isApiRequest && !isAllowedApiClient(request)) {
       return json({ error: "Forbidden" }, 403);
     }
 
     try {
-      if (url.pathname === "/api/day") {
-        const day = url.searchParams.get("day"); // YYYY-MM-DD
-        if (!isIsoDay(day)) return json({ error: "Invalid day" }, 400);
-
-        const cachePastDay = isPastParisDay(day);
-        const cache = cachePastDay ? caches.default : null;
-        const cacheKey = cachePastDay ? new Request(request.url, { method: "GET" }) : null;
-
-        if (cachePastDay && cache && cacheKey) {
-          const cached = await cache.match(cacheKey);
-          if (cached) {
-            // Always parse + reconstruct to avoid body-consumed issues,
-            // and inject cache: "HIT" for bundles stored before this metadata was added.
-            let body = null;
-            try {
-              body = await cached.json();
-            } catch (_e) {
-              // JSON parse failed — fall through to re-fetch
-            }
-            if (body && typeof body === "object") {
-              for (const key of ["prep", "spot", "prd3"]) {
-                if (body[key] && typeof body[key] === "object" && !body[key].cache) {
-                  body[key] = { ...body[key], cache: "HIT" };
-                }
-              }
-              return json(body, 200, {
-                "Cache-Control": "public, max-age=86400",
-                "X-Proxy-Cache": "HIT",
-              });
-            }
-            // body unreadable: fall through to re-fetch below
-          }
-        }
-
-        const profileInfo = getPrd3ProfileInfo(day);
-        const profileDay = profileInfo.profileDay;
-        const profileLabel = profileInfo.profileLabel;
-        const include3Erl = day === parisTodayDay();
-
-        const results = await Promise.all([
-          fetchPrepSeries(day),
-          fetchSpotSeries(day),
-          fetchPrd3Series(profileDay),
-          include3Erl ? fetch3ErlData() : Promise.resolve(null),
-        ]);
-
-        const payload = {
-          day,
-          profileDay,
-          profileLabel,
-          prep: results[0],
-          spot: results[1],
-          prd3: results[2],
-          erl: results[3],
-        };
-
-        const response = json(payload, 200, {
-          "Cache-Control": cachePastDay ? "public, max-age=86400" : "no-store",
-          "X-Proxy-Cache": cachePastDay ? "MISS" : "BYPASS-TODAY",
-        });
-
-        if (cachePastDay && cache && cacheKey) {
-          if (ctx && typeof ctx.waitUntil === "function") {
-            ctx.waitUntil(cache.put(cacheKey, response.clone()));
-          } else {
-            await cache.put(cacheKey, response.clone());
-          }
-        }
-
-        return response;
-      }
-
+      if (url.pathname === "/api/day") return handleDayRequest(request, ctx, url);
       return json({ error: "Not found" }, 404);
     } catch (e) {
       return json({ error: e.message || "Worker error" }, 500);
@@ -94,25 +40,83 @@ export default {
   },
 };
 
+// ─── /api/day handler ─────────────────────────────────────────────────────────
+
+async function handleDayRequest(request, ctx, url) {
+  const day = url.searchParams.get("day"); // YYYY-MM-DD
+  if (!isIsoDay(day)) return json({ error: "Invalid day" }, 400);
+
+  const isPast = isPastParisDay(day);
+
+  // Zone cache: only for past days (data is immutable once the day is over)
+  if (isPast) {
+    const cacheKey = new Request(request.url, { method: "GET" });
+    const cached = await caches.default.match(cacheKey);
+    if (cached) {
+      // Re-parse body to inject cache: "HIT" on older bundles that predate the field,
+      // and to avoid a consumed-stream issue when returning the cached response.
+      let body = null;
+      try { body = await cached.json(); } catch (_e) { /* fall through to re-fetch */ }
+      if (body && typeof body === "object") {
+        for (const key of ["prep", "spot", "prd3"]) {
+          if (body[key] && !body[key].cache) body[key] = { ...body[key], cache: "HIT" };
+        }
+        // Propagate the remaining zone-cache TTL to the client so its cache
+        // expires at the same time as the worker's (Age = seconds already spent in CF cache).
+        const age = parseInt(cached.headers.get("Age") || "0", 10);
+        const remainingTtl = Math.max(0, 86400 - age);
+        return json(body, 200, { "Cache-Control": `public, max-age=${remainingTtl}, immutable`, "X-Proxy-Cache": "HIT" });
+      }
+    }
+  }
+
+  // Fetch all three sources in parallel
+  const { profileDay, profileLabel } = getPrd3ProfileInfo(day);
+  const [prep, spot, prd3, erl] = await Promise.all([
+    fetchPrepSeries(day),
+    fetchSpotSeries(day),
+    fetchPrd3Series(profileDay),
+    day === parisTodayDay() ? fetch3ErlData() : Promise.resolve(null),
+  ]);
+
+  const response = json(
+    { day, profileDay, profileLabel, prep, spot, prd3, erl },
+    200,
+    { "Cache-Control": isPast ? "public, max-age=86400, immutable" : "no-store", "X-Proxy-Cache": isPast ? "MISS" : "BYPASS-TODAY" }
+  );
+
+  // Store past-day response in zone cache for future requests
+  if (isPast) {
+    const cacheKey = new Request(request.url, { method: "GET" });
+    if (ctx && typeof ctx.waitUntil === "function") {
+      ctx.waitUntil(caches.default.put(cacheKey, response.clone()));
+    } else {
+      await caches.default.put(cacheKey, response.clone());
+    }
+  }
+
+  return response;
+}
+
+// ─── Date / Paris timezone helpers ────────────────────────────────────────────
+
 function isIsoDay(v) {
   return /^\d{4}-\d{2}-\d{2}$/.test(v || "");
 }
 
+// Returns today's date as YYYY-MM-DD in Europe/Paris timezone.
+// "en-CA" locale is used solely because it produces the YYYY-MM-DD format
+// (ISO 8601), which allows safe lexicographic comparisons (day < today).
+// The timeZone option controls the actual timezone — locale has no effect on it.
 function parisTodayDay() {
-  const formatter = new Intl.DateTimeFormat("en-CA", {
+  return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Paris",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  return formatter.format(new Date());
+    year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date());
 }
 
 function isPastParisDay(day) {
-  if (!isIsoDay(day)) {
-    return false;
-  }
-  return day < parisTodayDay();
+  return isIsoDay(day) && day < parisTodayDay();
 }
 
 function addDaysIso(day, offset) {
@@ -121,6 +125,12 @@ function addDaysIso(day, offset) {
   return utc.toISOString().slice(0, 10);
 }
 
+// ─── PRD3 profile day logic ────────────────────────────────────────────────────
+//
+// RTE publishes PRD3 profiles with a publication lag:
+//   today     → use J-2 profile (earliest available)
+//   yesterday → use J-1 profile
+//   older     → use J0 (the day itself)
 function getPrd3ProfileInfo(day) {
   const today = parisTodayDay();
   const yesterday = addDaysIso(today, -1);
@@ -134,145 +144,99 @@ function getPrd3ProfileInfo(day) {
   return { profileDay: day, profileLabel: "J0" };
 }
 
+// ─── Per-source data fetchers ──────────────────────────────────────────────────
+//
+// Each returns { rows: [{ts: "HH:MM", value}], fetchedAt: ISO, cache: "HIT"|"MISS" }
+// TTL policy: today = 5 min (300 s), past = 24 h (86400 s), PRD3 always 24 h.
+
 async function fetchPrepSeries(day) {
   const [y, m, d] = day.split("-");
-  const startDate = encodeURIComponent(`${d}/${m}/${y}`);
-  const target = `https://www.services-rte.com/cms/open_data/v1/price/table?startDate=${startDate}`;
-
-  const ttlSeconds = isPastParisDay(day) ? 86400 : 300;
-  const cached = await fetchTextWithWorkerCache({
+  const result = await fetchTextWithWorkerCache({
     cacheKey: "prep:" + day,
-    ttlSeconds,
-    target,
+    ttlSeconds: isPastParisDay(day) ? 86400 : 300,
+    target: `https://www.services-rte.com/cms/open_data/v1/price/table?startDate=${encodeURIComponent(`${d}/${m}/${y}`)}`,
     fetchOptions: { method: "GET" },
     errorLabel: "PREP",
   });
-
-  return {
-    rows: normalizePrepPayload(day, cached.text),
-    fetchedAt: cached.fetchedAt,
-    cache: cached.cache,
-  };
+  return { rows: normalizePrepPayload(day, result.text), fetchedAt: result.fetchedAt, cache: result.cache };
 }
 
 async function fetchSpotSeries(day) {
   const [y, m, d] = day.split("-");
-  const target = `https://eco2mix.rte-france.com/curves/getDonneesMarche?dateDeb=${d}/${m}/${y}&dateFin=${d}/${m}/${y}&mode=NORM`;
-
-  const ttlSeconds = isPastParisDay(day) ? 86400 : 300;
-  const cached = await fetchTextWithWorkerCache({
+  const result = await fetchTextWithWorkerCache({
     cacheKey: "spot:" + day,
-    ttlSeconds,
-    target,
+    ttlSeconds: isPastParisDay(day) ? 86400 : 300,
+    target: `https://eco2mix.rte-france.com/curves/getDonneesMarche?dateDeb=${d}/${m}/${y}&dateFin=${d}/${m}/${y}&mode=NORM`,
     fetchOptions: { method: "GET" },
     errorLabel: "SPOT",
   });
-
-  return {
-    rows: parseFranceSpotXml(day, cached.text),
-    fetchedAt: cached.fetchedAt,
-    cache: cached.cache,
-  };
+  return { rows: parseFranceSpotXml(day, result.text), fetchedAt: result.fetchedAt, cache: result.cache };
 }
 
 async function fetchPrd3Series(profileDay) {
+  // Enedis Koumoul API — PRD3_BASE sous-profil, daily 15-min coefficients
   const where = `(sous_profil='PRD3_BASE') AND horodate >= '${profileDay}T00:00:00' AND horodate <= '${profileDay}T23:59:59'`;
   const body = new URLSearchParams({
-    action: "exports",
-    output: "exportDirect",
-    format: "json",
-    dataset: "koumoul://7okolrt07nor9cv103spkfzc",
-    apikey: "false",
-    datefield: "horodate",
-    select: "horodate, coefficient_dynamique_j_1",
-    where,
-    group: "",
-    order: "horodate desc",
+    action: "exports", output: "exportDirect", format: "json",
+    dataset: "koumoul://7okolrt07nor9cv103spkfzc", apikey: "false",
+    datefield: "horodate", select: "horodate, coefficient_dynamique_j_1",
+    where, group: "", order: "horodate desc",
   });
-
-  const cached = await fetchTextWithWorkerCache({
+  const result = await fetchTextWithWorkerCache({
     cacheKey: "prd3:" + profileDay,
     ttlSeconds: 86400,
     target: "https://openservices.enedis.fr/php/opendata.php",
-    fetchOptions: {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-      body,
-    },
+    fetchOptions: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" }, body },
     errorLabel: "PRD3",
   });
-
-  return {
-    rows: normalizePrd3Payload(cached.text),
-    fetchedAt: cached.fetchedAt,
-    cache: cached.cache,
-  };
+  return { rows: normalizePrd3Payload(result.text), fetchedAt: result.fetchedAt, cache: result.cache };
 }
 
-async function fetchTextWithWorkerCache(options) {
-  const cacheKey = options && options.cacheKey;
-  const ttlSeconds = (options && options.ttlSeconds) || 0;
-  const target = options && options.target;
-  const fetchOptions = (options && options.fetchOptions) || { method: "GET" };
-  const errorLabel = (options && options.errorLabel) || "Upstream";
+// ─── Worker-side source cache helper ──────────────────────────────────────────
+//
+// Uses a synthetic internal URL (worker-cache.internal/<key>) as the cache key.
+// X-Source-Fetched-At preserves the original upstream fetch time across cache HITs.
 
-  const cache = caches.default;
-  const workerCacheRequest = new Request("https://worker-cache.internal/" + encodeURIComponent(cacheKey), { method: "GET" });
+async function fetchTextWithWorkerCache({ cacheKey, ttlSeconds, target, fetchOptions, errorLabel }) {
+  const cacheRequest = new Request("https://worker-cache.internal/" + encodeURIComponent(cacheKey), { method: "GET" });
 
   if (ttlSeconds > 0) {
-    const cached = await cache.match(workerCacheRequest);
-    if (cached) {
-      const cachedFetchedAt = cached.headers.get("X-Source-Fetched-At") || new Date().toISOString();
-      return {
-        text: await cached.text(),
-        fetchedAt: cachedFetchedAt,
-        cache: "HIT",
-      };
+    const hit = await caches.default.match(cacheRequest);
+    if (hit) {
+      return { text: await hit.text(), fetchedAt: hit.headers.get("X-Source-Fetched-At") || new Date().toISOString(), cache: "HIT" };
     }
   }
 
   const upstream = await fetch(target, fetchOptions);
   const text = await upstream.text();
-
-  if (!upstream.ok) {
-    throw new Error(errorLabel + " upstream error: " + upstream.status);
-  }
+  if (!upstream.ok) throw new Error((errorLabel || "Upstream") + " error: " + upstream.status);
 
   const fetchedAt = new Date().toISOString();
-
   if (ttlSeconds > 0) {
-    const cacheResponse = new Response(text, {
+    await caches.default.put(cacheRequest, new Response(text, {
       status: 200,
       headers: {
         "Content-Type": upstream.headers.get("Content-Type") || "text/plain; charset=utf-8",
         "Cache-Control": "public, max-age=" + ttlSeconds,
         "X-Source-Fetched-At": fetchedAt,
       },
-    });
-    await cache.put(workerCacheRequest, cacheResponse);
+    }));
   }
-
-  return {
-    text,
-    fetchedAt,
-    cache: "MISS",
-  };
+  return { text, fetchedAt, cache: "MISS" };
 }
 
+// ─── 3ERL data (today only, short-lived CF cache) ─────────────────────────────
+
 async function fetch3ErlData() {
-  const upstream = await fetch("https://3erl.fr/api.json", {
-    method: "GET",
-    cf: { cacheEverything: true, cacheTtl: 300 },
-  });
-  if (!upstream.ok) {
-    return null;
-  }
   try {
-    return await upstream.json();
+    const upstream = await fetch("https://3erl.fr/api.json", { method: "GET", cf: { cacheEverything: true, cacheTtl: 300 } });
+    return upstream.ok ? await upstream.json() : null;
   } catch (_e) {
     return null;
   }
 }
+
+// ─── CORS / access-control ────────────────────────────────────────────────────
 
 function corsHeaders() {
   return {
@@ -295,103 +259,74 @@ function isAllowedSiteOrigin(request) {
   const allowedOrigin = "https://mathieu.carbou.me";
   const origin = String(request.headers.get("Origin") || "").toLowerCase();
   const referer = String(request.headers.get("Referer") || "").toLowerCase();
-
-  if (origin) {
-    return origin === allowedOrigin;
-  }
-  return referer.startsWith(allowedOrigin + "/");
+  return origin ? origin === allowedOrigin : referer.startsWith(allowedOrigin + "/");
 }
 
 function isAllowedCountry(request) {
-  const country = String(request.headers.get("CF-IPCountry") || "").toUpperCase();
-  return country === "FR";
+  return String(request.headers.get("CF-IPCountry") || "").toUpperCase() === "FR";
 }
 
-function withCorsAndCacheHeaders(response, cacheState) {
-  const headers = new Headers(response.headers);
-  Object.entries(corsHeaders()).forEach(([k, v]) => headers.set(k, v));
-  headers.set("X-Proxy-Cache", cacheState);
-  return new Response(response.body, {
-    status: response.status,
-    headers,
-  });
-}
+// ─── Response normalizers / Parsers ───────────────────────────────────────────
+//
+// All normalizers output [{ts: "HH:MM", value: number}] sorted ascending.
 
+// RTE open-data price table — PRE+ values in €/MWh
 function normalizePrepPayload(day, text) {
-  const parsed = JSON.parse(text);
-  const values = Array.isArray(parsed && parsed.values) ? parsed.values : [];
-
-  return values
-    .map((entry) => ({
-      ts: toTimeSlot(entry && entry.date),
-      day: entry && entry.date,
-      value: Number(entry && entry.pre && entry.pre.positive),
-    }))
-    .filter((entry) => typeof entry.day === "string" && entry.day.slice(0, 10) === day && isTimeSlot(entry.ts) && Number.isFinite(entry.value))
-    .map((entry) => ({ ts: entry.ts, value: entry.value }))
+  const { values = [] } = JSON.parse(text);
+  return (Array.isArray(values) ? values : [])
+    .filter((e) => typeof e.date === "string" && e.date.slice(0, 10) === day)
+    .map((e) => ({ ts: toTimeSlot(e.date), value: Number(e.pre && e.pre.positive) }))
+    .filter((e) => isTimeSlot(e.ts) && Number.isFinite(e.value))
     .sort(sortByTs);
 }
 
+// Enedis Koumoul API — PRD3_BASE dynamic coefficient (dimensionless)
 function normalizePrd3Payload(text) {
-  const parsed = JSON.parse(text);
-  const values = Array.isArray(parsed) ? parsed : [];
-
-  return values
-    .map((row) => ({
-      ts: toTimeSlot(row && row.horodate),
-      value: Number(row && row.coefficient_dynamique_j_1),
-    }))
-    .filter((entry) => isTimeSlot(entry.ts) && Number.isFinite(entry.value))
+  const values = JSON.parse(text);
+  return (Array.isArray(values) ? values : [])
+    .map((row) => ({ ts: toTimeSlot(row && row.horodate), value: Number(row && row.coefficient_dynamique_j_1) }))
+    .filter((e) => isTimeSlot(e.ts) && Number.isFinite(e.value))
     .sort(sortByTs);
 }
 
+// RTE eco2mix XML — France SPOT price in €/MWh, hourly or 15-min periods
 function parseFranceSpotXml(day, xml) {
-  const dayPattern = new RegExp(`<donneesMarche\\b[^>]*date=['\"]${escapeRegExp(day)}['\"][^>]*>([\\s\\S]*?)<\\/donneesMarche>`);
-  const dayMatch = xml.match(dayPattern);
-  const dayBlock = dayMatch ? dayMatch[1] : xml;
-  const typeMatch = dayBlock.match(/<type\b[^>]*perimetre=['\"]FR['\"][^>]*>([\s\S]*?)<\/type>/);
-
-  if (!typeMatch) {
-    return [];
-  }
+  const dayBlock = xml.match(
+    new RegExp(`<donneesMarche\\b[^>]*date=['\"]${escapeRegExp(day)}['\"][^>]*>([\\s\\S]*?)<\\/donneesMarche>`)
+  );
+  const typeBlock = (dayBlock ? dayBlock[1] : xml).match(
+    /<type\b[^>]*perimetre=['\"]FR['\"][^>]*>([\s\S]*?)<\/type>/
+  );
+  if (!typeBlock) return [];
 
   const rawValues = [];
-  const valuePattern = /<valeur\b[^>]*periode=['\"](\d+)['\"][^>]*>([^<]*)<\/valeur>/g;
-  let match;
-
-  while ((match = valuePattern.exec(typeMatch[1])) !== null) {
-    const period = Number(match[1]);
-    const value = Number(String(match[2] || "").trim().replace(",", "."));
-    if (Number.isFinite(period) && Number.isFinite(value)) {
-      rawValues.push({ period, value });
-    }
+  const re = /<valeur\b[^>]*periode=['\"](\d+)['\"][^>]*>([^<]*)<\/valeur>/g;
+  let m;
+  while ((m = re.exec(typeBlock[1])) !== null) {
+    const period = Number(m[1]);
+    const value = Number(String(m[2] || "").trim().replace(",", "."));
+    if (Number.isFinite(period) && Number.isFinite(value)) rawValues.push({ period, value });
   }
 
-  const stepMinutes = rawValues.some((entry) => entry.period > 23) ? 15 : 60;
-
-  return rawValues.map((entry) => ({
-    ts: buildPeriodDate(entry.period, stepMinutes),
-    value: entry.value,
-  })).sort(sortByTs);
+  const stepMinutes = rawValues.some((e) => e.period > 23) ? 15 : 60;
+  return rawValues
+    .map(({ period, value }) => ({ ts: buildPeriodDate(period, stepMinutes), value }))
+    .sort(sortByTs);
 }
 
+// ─── Misc utilities ───────────────────────────────────────────────────────────
+
+// Convert a period index to "HH:MM" (e.g. period=3, step=15 → "00:45")
 function buildPeriodDate(period, stepMinutes) {
-  const totalMinutes = period * stepMinutes;
-  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
-  const minutes = String(totalMinutes % 60).padStart(2, "0");
-  return `${hours}:${minutes}`;
+  const total = period * stepMinutes;
+  return String(Math.floor(total / 60)).padStart(2, "0") + ":" + String(total % 60).padStart(2, "0");
 }
 
+// Extract "HH:MM" from an ISO timestamp, or pass through if already a slot
 function toTimeSlot(value) {
   const text = String(value || "");
-  const match = text.match(/T(\d{2}:\d{2})/);
-  if (match) {
-    return match[1];
-  }
-  if (isTimeSlot(text)) {
-    return text;
-  }
-  return null;
+  const m = text.match(/T(\d{2}:\d{2})/);
+  return m ? m[1] : (isTimeSlot(text) ? text : null);
 }
 
 function isTimeSlot(value) {

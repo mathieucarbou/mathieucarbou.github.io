@@ -182,26 +182,11 @@ permalink: /prep/
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
-    var CACHE_PREFIX = "prep_v6:";
+    var CACHE_PREFIX = "prep_v7:";
     var API_BASE_URL = "https://prep-api-1.carbou.me/api";
     var resizeTimer = null;
 
-    function cacheGet(key) {
-      try {
-        var raw = localStorage.getItem(CACHE_PREFIX + key);
-        return raw ? JSON.parse(raw) : null;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function cacheSet(key, data) {
-      try {
-        localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(data));
-      } catch (e) {
-        // storage quota exceeded or unavailable — fail silently
-      }
-    }
+    // ─── localStorage timed cache ─────────────────────────────────────────────
 
     function cacheGetTimed(key, maxAgeMs) {
       try {
@@ -250,6 +235,8 @@ permalink: /prep/
       }
     }
 
+    // ─── Date / Paris timezone helpers ────────────────────────────────────────
+
     function partsInParis(date) {
       var formatter = new Intl.DateTimeFormat("en-CA", {
         timeZone: TIMEZONE,
@@ -278,16 +265,6 @@ permalink: /prep/
 
     function todayParis() {
       return parisDateString(new Date());
-    }
-
-    function dateForRte(day) {
-      var tokens = day.split("-");
-      return encodeURIComponent(tokens[2] + "/" + tokens[1] + "/" + tokens[0]);
-    }
-
-    function dayKey(isoDate) {
-      var p = partsInParis(new Date(isoDate));
-      return p.year + "-" + p.month + "-" + p.day;
     }
 
     function slotTime(isoDate) {
@@ -373,6 +350,8 @@ permalink: /prep/
       load();
     }
 
+    // ─── PRD3 profile day logic ────────────────────────────────────────────────
+
     function getPrd3ProfileInfo(day) {
       var today = todayParis();
       var yesterday = addDays(today, -1);
@@ -397,10 +376,7 @@ permalink: /prep/
       };
     }
 
-    function slotKey(isoDate) {
-      var p = partsInParis(new Date(isoDate));
-      return p.year + "-" + p.month + "-" + p.day + "T" + p.hour + ":" + p.minute;
-    }
+    // ─── Formatters ────────────────────────────────────────────────────────────
 
     function toCentsPerKwh(prepEurPerMwh) {
       return prepEurPerMwh * 0.1;
@@ -429,6 +405,8 @@ permalink: /prep/
       if (profile === "3-") return "⛔️⛔️⛔️";
       return "⁉️";
     }
+
+    // ─── DOM helpers ──────────────────────────────────────────────────────────
 
     function setStatus(message, isError) {
       var node = document.getElementById("prep-status");
@@ -460,26 +438,15 @@ permalink: /prep/
         : "<span style=\"color:#c62828;font-weight:700;\">no</span>";
     }
 
-    function workerCacheBadge(state) {
-      if (state === "HIT") {
-        return "<span style=\"color:#2e7d32;font-weight:700;\">HIT</span>";
-      }
-      if (state === "MISS") {
-        return "<span style=\"color:#c62828;font-weight:700;\">MISS</span>";
-      }
-      return "-";
+    function setTimeslotInfo({ prep, spot, prd3, mergedCount }) {
+      document.getElementById("prep-timeslot-info").innerHTML =
+        mergedCount + " aligned timeslots" +
+        "<br>PREP: " + prep.count + " | local cache: " + yesNo(prep.fromCache) + " | worker: " + formatDataFetchTime(prep.fetchedAt) +
+        "<br>SPOT FR: " + spot.count + " | local cache: " + yesNo(spot.fromCache) + " | worker: " + formatDataFetchTime(spot.fetchedAt) +
+        "<br>PRD3: " + prd3.count + " | local cache: " + yesNo(prd3.fromCache) + " | worker: " + formatDataFetchTime(prd3.fetchedAt);
     }
 
-    function setTimeslotInfo(prepCount, prepFromCache, prepFetchedAt, prepWorkerCache, spotCount, spotFromCache, spotFetchedAt, spotWorkerCache, prd3Count, prd3FromCache, prd3FetchedAt, prd3WorkerCache, mergedCount, profileLabel) {
-      var prepFetchTime = formatDataFetchTime(prepFetchedAt);
-      var spotFetchTime = formatDataFetchTime(spotFetchedAt);
-      var prd3FetchTime = formatDataFetchTime(prd3FetchedAt);
-      document.getElementById("prep-timeslot-info").innerHTML =
-        mergedCount + " aligned timeslots, " + profileLabel +
-        "<br>PREP: " + prepCount + " | local history: " + yesNo(prepFromCache) + " | worker cache: " + workerCacheBadge(prepWorkerCache) + " | worker fetch: " + prepFetchTime +
-        "<br>SPOT FR: " + spotCount + " | local history: " + yesNo(spotFromCache) + " | worker cache: " + workerCacheBadge(spotWorkerCache) + " | worker fetch: " + spotFetchTime +
-        "<br>PRD3: " + prd3Count + " | local history: " + yesNo(prd3FromCache) + " | worker cache: " + workerCacheBadge(prd3WorkerCache) + " | worker fetch: " + prd3FetchTime;
-    }
+    // ─── Series data helpers ───────────────────────────────────────────────────
 
     function sortByTs(a, b) {
       var aSlot = slotTime(a.ts || "");
@@ -503,6 +470,8 @@ permalink: /prep/
         })
         .sort(sortByTs);
     }
+
+    // ─── API / cache bundle fetch ──────────────────────────────────────────────
 
     function fetchDayBundle(day) {
       var isToday = day === todayParis();
@@ -540,6 +509,8 @@ permalink: /prep/
           return { data: result, fromCache: false };
         });
     }
+
+    // ─── UI updaters ───────────────────────────────────────────────────────────
 
     function apply3ErlStatus(data) {
       if (!data) {
@@ -615,6 +586,8 @@ permalink: /prep/
       };
     }
 
+    // ─── Plotly graph ──────────────────────────────────────────────────────────
+
     function renderGraph(day, profileDay, profileLabel, merged, estimateSeriesEurPerMwh, estimateLastEurPerMwh) {
       var x = merged.map(function (p) {
         return p.key;
@@ -638,8 +611,6 @@ permalink: /prep/
         return typeof p.spot === "number" ? toCentsPerKwh(p.spot) : null;
       });
 
-      var latestPositive = prepPositive.filter(function (v) { return typeof v === "number" && v > 0; }).slice(-1)[0];
-      var latestNegative = prepNegative.filter(function (v) { return typeof v === "number" && v < 0; }).slice(-1)[0];
       var estimateCentsSeries = estimateSeriesEurPerMwh.map(function (value) {
         return typeof value === "number" ? toCentsPerKwh(value) : null;
       });
@@ -763,6 +734,8 @@ permalink: /prep/
       node.textContent = cents.toFixed(2) + " c€/kWh" + sentimentBadge(cents);
     }
 
+    // ─── Main load / init ──────────────────────────────────────────────────────
+
     function load() {
       var dayInput = document.getElementById("day");
       var minDate = dayInput.min || addDays(todayParis(), -LOOKBACK_DAYS);
@@ -803,22 +776,13 @@ permalink: /prep/
           setEstimationValue(estimate.last);
           renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
           setLastUpdateNow();
-          setTimeslotInfo(
-            prepRows.length,
-            bundleResult.fromCache,
-            prepFetchedAt,
-            prepWorkerCache,
-            spotRows.length,
-            bundleResult.fromCache,
-            spotFetchedAt,
-            spotWorkerCache,
-            prd3Rows.length,
-            bundleResult.fromCache,
-            prd3FetchedAt,
-            prd3WorkerCache,
-            merged.length,
-            effectiveProfileLabel
-          );
+          setTimeslotInfo({
+            prep: { count: prepRows.length, fromCache: bundleResult.fromCache, fetchedAt: prepFetchedAt, workerCache: prepWorkerCache },
+            spot: { count: spotRows.length, fromCache: bundleResult.fromCache, fetchedAt: spotFetchedAt, workerCache: spotWorkerCache },
+            prd3: { count: prd3Rows.length, fromCache: bundleResult.fromCache, fetchedAt: prd3FetchedAt, workerCache: prd3WorkerCache },
+            mergedCount: merged.length,
+            profileLabel: effectiveProfileLabel,
+          });
           setStatus("");
         })
         .catch(function (error) {
