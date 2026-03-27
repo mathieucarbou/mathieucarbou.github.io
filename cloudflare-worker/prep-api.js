@@ -20,7 +20,7 @@ const TTL_PAST        = 86400; // seconds — past days (immutable data)
 const TTL_TODAY       = 300;   // seconds — today: PREP & SPOT
 const TTL_PRD3        = 86400; // seconds — PRD3 profile (always 24 h)
 const TTL_3ERL        = 300;   // seconds — 3ERL CF edge cache
-const DEV             = true; // if true, bypasses CORS and client checks for easier testing
+const DEV             = false; // if true, bypasses CORS and client checks for easier testing
 
 export default {
   async fetch(request, env, ctx) {
