@@ -1,12 +1,24 @@
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const isApiRequest = url.pathname.startsWith("/api/");
 
     if (request.method === "OPTIONS") {
+      if (isApiRequest && !isAllowedApiClient(request)) {
+        return new Response(null, { status: 403, headers: corsHeaders() });
+      }
       return new Response(null, { status: 204, headers: corsHeaders() });
     }
 
+    if (isApiRequest && !isAllowedApiClient(request)) {
+      return json({ error: "Forbidden" }, 403);
+    }
+
     try {
+      if (isLegacyEndpoint(url.pathname)) {
+        return json({ error: "Not found" }, 404);
+      }
+
       if (url.pathname === "/api/3erl") {
         return proxyJson("https://3erl.fr/api.json", {
           request,
@@ -275,6 +287,35 @@ function corsHeaders() {
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
+}
+
+function isAllowedApiClient(request) {
+  return isAllowedApiHost(request) && isAllowedSiteOrigin(request) && isAllowedCountry(request);
+}
+
+function isAllowedApiHost(request) {
+  const host = String(request.headers.get("Host") || "").toLowerCase();
+  return /^prep-api(?:-[a-z0-9]+)?\.carbou\.me$/.test(host);
+}
+
+function isAllowedSiteOrigin(request) {
+  const allowedOrigin = "https://mathieu.carbou.me";
+  const origin = String(request.headers.get("Origin") || "").toLowerCase();
+  const referer = String(request.headers.get("Referer") || "").toLowerCase();
+
+  if (origin) {
+    return origin === allowedOrigin;
+  }
+  return referer.startsWith(allowedOrigin + "/");
+}
+
+function isAllowedCountry(request) {
+  const country = String(request.headers.get("CF-IPCountry") || "").toUpperCase();
+  return country === "FR";
+}
+
+function isLegacyEndpoint(pathname) {
+  return pathname === "/api/3erl" || pathname === "/api/rte" || pathname === "/api/spot" || pathname === "/api/prd3";
 }
 
 async function proxyJson(target, options) {
