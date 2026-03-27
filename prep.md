@@ -496,28 +496,18 @@ permalink: /prep/
         .sort(sortByTs);
     }
 
-    function hasWorkerCacheMetadata(bundle) {
-      if (!bundle || typeof bundle !== "object") {
-        return false;
-      }
-      var prepHas = bundle.prep && (bundle.prep.cache === "HIT" || bundle.prep.cache === "MISS");
-      var spotHas = bundle.spot && (bundle.spot.cache === "HIT" || bundle.spot.cache === "MISS");
-      var prd3Has = bundle.prd3 && (bundle.prd3.cache === "HIT" || bundle.prd3.cache === "MISS");
-      return !!(prepHas && spotHas && prd3Has);
-    }
-
     function fetchDayBundle(day) {
       var isToday = day === todayParis();
       var cacheKey = "day:" + day;
 
       if (isToday) {
         var cachedToday = cacheGetTimed("day-live:" + day, PREP_TODAY_CACHE_MS);
-        if (cachedToday && hasWorkerCacheMetadata(cachedToday)) {
+        if (cachedToday) {
           return Promise.resolve({ data: cachedToday, fromCache: true });
         }
       } else {
         var cached = cacheGetTimed(cacheKey, PAST_CACHE_MS);
-        if (cached && hasWorkerCacheMetadata(cached)) {
+        if (cached) {
           return Promise.resolve({ data: cached, fromCache: true });
         }
       }
