@@ -177,12 +177,13 @@ permalink: /prep/
 
 <script>
   (function () {
+    var VERSION = "v8";
     var TIMEZONE = "Europe/Paris";
     var LOOKBACK_DAYS = 30;
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
-    var CACHE_PREFIX = "prep_v7:";
+    var CACHE_PREFIX = "prep_" + VERSION + ":";
     var API_BASE_URL = "https://prep-api-1.carbou.me/api";
     var resizeTimer = null;
 
@@ -268,11 +269,7 @@ permalink: /prep/
     }
 
     function slotTime(isoDate) {
-      if (/^\d{2}:\d{2}$/.test(String(isoDate || ""))) {
-        return isoDate;
-      }
-      var p = partsInParis(new Date(isoDate));
-      return p.hour + ":" + p.minute;
+      return String(isoDate || "");
     }
 
     function withDisplayDay(day, time) {
@@ -451,10 +448,7 @@ permalink: /prep/
     function sortByTs(a, b) {
       var aSlot = slotTime(a.ts || "");
       var bSlot = slotTime(b.ts || "");
-      if (/^\d{2}:\d{2}$/.test(aSlot) && /^\d{2}:\d{2}$/.test(bSlot)) {
-        return aSlot.localeCompare(bSlot);
-      }
-      return new Date(a.ts) - new Date(b.ts);
+      return aSlot.localeCompare(bSlot);
     }
 
     function normalizeSeriesRows(rows) {
@@ -489,7 +483,7 @@ permalink: /prep/
         }
       }
 
-      var url = API_BASE_URL + "/day?day=" + encodeURIComponent(day);
+      var url = API_BASE_URL + "/day?day=" + encodeURIComponent(day) + "&v=" + encodeURIComponent(VERSION);
       return fetch(url)
         .then(function (response) {
           if (!response.ok) {
@@ -757,23 +751,22 @@ permalink: /prep/
       fetchDayBundle(day)
         .then(function (bundleResult) {
           var bundle = bundleResult.data || {};
-          // Support old format where each series was a direct array (before the {rows, fetchedAt, cache} wrapper).
-          // Also normalize ts: old cached entries may contain full ISO timestamps instead of HH:MM.
-          function seriesRows(s) {
-            var rows = Array.isArray(s) ? s : (s && s.rows);
-            return (Array.isArray(rows) ? rows : []).map(function(r) {
-              return r && typeof r.ts === "string" && r.ts.length > 5 ? { ts: slotTime(r.ts), value: r.value } : r;
-            });
+          function normalizeSeriesBundle(series) {
+            return Array.isArray(series)
+              ? { rows: normalizeSeriesRows(series), fetchedAt: null }
+              : { rows: normalizeSeriesRows(series && series.rows), fetchedAt: (series && series.fetchedAt) || null };
           }
-          function seriesFetchedAt(s) { return (!Array.isArray(s) && s && s.fetchedAt) || null; }
-          var prepRows = normalizeSeriesRows(seriesRows(bundle.prep));
-          var spotRows = normalizeSeriesRows(seriesRows(bundle.spot));
-          var prd3Rows = normalizeSeriesRows(seriesRows(bundle.prd3));
+          var prepSeries = normalizeSeriesBundle(bundle.prep);
+          var spotSeries = normalizeSeriesBundle(bundle.spot);
+          var prd3Series = normalizeSeriesBundle(bundle.prd3);
+          var prepRows = prepSeries.rows;
+          var spotRows = spotSeries.rows;
+          var prd3Rows = prd3Series.rows;
           var effectiveProfileDay = bundle.profileDay || profileDay;
           var effectiveProfileLabel = bundle.profileLabel || profileLabel;
-          var prepFetchedAt = seriesFetchedAt(bundle.prep);
-          var spotFetchedAt = seriesFetchedAt(bundle.spot);
-          var prd3FetchedAt = seriesFetchedAt(bundle.prd3);
+          var prepFetchedAt = prepSeries.fetchedAt;
+          var spotFetchedAt = spotSeries.fetchedAt;
+          var prd3FetchedAt = prd3Series.fetchedAt;
 
           apply3ErlStatus(bundle.erl || null);
 
