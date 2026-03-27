@@ -2,16 +2,16 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // if (request.method === "OPTIONS") {
-    //   if (isApiRequest && !isAllowedApiClient(request)) {
-    //     return new Response(null, { status: 403, headers: corsHeaders() });
-    //   }
-    //   return new Response(null, { status: 204, headers: corsHeaders() });
-    // }
+    if (request.method === "OPTIONS") {
+      if (isApiRequest && !isAllowedApiClient(request)) {
+        return new Response(null, { status: 403, headers: corsHeaders() });
+      }
+      return new Response(null, { status: 204, headers: corsHeaders() });
+    }
 
-    // if (isApiRequest && !isAllowedApiClient(request)) {
-    //   return json({ error: "Forbidden" }, 403);
-    // }
+    if (isApiRequest && !isAllowedApiClient(request)) {
+      return json({ error: "Forbidden" }, 403);
+    }
 
     try {
       if (url.pathname === "/api/day") {
