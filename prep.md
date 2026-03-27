@@ -181,6 +181,7 @@ permalink: /prep/
     var LOOKBACK_DAYS = 30;
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
+    var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
     var CACHE_PREFIX = "prep_v3:";
     var API_BASE_URL = "https://prep-api-2.carbou.me/api";
     var resizeTimer = null;
@@ -473,7 +474,7 @@ permalink: /prep/
           return Promise.resolve({ data: cachedTimed, fromCache: true });
         }
       } else {
-        var cached = cacheGet(cacheKey);
+        var cached = cacheGetTimed(cacheKey, PAST_CACHE_MS);
         if (cached) {
           return Promise.resolve({ data: cached, fromCache: true });
         }
@@ -492,7 +493,7 @@ permalink: /prep/
           if (liveCacheKey && liveCacheMs) {
             cacheSetTimed(liveCacheKey, result);
           } else {
-            cacheSet(cacheKey, result);
+            cacheSetTimed(cacheKey, result);
           }
 
           return { data: result, fromCache: false };
