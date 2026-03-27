@@ -651,6 +651,7 @@ permalink: /prep/
         return typeof value === "number" ? toCentsPerKwh(value) : null;
       });
       var estimateCents = typeof estimateLastEurPerMwh === "number" ? toCentsPerKwh(estimateLastEurPerMwh) : null;
+      var isMobile = window.matchMedia("(max-width: 640px)").matches;
 
       var traces = [
         {
@@ -676,7 +677,7 @@ permalink: /prep/
           y: spotValues,
           name: "France SPOT Prices",
           legendrank: 2,
-          line: { color: "#1e3a8a", width: 2, shape: "hv" },
+          line: { color: "#1e3a8a", width: isMobile ? 1 : 2, shape: "hv" },
           yaxis: "y",
         },
         {
@@ -686,7 +687,7 @@ permalink: /prep/
           y: prd3Values,
           name: "PRD3 Factors",
           legendrank: 1,
-          line: { color: "orange", width: 2, shape: "hv" },
+          line: { color: "orange", width: isMobile ? 1 : 2, shape: "hv" },
           yaxis: "y2",
         },
       ];
@@ -698,12 +699,10 @@ permalink: /prep/
           x: x,
           y: estimateCentsSeries,
           name: "PRE+ Daily Estimation",
-          line: { color: "lightgreen", width: 4 },
+          line: { color: "lightgreen", width: isMobile ? 2 : 4 },
           yaxis: "y",
         });
       }
-
-      var isMobile = window.matchMedia("(max-width: 640px)").matches;
 
       var layout = {
 
