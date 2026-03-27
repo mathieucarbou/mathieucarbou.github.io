@@ -181,8 +181,8 @@ permalink: /prep/
     var LOOKBACK_DAYS = 30;
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
-    var CACHE_PREFIX = "prep_v2:";
-    var API_BASE_URL = "https://prep-api.carbou.me/api";
+    var CACHE_PREFIX = "prep_v3:";
+    var API_BASE_URL = "https://prep-api-2.carbou.me/api";
     var resizeTimer = null;
 
     function cacheGet(key) {
@@ -438,13 +438,65 @@ permalink: /prep/
         "Last page update: " + p.hour + ":" + p.minute + ":" + p.second;
     }
 
-    function setTimeslotInfo(prepCount, prepFromCache, prd3Count, prd3FromCache, mergedCount, profileLabel) {
+    function setTimeslotInfo(prepCount, prepFromCache, spotCount, spotFromCache, prd3Count, prd3FromCache, mergedCount, profileLabel) {
       var cacheTag = " <span style=\"color:#2e7d32;font-weight:700;\">(cached)</span>";
       document.getElementById("prep-timeslot-info").innerHTML =
         mergedCount + " aligned timeslots" +
         "<br>PREP: " + prepCount + (prepFromCache ? cacheTag : "") +
+        ", SPOT FR: " + spotCount + (spotFromCache ? cacheTag : "") +
         ", PRD3: " + prd3Count + (prd3FromCache ? cacheTag : "") +
         ", " + profileLabel;
+    }
+
+    function sortByTs(a, b) {
+      return new Date(a.ts) - new Date(b.ts);
+    }
+
+    function normalizeSeriesRows(rows) {
+      return (Array.isArray(rows) ? rows : [])
+        .map(function (row) {
+          return {
+            ts: row && row.ts,
+            value: Number(row && row.value),
+          };
+        })
+        .filter(function (entry) {
+          return typeof entry.ts === "string" && Number.isFinite(entry.value);
+        })
+        .sort(sortByTs);
+    }
+
+    function fetchSeries(url, cacheKey, liveCacheKey, liveCacheMs) {
+      if (liveCacheKey && liveCacheMs) {
+        var cachedTimed = cacheGetTimed(liveCacheKey, liveCacheMs);
+        if (cachedTimed && cachedTimed.length) {
+          return Promise.resolve({ data: cachedTimed, fromCache: true });
+        }
+      } else {
+        var cached = cacheGet(cacheKey);
+        if (cached) {
+          return Promise.resolve({ data: cached, fromCache: true });
+        }
+      }
+
+      return fetch(url)
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error(String(response.status));
+          }
+          return response.json();
+        })
+        .then(function (rows) {
+          var result = normalizeSeriesRows(rows);
+
+          if (liveCacheKey && liveCacheMs) {
+            cacheSetTimed(liveCacheKey, result);
+          } else {
+            cacheSet(cacheKey, result);
+          }
+
+          return { data: result, fromCache: false };
+        });
     }
 
     function fetch3ErlStatus() {
@@ -471,107 +523,73 @@ permalink: /prep/
       var isToday = day === todayParis();
       var cacheKey = "prep:" + day;
 
-      if (isToday) {
-        var cachedToday = cacheGetTimed("prep-live:" + day, PREP_TODAY_CACHE_MS);
-        if (cachedToday) {
-          return Promise.resolve({ data: cachedToday, fromCache: true });
-        }
-      } else {
-        var cached = cacheGet(cacheKey);
-        if (cached) {
-          return Promise.resolve({ data: cached, fromCache: true });
-        }
-      }
+      return fetchSeries(
+        API_BASE_URL + "/rte?day=" + encodeURIComponent(day),
+        cacheKey,
+        isToday ? "prep-live:" + day : null,
+        isToday ? PREP_TODAY_CACHE_MS : 0
+      ).catch(function (error) {
+        throw new Error("PREP API error: " + error.message);
+      });
+    }
 
-      var url = API_BASE_URL + "/rte?day=" + encodeURIComponent(day);
-      return fetch(url)
-        .then(function (response) {
-          if (!response.ok) {
-            throw new Error("PREP API error: " + response.status);
-          }
-          return response.json();
-        })
-        .then(function (json) {
-          var entries = Array.isArray(json.values) ? json.values : [];
-          var result = entries
-            .map(function (entry) {
-              return {
-                d: entry.date,
-                v: Number((entry.pre && entry.pre.positive) || 0),
-              };
-            })
-            .filter(function (entry) {
-              return dayKey(entry.d) === day;
-            })
-            .sort(function (a, b) {
-              return new Date(a.d) - new Date(b.d);
-            });
-          if (isToday) {
-            cacheSetTimed("prep-live:" + day, result);
-          } else {
-            cacheSet(cacheKey, result);
-          }
-          return { data: result, fromCache: false };
-        });
+    function fetchSpot(day) {
+      var isToday = day === todayParis();
+      var cacheKey = "spot:" + day;
+
+      return fetchSeries(
+        API_BASE_URL + "/spot?day=" + encodeURIComponent(day),
+        cacheKey,
+        isToday ? "spot-live:" + day : null,
+        isToday ? PREP_TODAY_CACHE_MS : 0
+      ).catch(function (error) {
+        throw new Error("SPOT API error: " + error.message);
+      });
     }
 
     function fetchPrd3(profileDay) {
       var cacheKey = "prd3:" + profileDay;
 
-      var cached = cacheGet(cacheKey);
-      if (cached) {
-        return Promise.resolve({ data: cached, fromCache: true });
-      }
-
-      var url = API_BASE_URL + "/prd3?profileDay=" + encodeURIComponent(profileDay);
-
-      return fetch(url)
-        .then(function (response) {
-          if (!response.ok) {
-            throw new Error("PRD3 API error: " + response.status);
-          }
-          return response.json();
-        })
-        .then(function (rows) {
-          var values = Array.isArray(rows) ? rows : [];
-          var result = values
-            .map(function (row) {
-              return {
-                d: row.horodate,
-                v: Number(row.coefficient_dynamique_j_1 || 0),
-              };
-            })
-            .sort(function (a, b) {
-              return new Date(a.d) - new Date(b.d);
-            });
-          cacheSet(cacheKey, result);
-          return { data: result, fromCache: false };
-        });
+      return fetchSeries(
+        API_BASE_URL + "/prd3?profileDay=" + encodeURIComponent(profileDay),
+        cacheKey,
+        null,
+        0
+      ).catch(function (error) {
+        throw new Error("PRD3 API error: " + error.message);
+      });
     }
 
-    function mergeByTimeslot(day, prep, prd3) {
+    function mergeByTimeslot(day, prep, spot, prd3) {
       var prepMap = new Map();
       prep.forEach(function (point) {
-        prepMap.set(slotTime(point.d), point);
+        prepMap.set(slotTime(point.ts), point.value);
+      });
+
+      var spotMap = new Map();
+      spot.forEach(function (point) {
+        spotMap.set(slotTime(point.ts), point.value);
       });
 
       var prd3Map = new Map();
       prd3.forEach(function (point) {
-        prd3Map.set(slotTime(point.d), point);
+        prd3Map.set(slotTime(point.ts), point.value);
       });
 
-      var keys = Array.from(prepMap.keys()).filter(function (time) {
-        return prd3Map.has(time);
-      });
+      var keys = [];
+      for (var minutes = 0; minutes < 24 * 60; minutes += 15) {
+        var hh = String(Math.floor(minutes / 60)).padStart(2, "0");
+        var mm = String(minutes % 60).padStart(2, "0");
+        keys.push(hh + ":" + mm);
+      }
       keys.sort();
 
       return keys.map(function (key) {
-        var prepPoint = prepMap.get(key);
-        var prd3Point = prd3Map.get(key);
         return {
           key: withDisplayDay(day, key),
-          prep: prepPoint ? prepPoint.v : null,
-          prd3: prd3Point ? prd3Point.v : null,
+          prep: prepMap.has(key) ? prepMap.get(key) : null,
+          spot: spotMap.has(key) ? spotMap.get(key) : null,
+          prd3: prd3Map.has(key) ? prd3Map.get(key) : null,
         };
       });
     }
@@ -623,24 +641,23 @@ permalink: /prep/
         return typeof p.prd3 === "number" ? p.prd3 : null;
       });
 
+      var spotValues = merged.map(function (p) {
+        return typeof p.spot === "number" ? toCentsPerKwh(p.spot) : null;
+      });
+
       var latestPositive = prepPositive.filter(function (v) { return typeof v === "number" && v > 0; }).slice(-1)[0];
       var latestNegative = prepNegative.filter(function (v) { return typeof v === "number" && v < 0; }).slice(-1)[0];
-      var latestPrd3 = prd3Values.filter(function (v) { return typeof v === "number"; }).slice(-1)[0];
       var estimateCentsSeries = estimateSeriesEurPerMwh.map(function (value) {
         return typeof value === "number" ? toCentsPerKwh(value) : null;
       });
       var estimateCents = typeof estimateLastEurPerMwh === "number" ? toCentsPerKwh(estimateLastEurPerMwh) : null;
-
-      function boldLabel(label) {
-        return "<b>" + label + "</b>";
-      }
 
       var traces = [
         {
           type: "bar",
           x: x,
           y: prepPositive,
-          name: "Last Positive PRE+" + (typeof latestPositive === "number" ? " (" + latestPositive.toFixed(2) + " c€/kWh)" : ""),
+          name: "Positive PRE+",
           marker: { color: "deepskyblue" },
           yaxis: "y",
         },
@@ -648,7 +665,7 @@ permalink: /prep/
           type: "bar",
           x: x,
           y: prepNegative,
-          name: "Last Negative PRE+" + (typeof latestNegative === "number" ? " (" + latestNegative.toFixed(2) + " c€/kWh)" : ""),
+          name: "Negative PRE+",
           marker: { color: "red" },
           yaxis: "y",
         },
@@ -656,8 +673,19 @@ permalink: /prep/
           type: "scatter",
           mode: "lines",
           x: x,
+          y: spotValues,
+          name: "France SPOT Prices",
+          legendrank: 2,
+          line: { color: "#1e3a8a", width: 2, shape: "hv" },
+          yaxis: "y",
+        },
+        {
+          type: "scatter",
+          mode: "lines",
+          x: x,
           y: prd3Values,
-          name: "Last PRD3 Factor" + (typeof latestPrd3 === "number" ? " (" + latestPrd3.toFixed(6) + ")" : ""),
+          name: "PRD3 Factors",
+          legendrank: 1,
           line: { color: "orange", width: 2, shape: "hv" },
           yaxis: "y2",
         },
@@ -669,8 +697,8 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: estimateCentsSeries,
-          name: boldLabel("Last PRE+ Daily Estimation" + " (" + estimateCents.toFixed(2) + " c€/kWh)" + sentimentBadge(estimateCents)),
-          line: { color: "lightgreen", width: 2 },
+          name: "PRE+ Daily Estimation",
+          line: { color: "lightgreen", width: 4 },
           yaxis: "y",
         });
       }
@@ -762,7 +790,7 @@ permalink: /prep/
 
       setStatus("Loading data for " + day + " with PRD3 profile " + profileLabel + " (" + profileDay + ")...");
 
-      var fetches = [fetchPrep(day), fetchPrd3(profileDay)];
+      var fetches = [fetchPrep(day), fetchSpot(day), fetchPrd3(profileDay)];
       if (isToday) {
         fetches.push(fetch3ErlStatus());
       }
@@ -770,13 +798,14 @@ permalink: /prep/
       Promise.all(fetches)
         .then(function (results) {
           var prepResult = results[0];
-          var prd3Result = results[1];
-          var merged = mergeByTimeslot(day, prepResult.data, prd3Result.data);
+          var spotResult = results[1];
+          var prd3Result = results[2];
+          var merged = mergeByTimeslot(day, prepResult.data, spotResult.data, prd3Result.data);
           var estimate = estimateDailyPrepSeries(merged);
           setEstimationValue(estimate.last);
           renderGraph(day, profileDay, profileLabel, merged, estimate.series, estimate.last);
           setLastUpdateNow();
-          setTimeslotInfo(prepResult.data.length, prepResult.fromCache, prd3Result.data.length, prd3Result.fromCache, merged.length, profileLabel);
+          setTimeslotInfo(prepResult.data.length, prepResult.fromCache, spotResult.data.length, spotResult.fromCache, prd3Result.data.length, prd3Result.fromCache, merged.length, profileLabel);
           setStatus("");
         })
         .catch(function (error) {

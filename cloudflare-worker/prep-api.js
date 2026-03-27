@@ -25,11 +25,33 @@ export default {
         const [y, m, d] = day.split("-");
         const startDate = encodeURIComponent(`${d}/${m}/${y}`);
         const target = `https://www.services-rte.com/cms/open_data/v1/price/table?startDate=${startDate}`;
-        return proxyJson(target, {
+        return proxyData(target, {
           request,
           ctx,
           useCache: cachePastDay,
           ttlSeconds: 1 * 24 * 60 * 60,
+          transform(text) {
+            return normalizePrepPayload(day, text);
+          },
+        });
+      }
+
+      if (url.pathname === "/api/spot") {
+        const day = url.searchParams.get("day"); // YYYY-MM-DD
+        if (!isIsoDay(day)) return json({ error: "Invalid day" }, 400);
+
+        const cachePastDay = isPastParisDay(day);
+        const [y, m, d] = day.split("-");
+        const target = `https://eco2mix.rte-france.com/curves/getDonneesMarche?dateDeb=${d}/${m}/${y}&dateFin=${d}/${m}/${y}&mode=NORM`;
+
+        return proxyData(target, {
+          request,
+          ctx,
+          useCache: cachePastDay,
+          ttlSeconds: 1 * 24 * 60 * 60,
+          transform(text) {
+            return parseFranceSpotXml(day, text);
+          },
         });
       }
 
@@ -53,26 +75,18 @@ export default {
           order: "horodate desc",
         });
 
-        const upstream = await fetch("https://openservices.enedis.fr/php/opendata.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body,
-          cf: cachePastDay
-            ? {
-                cacheEverything: true,
-                cacheTtl: 1 * 24 * 60 * 60,
-              }
-            : undefined,
-        });
-
-        const text = await upstream.text();
-        return new Response(text, {
-          status: upstream.status,
-          headers: {
-            ...corsHeaders(),
-            "Content-Type": upstream.headers.get("Content-Type") || "application/json",
-            "Cache-Control": cachePastDay ? "public, max-age=86400" : "no-store",
-            "X-Proxy-Cache": cachePastDay ? "ENABLED-PAST-DAY" : "BYPASS-TODAY",
+        return proxyData("https://openservices.enedis.fr/php/opendata.php", {
+          request,
+          ctx,
+          useCache: cachePastDay,
+          ttlSeconds: 1 * 24 * 60 * 60,
+          fetchOptions: {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+            body,
+          },
+          transform(text) {
+            return normalizePrd3Payload(text);
           },
         });
       }
@@ -115,6 +129,65 @@ function corsHeaders() {
 
 async function proxyJson(target, options) {
   return proxyJsonWithOptions(target, options || {});
+}
+
+async function proxyData(target, options) {
+  const request = options && options.request;
+  const ctx = options && options.ctx;
+  const useCache = !(options && options.useCache === false);
+  const ttlSeconds = (options && options.ttlSeconds) || 60;
+  const transform = options && options.transform;
+  const baseFetchOptions = (options && options.fetchOptions) || { method: "GET" };
+
+  var cache = null;
+  var cacheKey = null;
+  var cached = null;
+
+  if (useCache && request) {
+    cache = caches.default;
+    cacheKey = new Request(request.url, { method: "GET" });
+    cached = await cache.match(cacheKey);
+  }
+
+  const fetchOptions = { ...baseFetchOptions };
+  if (useCache && ttlSeconds > 0) {
+    fetchOptions.cf = {
+      ...(baseFetchOptions.cf || {}),
+      cacheEverything: true,
+      cacheTtl: ttlSeconds,
+    };
+  }
+
+  const upstream = await fetch(target, fetchOptions);
+  const text = await upstream.text();
+
+  if (!upstream.ok) {
+    return new Response(text, {
+      status: upstream.status,
+      headers: {
+        ...corsHeaders(),
+        "Content-Type": upstream.headers.get("Content-Type") || "application/json",
+        "Cache-Control": useCache ? "public, max-age=" + ttlSeconds : "no-store",
+        "X-Proxy-Cache": useCache ? (cached ? "MISS" : "BYPASS") : "DISABLED",
+      },
+    });
+  }
+
+  const payload = transform ? transform(text) : JSON.parse(text);
+  const response = json(payload, upstream.status, {
+    "Cache-Control": useCache ? "public, max-age=" + ttlSeconds : "no-store",
+    "X-Proxy-Cache": useCache ? (cached ? "MISS" : "BYPASS") : "DISABLED",
+  });
+
+  if (useCache && cache && cacheKey) {
+    if (ctx && typeof ctx.waitUntil === "function") {
+      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    } else {
+      await cache.put(cacheKey, response.clone());
+    }
+  }
+
+  return response;
 }
 
 async function proxyJsonWithOptions(target, options) {
@@ -180,9 +253,80 @@ function withCorsAndCacheHeaders(response, cacheState) {
   });
 }
 
-function json(obj, status = 200) {
+function normalizePrepPayload(day, text) {
+  const parsed = JSON.parse(text);
+  const values = Array.isArray(parsed && parsed.values) ? parsed.values : [];
+
+  return values
+    .map((entry) => ({
+      ts: entry && entry.date,
+      value: Number(entry && entry.pre && entry.pre.positive),
+    }))
+    .filter((entry) => typeof entry.ts === "string" && entry.ts.slice(0, 10) === day && Number.isFinite(entry.value))
+    .sort(sortByTs);
+}
+
+function normalizePrd3Payload(text) {
+  const parsed = JSON.parse(text);
+  const values = Array.isArray(parsed) ? parsed : [];
+
+  return values
+    .map((row) => ({
+      ts: row && row.horodate,
+      value: Number(row && row.coefficient_dynamique_j_1),
+    }))
+    .filter((entry) => typeof entry.ts === "string" && Number.isFinite(entry.value))
+    .sort(sortByTs);
+}
+
+function parseFranceSpotXml(day, xml) {
+  const dayPattern = new RegExp(`<donneesMarche\\b[^>]*date=['\"]${escapeRegExp(day)}['\"][^>]*>([\\s\\S]*?)<\\/donneesMarche>`);
+  const dayMatch = xml.match(dayPattern);
+  const dayBlock = dayMatch ? dayMatch[1] : xml;
+  const typeMatch = dayBlock.match(/<type\b[^>]*perimetre=['\"]FR['\"][^>]*>([\s\S]*?)<\/type>/);
+
+  if (!typeMatch) {
+    return [];
+  }
+
+  const rawValues = [];
+  const valuePattern = /<valeur\b[^>]*periode=['\"](\d+)['\"][^>]*>([^<]*)<\/valeur>/g;
+  let match;
+
+  while ((match = valuePattern.exec(typeMatch[1])) !== null) {
+    const period = Number(match[1]);
+    const value = Number(String(match[2] || "").trim().replace(",", "."));
+    if (Number.isFinite(period) && Number.isFinite(value)) {
+      rawValues.push({ period, value });
+    }
+  }
+
+  const stepMinutes = rawValues.some((entry) => entry.period > 23) ? 15 : 60;
+
+  return rawValues.map((entry) => ({
+    ts: buildPeriodDate(day, entry.period, stepMinutes),
+    value: entry.value,
+  })).sort(sortByTs);
+}
+
+function buildPeriodDate(day, period, stepMinutes) {
+  const totalMinutes = period * stepMinutes;
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const minutes = String(totalMinutes % 60).padStart(2, "0");
+  return `${day}T${hours}:${minutes}:00`;
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function sortByTs(a, b) {
+  return new Date(a.ts) - new Date(b.ts);
+}
+
+function json(obj, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { ...corsHeaders(), "Content-Type": "application/json" },
+    headers: { ...corsHeaders(), "Content-Type": "application/json", ...extraHeaders },
   });
 }
