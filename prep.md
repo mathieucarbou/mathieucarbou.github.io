@@ -757,17 +757,23 @@ permalink: /prep/
       fetchDayBundle(day)
         .then(function (bundleResult) {
           var bundle = bundleResult.data || {};
-          var prepRows = normalizeSeriesRows(bundle.prep && bundle.prep.rows);
-          var spotRows = normalizeSeriesRows(bundle.spot && bundle.spot.rows);
-          var prd3Rows = normalizeSeriesRows(bundle.prd3 && bundle.prd3.rows);
+          // Support old format where each series was a direct array (before the {rows, fetchedAt, cache} wrapper).
+          // Also normalize ts: old cached entries may contain full ISO timestamps instead of HH:MM.
+          function seriesRows(s) {
+            var rows = Array.isArray(s) ? s : (s && s.rows);
+            return (Array.isArray(rows) ? rows : []).map(function(r) {
+              return r && typeof r.ts === "string" && r.ts.length > 5 ? { ts: slotTime(r.ts), value: r.value } : r;
+            });
+          }
+          function seriesFetchedAt(s) { return (!Array.isArray(s) && s && s.fetchedAt) || null; }
+          var prepRows = normalizeSeriesRows(seriesRows(bundle.prep));
+          var spotRows = normalizeSeriesRows(seriesRows(bundle.spot));
+          var prd3Rows = normalizeSeriesRows(seriesRows(bundle.prd3));
           var effectiveProfileDay = bundle.profileDay || profileDay;
           var effectiveProfileLabel = bundle.profileLabel || profileLabel;
-          var prepFetchedAt = bundle.prep && bundle.prep.fetchedAt ? bundle.prep.fetchedAt : null;
-          var spotFetchedAt = bundle.spot && bundle.spot.fetchedAt ? bundle.spot.fetchedAt : null;
-          var prd3FetchedAt = bundle.prd3 && bundle.prd3.fetchedAt ? bundle.prd3.fetchedAt : null;
-          var prepWorkerCache = bundle.prep && bundle.prep.cache ? bundle.prep.cache : null;
-          var spotWorkerCache = bundle.spot && bundle.spot.cache ? bundle.spot.cache : null;
-          var prd3WorkerCache = bundle.prd3 && bundle.prd3.cache ? bundle.prd3.cache : null;
+          var prepFetchedAt = seriesFetchedAt(bundle.prep);
+          var spotFetchedAt = seriesFetchedAt(bundle.spot);
+          var prd3FetchedAt = seriesFetchedAt(bundle.prd3);
 
           apply3ErlStatus(bundle.erl || null);
 
@@ -777,11 +783,10 @@ permalink: /prep/
           renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
           setLastUpdateNow();
           setTimeslotInfo({
-            prep: { count: prepRows.length, fromCache: bundleResult.fromCache, fetchedAt: prepFetchedAt, workerCache: prepWorkerCache },
-            spot: { count: spotRows.length, fromCache: bundleResult.fromCache, fetchedAt: spotFetchedAt, workerCache: spotWorkerCache },
-            prd3: { count: prd3Rows.length, fromCache: bundleResult.fromCache, fetchedAt: prd3FetchedAt, workerCache: prd3WorkerCache },
+            prep: { count: prepRows.length, fromCache: bundleResult.fromCache, fetchedAt: prepFetchedAt },
+            spot: { count: spotRows.length, fromCache: bundleResult.fromCache, fetchedAt: spotFetchedAt },
+            prd3: { count: prd3Rows.length, fromCache: bundleResult.fromCache, fetchedAt: prd3FetchedAt },
             mergedCount: merged.length,
-            profileLabel: effectiveProfileLabel,
           });
           setStatus("");
         })

@@ -11,12 +11,21 @@
 //   2. Per-source worker cache: PREP/SPOT today=5 min, past=24 h; PRD3 always 24 h.
 // =============================================================================
 
+// ─── Configuration ────────────────────────────────────────────────────────────
+
+const TIMEZONE        = "Europe/Paris";
+const ALLOWED_ORIGIN  = "https://mathieu.carbou.me";
+const ALLOWED_HOST_RE = /^prep-api(?:-[a-z0-9]+)?\.carbou\.me$/;
+const TTL_PAST        = 86400; // seconds — past days (immutable data)
+const TTL_TODAY       = 300;   // seconds — today: PREP & SPOT
+const TTL_PRD3        = 86400; // seconds — PRD3 profile (always 24 h)
+const TTL_3ERL        = 300;   // seconds — 3ERL CF edge cache
+const DEV             = true; // if true, bypasses CORS and client checks for easier testing
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    // const isApiRequest = url.pathname.startsWith("/api/");
-    // for debug purposes
-    const isApiRequest = false;
+    const isApiRequest = !DEV && url.pathname.startsWith("/api/");
 
     // CORS preflight
     if (request.method === "OPTIONS") {
@@ -64,7 +73,7 @@ async function handleDayRequest(request, ctx, url) {
         // Propagate the remaining zone-cache TTL to the client so its cache
         // expires at the same time as the worker's (Age = seconds already spent in CF cache).
         const age = parseInt(cached.headers.get("Age") || "0", 10);
-        const remainingTtl = Math.max(0, 86400 - age);
+        const remainingTtl = Math.max(0, TTL_PAST - age);
         return json(body, 200, { "Cache-Control": `public, max-age=${remainingTtl}, immutable`, "X-Proxy-Cache": "HIT" });
       }
     }
@@ -82,7 +91,7 @@ async function handleDayRequest(request, ctx, url) {
   const response = json(
     { day, profileDay, profileLabel, prep, spot, prd3, erl },
     200,
-    { "Cache-Control": isPast ? "public, max-age=86400, immutable" : "no-store", "X-Proxy-Cache": isPast ? "MISS" : "BYPASS-TODAY" }
+    { "Cache-Control": isPast ? `public, max-age=${TTL_PAST}, immutable` : "no-store", "X-Proxy-Cache": isPast ? "MISS" : "BYPASS-TODAY" }
   );
 
   // Store past-day response in zone cache for future requests
@@ -110,7 +119,7 @@ function isIsoDay(v) {
 // The timeZone option controls the actual timezone — locale has no effect on it.
 function parisTodayDay() {
   return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Europe/Paris",
+    timeZone: TIMEZONE,
     year: "numeric", month: "2-digit", day: "2-digit",
   }).format(new Date());
 }
@@ -147,13 +156,13 @@ function getPrd3ProfileInfo(day) {
 // ─── Per-source data fetchers ──────────────────────────────────────────────────
 //
 // Each returns { rows: [{ts: "HH:MM", value}], fetchedAt: ISO, cache: "HIT"|"MISS" }
-// TTL policy: today = 5 min (300 s), past = 24 h (86400 s), PRD3 always 24 h.
+// TTL policy: TTL_TODAY / TTL_PAST / TTL_PRD3 (see configuration block above).
 
 async function fetchPrepSeries(day) {
   const [y, m, d] = day.split("-");
   const result = await fetchTextWithWorkerCache({
     cacheKey: "prep:" + day,
-    ttlSeconds: isPastParisDay(day) ? 86400 : 300,
+    ttlSeconds: isPastParisDay(day) ? TTL_PAST : TTL_TODAY,
     target: `https://www.services-rte.com/cms/open_data/v1/price/table?startDate=${encodeURIComponent(`${d}/${m}/${y}`)}`,
     fetchOptions: { method: "GET" },
     errorLabel: "PREP",
@@ -165,7 +174,7 @@ async function fetchSpotSeries(day) {
   const [y, m, d] = day.split("-");
   const result = await fetchTextWithWorkerCache({
     cacheKey: "spot:" + day,
-    ttlSeconds: isPastParisDay(day) ? 86400 : 300,
+    ttlSeconds: isPastParisDay(day) ? TTL_PAST : TTL_TODAY,
     target: `https://eco2mix.rte-france.com/curves/getDonneesMarche?dateDeb=${d}/${m}/${y}&dateFin=${d}/${m}/${y}&mode=NORM`,
     fetchOptions: { method: "GET" },
     errorLabel: "SPOT",
@@ -184,7 +193,7 @@ async function fetchPrd3Series(profileDay) {
   });
   const result = await fetchTextWithWorkerCache({
     cacheKey: "prd3:" + profileDay,
-    ttlSeconds: 86400,
+    ttlSeconds: TTL_PRD3,
     target: "https://openservices.enedis.fr/php/opendata.php",
     fetchOptions: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" }, body },
     errorLabel: "PRD3",
@@ -229,7 +238,7 @@ async function fetchTextWithWorkerCache({ cacheKey, ttlSeconds, target, fetchOpt
 
 async function fetch3ErlData() {
   try {
-    const upstream = await fetch("https://3erl.fr/api.json", { method: "GET", cf: { cacheEverything: true, cacheTtl: 300 } });
+    const upstream = await fetch("https://3erl.fr/api.json", { method: "GET", cf: { cacheEverything: true, cacheTtl: TTL_3ERL } });
     return upstream.ok ? await upstream.json() : null;
   } catch (_e) {
     return null;
@@ -240,7 +249,7 @@ async function fetch3ErlData() {
 
 function corsHeaders() {
   return {
-    "Access-Control-Allow-Origin": "https://mathieu.carbou.me",
+    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
@@ -252,14 +261,13 @@ function isAllowedApiClient(request) {
 
 function isAllowedApiHost(request) {
   const host = String(request.headers.get("Host") || "").toLowerCase();
-  return /^prep-api(?:-[a-z0-9]+)?\.carbou\.me$/.test(host);
+  return ALLOWED_HOST_RE.test(host);
 }
 
 function isAllowedSiteOrigin(request) {
-  const allowedOrigin = "https://mathieu.carbou.me";
   const origin = String(request.headers.get("Origin") || "").toLowerCase();
   const referer = String(request.headers.get("Referer") || "").toLowerCase();
-  return origin ? origin === allowedOrigin : referer.startsWith(allowedOrigin + "/");
+  return origin ? origin === ALLOWED_ORIGIN : referer.startsWith(ALLOWED_ORIGIN + "/");
 }
 
 function isAllowedCountry(request) {
