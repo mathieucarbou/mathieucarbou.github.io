@@ -26,6 +26,25 @@ export default {
         if (cachePastDay && cache && cacheKey) {
           const cached = await cache.match(cacheKey);
           if (cached) {
+            // Patch source cache fields for bundles stored before the cache metadata was added
+            try {
+              const body = await cached.json();
+              let patched = false;
+              for (const key of ["prep", "spot", "prd3"]) {
+                if (body[key] && typeof body[key] === "object" && !body[key].cache) {
+                  body[key] = { ...body[key], cache: "HIT" };
+                  patched = true;
+                }
+              }
+              if (patched) {
+                return json(body, 200, {
+                  "Cache-Control": "public, max-age=86400",
+                  "X-Proxy-Cache": "HIT",
+                });
+              }
+            } catch (_e) {
+              // JSON parse failed, fall through to raw response
+            }
             return withCorsAndCacheHeaders(cached, "HIT");
           }
         }
