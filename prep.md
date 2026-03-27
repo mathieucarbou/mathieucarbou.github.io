@@ -183,7 +183,7 @@ permalink: /prep/
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
     var CACHE_PREFIX = "prep_v3:";
-    var API_BASE_URL = "https://prep-api-2.carbou.me/api";
+    var API_BASE_URL = "https://prep-api-1.carbou.me/api";
     var resizeTimer = null;
 
     function cacheGet(key) {
@@ -210,7 +210,7 @@ permalink: /prep/
           return null;
         }
         var parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed.savedAt !== "number" || !Array.isArray(parsed.data)) {
+        if (!parsed || typeof parsed.savedAt !== "number" || !("data" in parsed)) {
           return null;
         }
         if (Date.now() - parsed.savedAt > maxAgeMs) {
@@ -467,11 +467,14 @@ permalink: /prep/
         .sort(sortByTs);
     }
 
-    function fetchSeries(url, cacheKey, liveCacheKey, liveCacheMs) {
-      if (liveCacheKey && liveCacheMs) {
-        var cachedTimed = cacheGetTimed(liveCacheKey, liveCacheMs);
-        if (cachedTimed && cachedTimed.length) {
-          return Promise.resolve({ data: cachedTimed, fromCache: true });
+    function fetchDayBundle(day) {
+      var isToday = day === todayParis();
+      var cacheKey = "day:" + day;
+
+      if (isToday) {
+        var cachedToday = cacheGetTimed("day-live:" + day, PREP_TODAY_CACHE_MS);
+        if (cachedToday) {
+          return Promise.resolve({ data: cachedToday, fromCache: true });
         }
       } else {
         var cached = cacheGetTimed(cacheKey, PAST_CACHE_MS);
@@ -480,18 +483,19 @@ permalink: /prep/
         }
       }
 
+      var url = API_BASE_URL + "/day?day=" + encodeURIComponent(day);
       return fetch(url)
         .then(function (response) {
           if (!response.ok) {
-            throw new Error(String(response.status));
+            throw new Error("DAY API error: " + response.status);
           }
           return response.json();
         })
-        .then(function (rows) {
-          var result = normalizeSeriesRows(rows);
+        .then(function (payload) {
+          var result = payload && typeof payload === "object" ? payload : {};
 
-          if (liveCacheKey && liveCacheMs) {
-            cacheSetTimed(liveCacheKey, result);
+          if (isToday) {
+            cacheSetTimed("day-live:" + day, result);
           } else {
             cacheSetTimed(cacheKey, result);
           }
@@ -500,65 +504,16 @@ permalink: /prep/
         });
     }
 
-    function fetch3ErlStatus() {
-      return fetch(API_BASE_URL + "/3erl")
-        .then(function (response) {
-          if (!response.ok) {
-            throw new Error("3ERL API error: " + response.status);
-          }
-          return response.json();
-        })
-        .then(function (data) {
-          document.getElementById("trend").textContent = formatTrend(data.PREP_Profile) + " (" + (data.PREP_Profile || "?") + ")";
-          document.getElementById("bridage").textContent = (data.Bridage ? "ON" : "OFF") + sentimentBadge(data.Bridage ? -1 : 1);
-          document.getElementById("bridage-cdc").textContent = (data.Bridage_CDC ? "ON" : "OFF") + sentimentBadge(data.Bridage_CDC ? -1 : 1);
-        })
-        .catch(function () {
-          document.getElementById("trend").textContent = "Unavailable";
-          document.getElementById("bridage").textContent = "Unavailable";
-          document.getElementById("bridage-cdc").textContent = "Unavailable";
-        });
-    }
-
-    function fetchPrep(day) {
-      var isToday = day === todayParis();
-      var cacheKey = "prep:" + day;
-
-      return fetchSeries(
-        API_BASE_URL + "/rte?day=" + encodeURIComponent(day),
-        cacheKey,
-        isToday ? "prep-live:" + day : null,
-        isToday ? PREP_TODAY_CACHE_MS : 0
-      ).catch(function (error) {
-        throw new Error("PREP API error: " + error.message);
-      });
-    }
-
-    function fetchSpot(day) {
-      var isToday = day === todayParis();
-      var cacheKey = "spot:" + day;
-
-      return fetchSeries(
-        API_BASE_URL + "/spot?day=" + encodeURIComponent(day),
-        cacheKey,
-        isToday ? "spot-live:" + day : null,
-        isToday ? PREP_TODAY_CACHE_MS : 0
-      ).catch(function (error) {
-        throw new Error("SPOT API error: " + error.message);
-      });
-    }
-
-    function fetchPrd3(profileDay) {
-      var cacheKey = "prd3:" + profileDay;
-
-      return fetchSeries(
-        API_BASE_URL + "/prd3?profileDay=" + encodeURIComponent(profileDay),
-        cacheKey,
-        null,
-        0
-      ).catch(function (error) {
-        throw new Error("PRD3 API error: " + error.message);
-      });
+    function apply3ErlStatus(data) {
+      if (!data) {
+        document.getElementById("trend").textContent = "Unavailable";
+        document.getElementById("bridage").textContent = "Unavailable";
+        document.getElementById("bridage-cdc").textContent = "Unavailable";
+        return;
+      }
+      document.getElementById("trend").textContent = formatTrend(data.PREP_Profile) + " (" + (data.PREP_Profile || "?") + ")";
+      document.getElementById("bridage").textContent = (data.Bridage ? "ON" : "OFF") + sentimentBadge(data.Bridage ? -1 : 1);
+      document.getElementById("bridage-cdc").textContent = (data.Bridage_CDC ? "ON" : "OFF") + sentimentBadge(data.Bridage_CDC ? -1 : 1);
     }
 
     function mergeByTimeslot(day, prep, spot, prd3) {
@@ -786,26 +741,35 @@ permalink: /prep/
       var profileInfo = getPrd3ProfileInfo(day);
       var profileDay = profileInfo.profileDay;
       var profileLabel = profileInfo.profileLabel;
-      var isToday = day === todayParis();
 
       setStatus("Loading data for " + day + " with PRD3 profile " + profileLabel + " (" + profileDay + ")...");
 
-      var fetches = [fetchPrep(day), fetchSpot(day), fetchPrd3(profileDay)];
-      if (isToday) {
-        fetches.push(fetch3ErlStatus());
-      }
+      fetchDayBundle(day)
+        .then(function (bundleResult) {
+          var bundle = bundleResult.data || {};
+          var prepRows = normalizeSeriesRows(bundle.prep);
+          var spotRows = normalizeSeriesRows(bundle.spot);
+          var prd3Rows = normalizeSeriesRows(bundle.prd3);
+          var effectiveProfileDay = bundle.profileDay || profileDay;
+          var effectiveProfileLabel = bundle.profileLabel || profileLabel;
 
-      Promise.all(fetches)
-        .then(function (results) {
-          var prepResult = results[0];
-          var spotResult = results[1];
-          var prd3Result = results[2];
-          var merged = mergeByTimeslot(day, prepResult.data, spotResult.data, prd3Result.data);
+          apply3ErlStatus(bundle.erl || null);
+
+          var merged = mergeByTimeslot(day, prepRows, spotRows, prd3Rows);
           var estimate = estimateDailyPrepSeries(merged);
           setEstimationValue(estimate.last);
-          renderGraph(day, profileDay, profileLabel, merged, estimate.series, estimate.last);
+          renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
           setLastUpdateNow();
-          setTimeslotInfo(prepResult.data.length, prepResult.fromCache, spotResult.data.length, spotResult.fromCache, prd3Result.data.length, prd3Result.fromCache, merged.length, profileLabel);
+          setTimeslotInfo(
+            prepRows.length,
+            bundleResult.fromCache,
+            spotRows.length,
+            bundleResult.fromCache,
+            prd3Rows.length,
+            bundleResult.fromCache,
+            merged.length,
+            effectiveProfileLabel
+          );
           setStatus("");
         })
         .catch(function (error) {
@@ -845,7 +809,24 @@ permalink: /prep/
         resizeTimer = setTimeout(resizeGraph, 120);
       });
 
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState !== "visible") {
+          return;
+        }
+        var selectedDay = document.getElementById("day").value;
+        if (selectedDay === todayParis()) {
+          load();
+        }
+      });
+
       setInterval(function () {
+        if (document.visibilityState !== "visible") {
+          return;
+        }
+        var selectedDay = document.getElementById("day").value;
+        if (selectedDay !== todayParis()) {
+          return;
+        }
         load();
       }, AUTO_REFRESH_MS);
 

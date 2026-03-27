@@ -16,6 +16,59 @@ export default {
         });
       }
 
+      if (url.pathname === "/api/day") {
+        const day = url.searchParams.get("day"); // YYYY-MM-DD
+        if (!isIsoDay(day)) return json({ error: "Invalid day" }, 400);
+
+        const cachePastDay = isPastParisDay(day);
+        const cache = cachePastDay ? caches.default : null;
+        const cacheKey = cachePastDay ? new Request(request.url, { method: "GET" }) : null;
+
+        if (cachePastDay && cache && cacheKey) {
+          const cached = await cache.match(cacheKey);
+          if (cached) {
+            return withCorsAndCacheHeaders(cached, "HIT");
+          }
+        }
+
+        const profileInfo = getPrd3ProfileInfo(day);
+        const profileDay = profileInfo.profileDay;
+        const profileLabel = profileInfo.profileLabel;
+        const include3Erl = day === parisTodayDay();
+
+        const results = await Promise.all([
+          fetchPrepSeries(day, cachePastDay),
+          fetchSpotSeries(day, cachePastDay),
+          fetchPrd3Series(profileDay, isPastParisDay(profileDay)),
+          include3Erl ? fetch3ErlData() : Promise.resolve(null),
+        ]);
+
+        const payload = {
+          day,
+          profileDay,
+          profileLabel,
+          prep: results[0],
+          spot: results[1],
+          prd3: results[2],
+          erl: results[3],
+        };
+
+        const response = json(payload, 200, {
+          "Cache-Control": cachePastDay ? "public, max-age=86400" : "no-store",
+          "X-Proxy-Cache": cachePastDay ? "MISS" : "BYPASS-TODAY",
+        });
+
+        if (cachePastDay && cache && cacheKey) {
+          if (ctx && typeof ctx.waitUntil === "function") {
+            ctx.waitUntil(cache.put(cacheKey, response.clone()));
+          } else {
+            await cache.put(cacheKey, response.clone());
+          }
+        }
+
+        return response;
+      }
+
       if (url.pathname === "/api/rte") {
         const day = url.searchParams.get("day"); // YYYY-MM-DD
         if (!isIsoDay(day)) return json({ error: "Invalid day" }, 400);
@@ -117,6 +170,103 @@ function isPastParisDay(day) {
     return false;
   }
   return day < parisTodayDay();
+}
+
+function addDaysIso(day, offset) {
+  const utc = new Date(day + "T00:00:00Z");
+  utc.setUTCDate(utc.getUTCDate() + offset);
+  return utc.toISOString().slice(0, 10);
+}
+
+function getPrd3ProfileInfo(day) {
+  const today = parisTodayDay();
+  const yesterday = addDaysIso(today, -1);
+
+  if (day === today) {
+    return { profileDay: addDaysIso(day, -2), profileLabel: "J-2" };
+  }
+  if (day === yesterday) {
+    return { profileDay: addDaysIso(day, -1), profileLabel: "J-1" };
+  }
+  return { profileDay: day, profileLabel: "J0" };
+}
+
+async function fetchPrepSeries(day, useCache) {
+  const [y, m, d] = day.split("-");
+  const startDate = encodeURIComponent(`${d}/${m}/${y}`);
+  const target = `https://www.services-rte.com/cms/open_data/v1/price/table?startDate=${startDate}`;
+
+  const upstream = await fetch(target, useCache
+    ? { cf: { cacheEverything: true, cacheTtl: 86400 } }
+    : undefined);
+  const text = await upstream.text();
+
+  if (!upstream.ok) {
+    throw new Error("PREP upstream error: " + upstream.status);
+  }
+
+  return normalizePrepPayload(day, text);
+}
+
+async function fetchSpotSeries(day, useCache) {
+  const [y, m, d] = day.split("-");
+  const target = `https://eco2mix.rte-france.com/curves/getDonneesMarche?dateDeb=${d}/${m}/${y}&dateFin=${d}/${m}/${y}&mode=NORM`;
+
+  const upstream = await fetch(target, useCache
+    ? { cf: { cacheEverything: true, cacheTtl: 86400 } }
+    : undefined);
+  const text = await upstream.text();
+
+  if (!upstream.ok) {
+    throw new Error("SPOT upstream error: " + upstream.status);
+  }
+
+  return parseFranceSpotXml(day, text);
+}
+
+async function fetchPrd3Series(profileDay, useCache) {
+  const where = `(sous_profil='PRD3_BASE') AND horodate >= '${profileDay}T00:00:00' AND horodate <= '${profileDay}T23:59:59'`;
+  const body = new URLSearchParams({
+    action: "exports",
+    output: "exportDirect",
+    format: "json",
+    dataset: "koumoul://7okolrt07nor9cv103spkfzc",
+    apikey: "false",
+    datefield: "horodate",
+    select: "horodate, coefficient_dynamique_j_1",
+    where,
+    group: "",
+    order: "horodate desc",
+  });
+
+  const upstream = await fetch("https://openservices.enedis.fr/php/opendata.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    body,
+    cf: useCache ? { cacheEverything: true, cacheTtl: 86400 } : undefined,
+  });
+  const text = await upstream.text();
+
+  if (!upstream.ok) {
+    throw new Error("PRD3 upstream error: " + upstream.status);
+  }
+
+  return normalizePrd3Payload(text);
+}
+
+async function fetch3ErlData() {
+  const upstream = await fetch("https://3erl.fr/api.json", {
+    method: "GET",
+    cf: { cacheEverything: true, cacheTtl: 300 },
+  });
+  if (!upstream.ok) {
+    return null;
+  }
+  try {
+    return await upstream.json();
+  } catch (_e) {
+    return null;
+  }
 }
 
 function corsHeaders() {
