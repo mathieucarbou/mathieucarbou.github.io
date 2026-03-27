@@ -1,6 +1,7 @@
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const isApiRequest = url.pathname.startsWith("/api/");
 
     if (request.method === "OPTIONS") {
       if (isApiRequest && !isAllowedApiClient(request)) {
