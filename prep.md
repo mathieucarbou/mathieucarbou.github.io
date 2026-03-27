@@ -182,7 +182,7 @@ permalink: /prep/
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
-    var CACHE_PREFIX = "prep_v4:";
+    var CACHE_PREFIX = "prep_v5:";
     var API_BASE_URL = "https://prep-api-2.carbou.me/api";
     var resizeTimer = null;
 
@@ -457,15 +457,25 @@ permalink: /prep/
         : "<span style=\"color:#c62828;font-weight:700;\">no</span>";
     }
 
-    function setTimeslotInfo(prepCount, prepFromCache, prepFetchedAt, spotCount, spotFromCache, spotFetchedAt, prd3Count, prd3FromCache, prd3FetchedAt, mergedCount, profileLabel) {
+    function workerCacheBadge(state) {
+      if (state === "HIT") {
+        return "<span style=\"color:#2e7d32;font-weight:700;\">HIT</span>";
+      }
+      if (state === "MISS") {
+        return "<span style=\"color:#c62828;font-weight:700;\">MISS</span>";
+      }
+      return "-";
+    }
+
+    function setTimeslotInfo(prepCount, prepFromCache, prepFetchedAt, prepWorkerCache, spotCount, spotFromCache, spotFetchedAt, spotWorkerCache, prd3Count, prd3FromCache, prd3FetchedAt, prd3WorkerCache, mergedCount, profileLabel) {
       var prepFetchTime = formatDataFetchTime(prepFetchedAt);
       var spotFetchTime = formatDataFetchTime(spotFetchedAt);
       var prd3FetchTime = formatDataFetchTime(prd3FetchedAt);
       document.getElementById("prep-timeslot-info").innerHTML =
         mergedCount + " aligned timeslots, " + profileLabel +
-        "<br>PREP: " + prepCount + " | local history: " + yesNo(prepFromCache) + " | worker fetch: " + prepFetchTime +
-        "<br>SPOT FR: " + spotCount + " | local history: " + yesNo(spotFromCache) + " | worker fetch: " + spotFetchTime +
-        "<br>PRD3: " + prd3Count + " | local history: " + yesNo(prd3FromCache) + " | worker fetch: " + prd3FetchTime;
+        "<br>PREP: " + prepCount + " | local history: " + yesNo(prepFromCache) + " | worker cache: " + workerCacheBadge(prepWorkerCache) + " | worker fetch: " + prepFetchTime +
+        "<br>SPOT FR: " + spotCount + " | local history: " + yesNo(spotFromCache) + " | worker cache: " + workerCacheBadge(spotWorkerCache) + " | worker fetch: " + spotFetchTime +
+        "<br>PRD3: " + prd3Count + " | local history: " + yesNo(prd3FromCache) + " | worker cache: " + workerCacheBadge(prd3WorkerCache) + " | worker fetch: " + prd3FetchTime;
     }
 
     function sortByTs(a, b) {
@@ -486,18 +496,28 @@ permalink: /prep/
         .sort(sortByTs);
     }
 
+    function hasWorkerCacheMetadata(bundle) {
+      if (!bundle || typeof bundle !== "object") {
+        return false;
+      }
+      var prepHas = bundle.prep && (bundle.prep.cache === "HIT" || bundle.prep.cache === "MISS");
+      var spotHas = bundle.spot && (bundle.spot.cache === "HIT" || bundle.spot.cache === "MISS");
+      var prd3Has = bundle.prd3 && (bundle.prd3.cache === "HIT" || bundle.prd3.cache === "MISS");
+      return !!(prepHas && spotHas && prd3Has);
+    }
+
     function fetchDayBundle(day) {
       var isToday = day === todayParis();
       var cacheKey = "day:" + day;
 
       if (isToday) {
         var cachedToday = cacheGetTimed("day-live:" + day, PREP_TODAY_CACHE_MS);
-        if (cachedToday) {
+        if (cachedToday && hasWorkerCacheMetadata(cachedToday)) {
           return Promise.resolve({ data: cachedToday, fromCache: true });
         }
       } else {
         var cached = cacheGetTimed(cacheKey, PAST_CACHE_MS);
-        if (cached) {
+        if (cached && hasWorkerCacheMetadata(cached)) {
           return Promise.resolve({ data: cached, fromCache: true });
         }
       }
@@ -774,6 +794,9 @@ permalink: /prep/
           var prepFetchedAt = bundle.prep && bundle.prep.fetchedAt ? bundle.prep.fetchedAt : null;
           var spotFetchedAt = bundle.spot && bundle.spot.fetchedAt ? bundle.spot.fetchedAt : null;
           var prd3FetchedAt = bundle.prd3 && bundle.prd3.fetchedAt ? bundle.prd3.fetchedAt : null;
+          var prepWorkerCache = bundle.prep && bundle.prep.cache ? bundle.prep.cache : null;
+          var spotWorkerCache = bundle.spot && bundle.spot.cache ? bundle.spot.cache : null;
+          var prd3WorkerCache = bundle.prd3 && bundle.prd3.cache ? bundle.prd3.cache : null;
 
           apply3ErlStatus(bundle.erl || null);
 
@@ -786,12 +809,15 @@ permalink: /prep/
             prepRows.length,
             bundleResult.fromCache,
             prepFetchedAt,
+            prepWorkerCache,
             spotRows.length,
             bundleResult.fromCache,
             spotFetchedAt,
+            spotWorkerCache,
             prd3Rows.length,
             bundleResult.fromCache,
             prd3FetchedAt,
+            prd3WorkerCache,
             merged.length,
             effectiveProfileLabel
           );

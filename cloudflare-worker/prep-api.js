@@ -131,6 +131,7 @@ async function fetchPrepSeries(day) {
   return {
     rows: normalizePrepPayload(day, cached.text),
     fetchedAt: cached.fetchedAt,
+    cache: cached.cache,
   };
 }
 
@@ -150,6 +151,7 @@ async function fetchSpotSeries(day) {
   return {
     rows: parseFranceSpotXml(day, cached.text),
     fetchedAt: cached.fetchedAt,
+    cache: cached.cache,
   };
 }
 
@@ -183,6 +185,7 @@ async function fetchPrd3Series(profileDay) {
   return {
     rows: normalizePrd3Payload(cached.text),
     fetchedAt: cached.fetchedAt,
+    cache: cached.cache,
   };
 }
 
@@ -203,6 +206,7 @@ async function fetchTextWithWorkerCache(options) {
       return {
         text: await cached.text(),
         fetchedAt: cachedFetchedAt,
+        cache: "HIT",
       };
     }
   }
@@ -231,6 +235,7 @@ async function fetchTextWithWorkerCache(options) {
   return {
     text,
     fetchedAt,
+    cache: "MISS",
   };
 }
 
