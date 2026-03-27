@@ -1,33 +1,19 @@
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const isApiRequest = url.pathname.startsWith("/api/");
 
-    if (request.method === "OPTIONS") {
-      if (isApiRequest && !isAllowedApiClient(request)) {
-        return new Response(null, { status: 403, headers: corsHeaders() });
-      }
-      return new Response(null, { status: 204, headers: corsHeaders() });
-    }
+    // if (request.method === "OPTIONS") {
+    //   if (isApiRequest && !isAllowedApiClient(request)) {
+    //     return new Response(null, { status: 403, headers: corsHeaders() });
+    //   }
+    //   return new Response(null, { status: 204, headers: corsHeaders() });
+    // }
 
-    if (isApiRequest && !isAllowedApiClient(request)) {
-      return json({ error: "Forbidden" }, 403);
-    }
+    // if (isApiRequest && !isAllowedApiClient(request)) {
+    //   return json({ error: "Forbidden" }, 403);
+    // }
 
     try {
-      if (isLegacyEndpoint(url.pathname)) {
-        return json({ error: "Not found" }, 404);
-      }
-
-      if (url.pathname === "/api/3erl") {
-        return proxyJson("https://3erl.fr/api.json", {
-          request,
-          ctx,
-          ttlSeconds: 300,
-          staleOn429: true,
-        });
-      }
-
       if (url.pathname === "/api/day") {
         const day = url.searchParams.get("day"); // YYYY-MM-DD
         if (!isIsoDay(day)) return json({ error: "Invalid day" }, 400);
@@ -49,9 +35,9 @@ export default {
         const include3Erl = day === parisTodayDay();
 
         const results = await Promise.all([
-          fetchPrepSeries(day, cachePastDay),
-          fetchSpotSeries(day, cachePastDay),
-          fetchPrd3Series(profileDay, isPastParisDay(profileDay)),
+          fetchPrepSeries(day),
+          fetchSpotSeries(day),
+          fetchPrd3Series(profileDay),
           include3Erl ? fetch3ErlData() : Promise.resolve(null),
         ]);
 
@@ -79,81 +65,6 @@ export default {
         }
 
         return response;
-      }
-
-      if (url.pathname === "/api/rte") {
-        const day = url.searchParams.get("day"); // YYYY-MM-DD
-        if (!isIsoDay(day)) return json({ error: "Invalid day" }, 400);
-
-        const cachePastDay = isPastParisDay(day);
-
-        const [y, m, d] = day.split("-");
-        const startDate = encodeURIComponent(`${d}/${m}/${y}`);
-        const target = `https://www.services-rte.com/cms/open_data/v1/price/table?startDate=${startDate}`;
-        return proxyData(target, {
-          request,
-          ctx,
-          useCache: cachePastDay,
-          ttlSeconds: 1 * 24 * 60 * 60,
-          transform(text) {
-            return normalizePrepPayload(day, text);
-          },
-        });
-      }
-
-      if (url.pathname === "/api/spot") {
-        const day = url.searchParams.get("day"); // YYYY-MM-DD
-        if (!isIsoDay(day)) return json({ error: "Invalid day" }, 400);
-
-        const cachePastDay = isPastParisDay(day);
-        const [y, m, d] = day.split("-");
-        const target = `https://eco2mix.rte-france.com/curves/getDonneesMarche?dateDeb=${d}/${m}/${y}&dateFin=${d}/${m}/${y}&mode=NORM`;
-
-        return proxyData(target, {
-          request,
-          ctx,
-          useCache: cachePastDay,
-          ttlSeconds: 1 * 24 * 60 * 60,
-          transform(text) {
-            return parseFranceSpotXml(day, text);
-          },
-        });
-      }
-
-      if (url.pathname === "/api/prd3") {
-        const profileDay = url.searchParams.get("profileDay"); // YYYY-MM-DD
-        if (!isIsoDay(profileDay)) return json({ error: "Invalid profileDay" }, 400);
-
-        const cachePastDay = isPastParisDay(profileDay);
-
-        const where = `(sous_profil='PRD3_BASE') AND horodate >= '${profileDay}T00:00:00' AND horodate <= '${profileDay}T23:59:59'`;
-        const body = new URLSearchParams({
-          action: "exports",
-          output: "exportDirect",
-          format: "json",
-          dataset: "koumoul://7okolrt07nor9cv103spkfzc",
-          apikey: "false",
-          datefield: "horodate",
-          select: "horodate, coefficient_dynamique_j_1",
-          where,
-          group: "",
-          order: "horodate desc",
-        });
-
-        return proxyData("https://openservices.enedis.fr/php/opendata.php", {
-          request,
-          ctx,
-          useCache: cachePastDay,
-          ttlSeconds: 1 * 24 * 60 * 60,
-          fetchOptions: {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-            body,
-          },
-          transform(text) {
-            return normalizePrd3Payload(text);
-          },
-        });
       }
 
       return json({ error: "Not found" }, 404);
@@ -203,40 +114,46 @@ function getPrd3ProfileInfo(day) {
   return { profileDay: day, profileLabel: "J0" };
 }
 
-async function fetchPrepSeries(day, useCache) {
+async function fetchPrepSeries(day) {
   const [y, m, d] = day.split("-");
   const startDate = encodeURIComponent(`${d}/${m}/${y}`);
   const target = `https://www.services-rte.com/cms/open_data/v1/price/table?startDate=${startDate}`;
 
-  const upstream = await fetch(target, useCache
-    ? { cf: { cacheEverything: true, cacheTtl: 86400 } }
-    : undefined);
-  const text = await upstream.text();
+  const ttlSeconds = isPastParisDay(day) ? 86400 : 300;
+  const cached = await fetchTextWithWorkerCache({
+    cacheKey: "prep:" + day,
+    ttlSeconds,
+    target,
+    fetchOptions: { method: "GET" },
+    errorLabel: "PREP",
+  });
 
-  if (!upstream.ok) {
-    throw new Error("PREP upstream error: " + upstream.status);
-  }
-
-  return normalizePrepPayload(day, text);
+  return {
+    rows: normalizePrepPayload(day, cached.text),
+    fetchedAt: cached.fetchedAt,
+  };
 }
 
-async function fetchSpotSeries(day, useCache) {
+async function fetchSpotSeries(day) {
   const [y, m, d] = day.split("-");
   const target = `https://eco2mix.rte-france.com/curves/getDonneesMarche?dateDeb=${d}/${m}/${y}&dateFin=${d}/${m}/${y}&mode=NORM`;
 
-  const upstream = await fetch(target, useCache
-    ? { cf: { cacheEverything: true, cacheTtl: 86400 } }
-    : undefined);
-  const text = await upstream.text();
+  const ttlSeconds = isPastParisDay(day) ? 86400 : 300;
+  const cached = await fetchTextWithWorkerCache({
+    cacheKey: "spot:" + day,
+    ttlSeconds,
+    target,
+    fetchOptions: { method: "GET" },
+    errorLabel: "SPOT",
+  });
 
-  if (!upstream.ok) {
-    throw new Error("SPOT upstream error: " + upstream.status);
-  }
-
-  return parseFranceSpotXml(day, text);
+  return {
+    rows: parseFranceSpotXml(day, cached.text),
+    fetchedAt: cached.fetchedAt,
+  };
 }
 
-async function fetchPrd3Series(profileDay, useCache) {
+async function fetchPrd3Series(profileDay) {
   const where = `(sous_profil='PRD3_BASE') AND horodate >= '${profileDay}T00:00:00' AND horodate <= '${profileDay}T23:59:59'`;
   const body = new URLSearchParams({
     action: "exports",
@@ -251,19 +168,70 @@ async function fetchPrd3Series(profileDay, useCache) {
     order: "horodate desc",
   });
 
-  const upstream = await fetch("https://openservices.enedis.fr/php/opendata.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-    body,
-    cf: useCache ? { cacheEverything: true, cacheTtl: 86400 } : undefined,
+  const cached = await fetchTextWithWorkerCache({
+    cacheKey: "prd3:" + profileDay,
+    ttlSeconds: 86400,
+    target: "https://openservices.enedis.fr/php/opendata.php",
+    fetchOptions: {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+      body,
+    },
+    errorLabel: "PRD3",
   });
+
+  return {
+    rows: normalizePrd3Payload(cached.text),
+    fetchedAt: cached.fetchedAt,
+  };
+}
+
+async function fetchTextWithWorkerCache(options) {
+  const cacheKey = options && options.cacheKey;
+  const ttlSeconds = (options && options.ttlSeconds) || 0;
+  const target = options && options.target;
+  const fetchOptions = (options && options.fetchOptions) || { method: "GET" };
+  const errorLabel = (options && options.errorLabel) || "Upstream";
+
+  const cache = caches.default;
+  const workerCacheRequest = new Request("https://worker-cache.internal/" + encodeURIComponent(cacheKey), { method: "GET" });
+
+  if (ttlSeconds > 0) {
+    const cached = await cache.match(workerCacheRequest);
+    if (cached) {
+      const cachedFetchedAt = cached.headers.get("X-Source-Fetched-At") || new Date().toISOString();
+      return {
+        text: await cached.text(),
+        fetchedAt: cachedFetchedAt,
+      };
+    }
+  }
+
+  const upstream = await fetch(target, fetchOptions);
   const text = await upstream.text();
 
   if (!upstream.ok) {
-    throw new Error("PRD3 upstream error: " + upstream.status);
+    throw new Error(errorLabel + " upstream error: " + upstream.status);
   }
 
-  return normalizePrd3Payload(text);
+  const fetchedAt = new Date().toISOString();
+
+  if (ttlSeconds > 0) {
+    const cacheResponse = new Response(text, {
+      status: 200,
+      headers: {
+        "Content-Type": upstream.headers.get("Content-Type") || "text/plain; charset=utf-8",
+        "Cache-Control": "public, max-age=" + ttlSeconds,
+        "X-Source-Fetched-At": fetchedAt,
+      },
+    });
+    await cache.put(workerCacheRequest, cacheResponse);
+  }
+
+  return {
+    text,
+    fetchedAt,
+  };
 }
 
 async function fetch3ErlData() {
@@ -312,126 +280,6 @@ function isAllowedSiteOrigin(request) {
 function isAllowedCountry(request) {
   const country = String(request.headers.get("CF-IPCountry") || "").toUpperCase();
   return country === "FR";
-}
-
-function isLegacyEndpoint(pathname) {
-  return pathname === "/api/3erl" || pathname === "/api/rte" || pathname === "/api/spot" || pathname === "/api/prd3";
-}
-
-async function proxyJson(target, options) {
-  return proxyJsonWithOptions(target, options || {});
-}
-
-async function proxyData(target, options) {
-  const request = options && options.request;
-  const ctx = options && options.ctx;
-  const useCache = !(options && options.useCache === false);
-  const ttlSeconds = (options && options.ttlSeconds) || 60;
-  const transform = options && options.transform;
-  const baseFetchOptions = (options && options.fetchOptions) || { method: "GET" };
-
-  var cache = null;
-  var cacheKey = null;
-  var cached = null;
-
-  if (useCache && request) {
-    cache = caches.default;
-    cacheKey = new Request(request.url, { method: "GET" });
-    cached = await cache.match(cacheKey);
-  }
-
-  const fetchOptions = { ...baseFetchOptions };
-  if (useCache && ttlSeconds > 0) {
-    fetchOptions.cf = {
-      ...(baseFetchOptions.cf || {}),
-      cacheEverything: true,
-      cacheTtl: ttlSeconds,
-    };
-  }
-
-  const upstream = await fetch(target, fetchOptions);
-  const text = await upstream.text();
-
-  if (!upstream.ok) {
-    return new Response(text, {
-      status: upstream.status,
-      headers: {
-        ...corsHeaders(),
-        "Content-Type": upstream.headers.get("Content-Type") || "application/json",
-        "Cache-Control": useCache ? "public, max-age=" + ttlSeconds : "no-store",
-        "X-Proxy-Cache": useCache ? (cached ? "MISS" : "BYPASS") : "DISABLED",
-      },
-    });
-  }
-
-  const payload = transform ? transform(text) : JSON.parse(text);
-  const response = json(payload, upstream.status, {
-    "Cache-Control": useCache ? "public, max-age=" + ttlSeconds : "no-store",
-    "X-Proxy-Cache": useCache ? (cached ? "MISS" : "BYPASS") : "DISABLED",
-  });
-
-  if (useCache && cache && cacheKey) {
-    if (ctx && typeof ctx.waitUntil === "function") {
-      ctx.waitUntil(cache.put(cacheKey, response.clone()));
-    } else {
-      await cache.put(cacheKey, response.clone());
-    }
-  }
-
-  return response;
-}
-
-async function proxyJsonWithOptions(target, options) {
-  const request = options && options.request;
-  const ctx = options && options.ctx;
-  const useCache = !(options && options.useCache === false);
-  const ttlSeconds = (options && options.ttlSeconds) || 60;
-  const staleOn429 = !!(options && options.staleOn429);
-
-  var cache = null;
-  var cacheKey = null;
-  var cached = null;
-
-  if (useCache && request) {
-    cache = caches.default;
-    cacheKey = new Request(request.url, { method: "GET" });
-    cached = await cache.match(cacheKey);
-  }
-
-  const fetchOptions = { method: "GET" };
-  if (useCache && ttlSeconds > 0) {
-    fetchOptions.cf = {
-      cacheEverything: true,
-      cacheTtl: ttlSeconds,
-    };
-  }
-
-  const upstream = await fetch(target, fetchOptions);
-
-  if (staleOn429 && upstream.status === 429 && cached) {
-    return withCorsAndCacheHeaders(cached, "STALE-429");
-  }
-
-  const text = await upstream.text();
-  const response = new Response(text, {
-    status: upstream.status,
-    headers: {
-      ...corsHeaders(),
-      "Content-Type": upstream.headers.get("Content-Type") || "application/json",
-      "Cache-Control": useCache ? "public, max-age=" + ttlSeconds : "no-store",
-      "X-Proxy-Cache": useCache ? (cached ? "MISS" : "BYPASS") : "DISABLED",
-    },
-  });
-
-  if (useCache && upstream.ok && cache && cacheKey) {
-    if (ctx && typeof ctx.waitUntil === "function") {
-      ctx.waitUntil(cache.put(cacheKey, response.clone()));
-    } else {
-      await cache.put(cacheKey, response.clone());
-    }
-  }
-
-  return response;
 }
 
 function withCorsAndCacheHeaders(response, cacheState) {

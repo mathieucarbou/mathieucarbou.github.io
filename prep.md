@@ -182,8 +182,8 @@ permalink: /prep/
     var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
-    var CACHE_PREFIX = "prep_v3:";
-    var API_BASE_URL = "https://prep-api-1.carbou.me/api";
+    var CACHE_PREFIX = "prep_v4:";
+    var API_BASE_URL = "https://prep-api-2.carbou.me/api";
     var resizeTimer = null;
 
     function cacheGet(key) {
@@ -439,14 +439,33 @@ permalink: /prep/
         "Last page update: " + p.hour + ":" + p.minute + ":" + p.second;
     }
 
-    function setTimeslotInfo(prepCount, prepFromCache, spotCount, spotFromCache, prd3Count, prd3FromCache, mergedCount, profileLabel) {
-      var cacheTag = " <span style=\"color:#2e7d32;font-weight:700;\">(cached)</span>";
+    function formatDataFetchTime(isoString) {
+      if (!isoString) {
+        return "-";
+      }
+      var date = new Date(isoString);
+      if (isNaN(date.getTime())) {
+        return "-";
+      }
+      var p = partsInParis(date);
+      return p.year + "-" + p.month + "-" + p.day + " " + p.hour + ":" + p.minute + ":" + p.second;
+    }
+
+    function yesNo(flag) {
+      return flag
+        ? "<span style=\"color:#2e7d32;font-weight:700;\">yes</span>"
+        : "<span style=\"color:#c62828;font-weight:700;\">no</span>";
+    }
+
+    function setTimeslotInfo(prepCount, prepFromCache, prepFetchedAt, spotCount, spotFromCache, spotFetchedAt, prd3Count, prd3FromCache, prd3FetchedAt, mergedCount, profileLabel) {
+      var prepFetchTime = formatDataFetchTime(prepFetchedAt);
+      var spotFetchTime = formatDataFetchTime(spotFetchedAt);
+      var prd3FetchTime = formatDataFetchTime(prd3FetchedAt);
       document.getElementById("prep-timeslot-info").innerHTML =
-        mergedCount + " aligned timeslots" +
-        "<br>PREP: " + prepCount + (prepFromCache ? cacheTag : "") +
-        ", SPOT FR: " + spotCount + (spotFromCache ? cacheTag : "") +
-        ", PRD3: " + prd3Count + (prd3FromCache ? cacheTag : "") +
-        ", " + profileLabel;
+        mergedCount + " aligned timeslots, " + profileLabel +
+        "<br>PREP: " + prepCount + " | local history: " + yesNo(prepFromCache) + " | worker fetch: " + prepFetchTime +
+        "<br>SPOT FR: " + spotCount + " | local history: " + yesNo(spotFromCache) + " | worker fetch: " + spotFetchTime +
+        "<br>PRD3: " + prd3Count + " | local history: " + yesNo(prd3FromCache) + " | worker fetch: " + prd3FetchTime;
     }
 
     function sortByTs(a, b) {
@@ -685,7 +704,7 @@ permalink: /prep/
           tickformat: "%H:%M",
         },
         yaxis: {
-          title: "PRE+ (c€/kWh)",
+          title: "c€/kWh",
           zeroline: true,
           zerolinecolor: "#999",
           domain: [0, 0.86],
@@ -747,11 +766,14 @@ permalink: /prep/
       fetchDayBundle(day)
         .then(function (bundleResult) {
           var bundle = bundleResult.data || {};
-          var prepRows = normalizeSeriesRows(bundle.prep);
-          var spotRows = normalizeSeriesRows(bundle.spot);
-          var prd3Rows = normalizeSeriesRows(bundle.prd3);
+          var prepRows = normalizeSeriesRows(bundle.prep && bundle.prep.rows);
+          var spotRows = normalizeSeriesRows(bundle.spot && bundle.spot.rows);
+          var prd3Rows = normalizeSeriesRows(bundle.prd3 && bundle.prd3.rows);
           var effectiveProfileDay = bundle.profileDay || profileDay;
           var effectiveProfileLabel = bundle.profileLabel || profileLabel;
+          var prepFetchedAt = bundle.prep && bundle.prep.fetchedAt ? bundle.prep.fetchedAt : null;
+          var spotFetchedAt = bundle.spot && bundle.spot.fetchedAt ? bundle.spot.fetchedAt : null;
+          var prd3FetchedAt = bundle.prd3 && bundle.prd3.fetchedAt ? bundle.prd3.fetchedAt : null;
 
           apply3ErlStatus(bundle.erl || null);
 
@@ -763,10 +785,13 @@ permalink: /prep/
           setTimeslotInfo(
             prepRows.length,
             bundleResult.fromCache,
+            prepFetchedAt,
             spotRows.length,
             bundleResult.fromCache,
+            spotFetchedAt,
             prd3Rows.length,
             bundleResult.fromCache,
+            prd3FetchedAt,
             merged.length,
             effectiveProfileLabel
           );
