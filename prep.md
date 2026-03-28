@@ -401,7 +401,7 @@ permalink: /prep/
     var VERSION = "v8";
     var TIMEZONE = "Europe/Paris";
     var LOOKBACK_DAYS = 30;
-    var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
+    var TODAY_CACHE_MAX_MS = 15 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
     var THEME_STORAGE_KEY = "prep_theme";
     var CACHE_PREFIX = "prep_" + VERSION + ":";
@@ -425,6 +425,9 @@ permalink: /prep/
         if (!parsed || typeof parsed.savedAt !== "number" || !("data" in parsed)) {
           return null;
         }
+        if (typeof parsed.expiresAt === "number" && Date.now() > parsed.expiresAt) {
+          return null;
+        }
         if (Date.now() - parsed.savedAt > maxAgeMs) {
           return null;
         }
@@ -434,15 +437,24 @@ permalink: /prep/
       }
     }
 
-    function cacheSetTimed(key, data) {
+    function cacheSetTimed(key, data, expiresAt) {
       try {
-        localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({
+        var entry = {
           savedAt: Date.now(),
           data: data,
-        }));
+        };
+        if (typeof expiresAt === "number") {
+          entry.expiresAt = expiresAt;
+        }
+        localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(entry));
       } catch (e) {
         // storage quota exceeded or unavailable — fail silently
       }
+    }
+
+    function getTodayCacheExpiry(savedAtMs) {
+      var nextAlignedRefresh = nextRefreshDate(new Date(savedAtMs)).getTime();
+      return Math.min(nextAlignedRefresh, savedAtMs + TODAY_CACHE_MAX_MS);
     }
 
     function clearPrepCache() {
@@ -824,7 +836,7 @@ permalink: /prep/
       var cacheKey = "day:" + day;
 
       if (isToday) {
-        var cachedToday = cacheGetTimed("day-live:" + day, PREP_TODAY_CACHE_MS);
+        var cachedToday = cacheGetTimed("day-live:" + day, TODAY_CACHE_MAX_MS);
         if (cachedToday) {
           return Promise.resolve({ data: cachedToday, fromCache: true });
         }
@@ -847,7 +859,7 @@ permalink: /prep/
           var result = payload && typeof payload === "object" ? payload : {};
 
           if (isToday) {
-            cacheSetTimed("day-live:" + day, result);
+            cacheSetTimed("day-live:" + day, result, getTodayCacheExpiry(Date.now()));
           } else {
             cacheSetTimed(cacheKey, result);
           }
