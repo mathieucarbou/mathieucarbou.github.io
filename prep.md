@@ -166,7 +166,7 @@ permalink: /prep/
   .prep-meta {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 0.5rem;
     margin-bottom: 1rem;
   }
@@ -1052,7 +1052,7 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: estimateCentsSeries,
-          name: "Estimation journalière PRE+",
+          name: "Estimation PRE+ du jour",
           line: { color: palette.estimate, width: isMobile ? 2 : 4 },
           yaxis: "y",
         });
