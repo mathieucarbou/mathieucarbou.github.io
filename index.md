@@ -6,6 +6,8 @@ I am currently working as a Lead Software Engineer, at [IBM](https://www.ibm.com
 We built Ehcache and Terracotta Store and provide clustering and management solutions for caching and storing huge amount of data efficiently with no downtime, low latency in a consistency or availability mode.
 
 I am also an Arduino / ESP32 developer, creator and maintainer of several [Open Source Projects](https://mathieu.carbou.me/) that you will find below.
+With over 30 Arduino / ESP32 projects and 154 releases in 2025, plus over 40 releases in the [ESP32Async](https://github.com/ESP32Async) organization,
+I was proud to be both nominated as individual and as ESP32Async by the Arduino Team as being one of the [top Arduino Library maintainer for the year 2025](https://forum.arduino.cc/t/arduino-open-source-report-2025) ([PDF Report](https://mathieu.carbou.me/ArduinoOpenSourceReport2025.pdf)) !
 
 I've been involved during 10 years in the [Montreal Java User Group](https://www.montreal-jug.org/) that I've bootstrapped in 2010 with a friend (David). This is now one of the biggest JUG over the world.
 I was also part of the [Devoxx4Kids Quebec](http://www.devoxx4kids.org/quebec/) organization.
