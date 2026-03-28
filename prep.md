@@ -1068,7 +1068,7 @@ permalink: /prep/
           orientation: "v",
           x: 0.5,
           xanchor: "center",
-          y: isMobile ? 1.1 : 1.05,
+          y: isMobile ? 1.1 : 1,
           yanchor: "top",
         },
         margin: { t: 10, r: 60, l: 60, b: 30 },
