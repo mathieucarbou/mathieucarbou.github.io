@@ -1,5 +1,5 @@
 ---
-title: PRE+ x PRD3 Daily View
+title: Estimation PRE+ du jour
 permalink: /prep/
 ---
 
@@ -170,11 +170,11 @@ permalink: /prep/
   }
 </style>
 
-<h2 id="prep-page-title">PRE+ x PRD3 Daily View</h2>
+<h2 id="prep-page-title">Estimation PRE+ du jour</h2>
 
 <div class="prep-meta">
   <div class="prep-card">
-    <div class="prep-label">3ERL Trend</div>
+    <div class="prep-label">Tendance 3ERL</div>
     <div id="trend" class="prep-value">-</div>
   </div>
   <div class="prep-card">
@@ -186,18 +186,18 @@ permalink: /prep/
     <div id="bridage-cdc" class="prep-value">-</div>
   </div>
   <div class="prep-card">
-    <div class="prep-label">PRE+ Daily Estimation</div>
+    <div class="prep-label">Estimation journalière PRE+</div>
     <div id="prep-estimation" class="prep-value">-</div>
   </div>
 </div>
 
 <div class="prep-controls">
   <div class="prep-control-row">
-    <label for="day">Day:</label>
-    <button id="prev-day" type="button" aria-label="Previous day">←</button>
+    <label for="day">Jour:</label>
+    <button id="prev-day" type="button" aria-label="Jour précédent">←</button>
     <input id="day" type="date" />
-    <button id="next-day" type="button" aria-label="Next day">→</button>
-    <button id="today" type="button">Today</button>
+    <button id="next-day" type="button" aria-label="Jour suivant">→</button>
+    <button id="today" type="button">Aujourd'hui</button>
   </div>
 </div>
 
@@ -205,9 +205,9 @@ permalink: /prep/
 <div id="prep-plot"></div>
 <div id="prep-footer">
   <div id="prep-last-update">Dernière mise à jour: -</div>
-  <div id="prep-next-refresh">Prochain auto-refresh: -</div>
+  <div id="prep-next-refresh">Prochaine actualisation automatique: -</div>
   <div id="prep-timeslot-info"></div>
-  <div><button id="prep-clear-cache" type="button">Clear cache</button></div>
+  <div><button id="prep-clear-cache" type="button">Vider le cache</button></div>
   <div id="prep-explainer">
     <h3>Comment lire ce graphe</h3>
     <p>Le graphe superpose 3 signaux quart-horaires et une estimation journalière:</p>
@@ -215,11 +215,11 @@ permalink: /prep/
       <li><strong>PRE+</strong> (barres bleu/rouge): prix de règlement des écarts positifs en €/MWh (converti ici en c€/kWh). Bleu = prix positif, rouge = prix négatif. Source: <a href="https://www.services-rte.com/fr/visualisez-les-donnees-publiees-par-rte/equilibrage.html" target="_blank" rel="noopener noreferrer">Infos PRE+ (RTE)</a>.</li>
       <li><strong>SPOT</strong> (courbe bleue): prix marché day-ahead FR (€/MWh, converti en c€/kWh). Source: <a href="https://www.rte-france.com/donnees-publications/eco2mix-donnees-temps-reel/donnees-marche" target="_blank" rel="noopener noreferrer">Prix SPOT (RTE eco2mix)</a>.</li>
       <li><strong>PRD3</strong> (courbe orange): coefficient dynamique d'ensoleillement utilisé comme facteur de pondération. Source: <a href="https://data.enedis.fr/pages/coefficients-de-profils-dynamiques-jplus1-contenu/" target="_blank" rel="noopener noreferrer">Profil PRD3 (Enedis)</a>.</li>
-      <li><strong>Status 3ERL</strong> (cartes en haut): indicateurs de contexte du marché (trend/bridage). Source: <a href="https://3erl.fr/PREP_Profile.php" target="_blank" rel="noopener noreferrer">Status 3ERL</a>.</li>
+      <li><strong>Statut 3ERL</strong> (cartes en haut): indicateurs de contexte du marché (tendance/bridage). Source: <a href="https://3erl.fr/PREP_Profile.php" target="_blank" rel="noopener noreferrer">Statut 3ERL</a>.</li>
     </ul>
-    <p><strong>PRE+ Daily Estimation</strong> (courbe verte) est calculé en moyenne pondérée cumulative par PRD3:</p>
+    <p><strong>Estimation journalière PRE+</strong> (courbe verte) est calculée en moyenne pondérée cumulative par PRD3:</p>
     <p><em>estimation(t) = sum(PRE+(i) * PRD3(i)) / sum(PRD3(i))</em>, pour tous les points disponibles jusqu'au créneau <em>t</em>.</p>
-    <p>La valeur affichée dans la carte « PRE+ Daily Estimation » correspond au dernier point disponible de cette série. C'est cette valeur journalière qui sert de référence de valorisation du surplus en ACI (autoconsommation individuelle) utilisée par Enedis.</p>
+    <p>La valeur affichée dans la carte « Estimation journalière PRE+ » correspond au dernier point disponible de cette série. C'est cette valeur journalière qui sert de référence de valorisation du surplus en ACI (autoconsommation individuelle) utilisée par Enedis.</p>
     <p><strong>Cette valeur reste une estimation</strong>, car la courbe PRD3 du jour n'est pas encore connue en temps réel, et les prix PRE+ peuvent être ajustés a posteriori par Enedis.</p>
     <p>Règle PRD3 utilisée dans ce graphe:</p>
     <ul>
@@ -425,7 +425,7 @@ permalink: /prep/
       }
 
       if (!targetDate) {
-        node.textContent = "Prochain auto-refresh: -";
+        node.textContent = "Prochaine actualisation automatique: -";
         return;
       }
 
@@ -433,11 +433,11 @@ permalink: /prep/
       var nextSlot = p.hour + ":" + p.minute;
       var selectedDay = (document.getElementById("day") || {}).value;
       if (selectedDay && selectedDay !== todayParis()) {
-        node.textContent = "Auto-refresh actif uniquement sur Today (prochain créneau: " + nextSlot + ")";
+        node.textContent = "Actualisation automatique active uniquement pour aujourd'hui (prochain créneau: " + nextSlot + ")";
         return;
       }
 
-      node.textContent = "Prochain auto-refresh: " + nextSlot;
+      node.textContent = "Prochaine actualisation automatique: " + nextSlot;
     }
 
     function scheduleAlignedRefresh() {
@@ -525,10 +525,14 @@ permalink: /prep/
       node.style.color = isError ? "#b00020" : "inherit";
     }
 
+    function setValueColor(node, tone) {
+      node.style.color = tone || "inherit";
+    }
+
     function setLastUpdateNow() {
       var p = partsInParis(new Date());
       document.getElementById("prep-last-update").textContent =
-        "Last page update: " + p.hour + ":" + p.minute + ":" + p.second;
+        "Dernière mise à jour de la page: " + p.hour + ":" + p.minute + ":" + p.second;
     }
 
     function formatDataFetchTime(isoString) {
@@ -621,14 +625,27 @@ permalink: /prep/
 
     function apply3ErlStatus(data) {
       if (!data) {
-        document.getElementById("trend").textContent = "Unavailable";
-        document.getElementById("bridage").textContent = "Unavailable";
-        document.getElementById("bridage-cdc").textContent = "Unavailable";
+        var trendNode = document.getElementById("trend");
+        var bridageNode = document.getElementById("bridage");
+        var bridageCdcNode = document.getElementById("bridage-cdc");
+        trendNode.textContent = "Indisponible";
+        bridageNode.textContent = "Indisponible";
+        bridageCdcNode.textContent = "Indisponible";
+        setValueColor(trendNode, "inherit");
+        setValueColor(bridageNode, "inherit");
+        setValueColor(bridageCdcNode, "inherit");
         return;
       }
-      document.getElementById("trend").textContent = formatTrend(data.PREP_Profile) + " (" + (data.PREP_Profile || "?") + ")";
-      document.getElementById("bridage").textContent = (data.Bridage ? "ON" : "OFF") + sentimentBadge(data.Bridage ? -1 : 1);
-      document.getElementById("bridage-cdc").textContent = (data.Bridage_CDC ? "ON" : "OFF") + sentimentBadge(data.Bridage_CDC ? -1 : 1);
+      var trendNode = document.getElementById("trend");
+      var bridageNode = document.getElementById("bridage");
+      var bridageCdcNode = document.getElementById("bridage-cdc");
+
+      trendNode.textContent = formatTrend(data.PREP_Profile) + " (" + (data.PREP_Profile || "?") + ")";
+      bridageNode.textContent = (data.Bridage ? "ON" : "OFF") + sentimentBadge(data.Bridage ? -1 : 1);
+      bridageCdcNode.textContent = (data.Bridage_CDC ? "ON" : "OFF") + sentimentBadge(data.Bridage_CDC ? -1 : 1);
+      setValueColor(trendNode, "inherit");
+      setValueColor(bridageNode, data.Bridage ? "#c62828" : "#2e7d32");
+      setValueColor(bridageCdcNode, data.Bridage_CDC ? "#c62828" : "#2e7d32");
     }
 
     function mergeByTimeslot(day, prep, spot, prd3) {
@@ -729,7 +746,7 @@ permalink: /prep/
           type: "bar",
           x: x,
           y: prepPositive,
-          name: "Positive PRE+",
+          name: "PRE+ positif",
           marker: { color: "deepskyblue" },
           yaxis: "y",
         },
@@ -737,7 +754,7 @@ permalink: /prep/
           type: "bar",
           x: x,
           y: prepNegative,
-          name: "Negative PRE+",
+          name: "PRE+ négatif",
           marker: { color: "red" },
           yaxis: "y",
         },
@@ -746,7 +763,7 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: spotValues,
-          name: "SPOT Prices",
+          name: "Prix SPOT",
           legendrank: 2,
           line: { color: "#1e3a8a", width: isMobile ? 1 : 2, shape: "hv" },
           yaxis: "y",
@@ -756,7 +773,7 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: prd3Values,
-          name: "PRD3 Factors",
+          name: "Facteurs PRD3",
           legendrank: 1,
           line: { color: "orange", width: isMobile ? 1 : 2, shape: "hv" },
           yaxis: "y2",
@@ -769,33 +786,24 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: estimateCentsSeries,
-          name: "PRE+ Daily Estimation",
+          name: "Estimation journalière PRE+",
           line: { color: "lightgreen", width: isMobile ? 2 : 4 },
           yaxis: "y",
         });
       }
 
       var layout = {
-
-        title: {
-          text: "PRE+ (" + day + ") x PRD3 " + profileLabel + " (" + profileDay + ")",
-          x: 0.5,
-          xanchor: "center",
-          y: 0.995,
-          yanchor: "top",
-        },
         barmode: "overlay",
         bargap: 0.15,
         legend: {
           orientation: "v",
           x: 0.5,
           xanchor: "center",
-          y: isMobile ? 1.10 : 1.15,
+          y: isMobile ? 1.1 : 1.15,
           yanchor: "top",
         },
-        margin: { t: 80, r: 60, l: 60, b: 60 },
+        margin: { t: 30, r: 60, l: 60, b: 30 },
         xaxis: {
-          title: "Timeslot",
           type: "date",
           tickformat: "%H:%M",
         },
@@ -806,7 +814,7 @@ permalink: /prep/
           domain: [0, 0.86],
         },
         yaxis2: {
-          title: "PRD3 factor",
+          title: "Facteur PRD3",
           overlaying: "y",
           side: "right",
           rangemode: "tozero",
@@ -834,11 +842,13 @@ permalink: /prep/
     function setEstimationValue(estimateEurPerMwh) {
       var node = document.getElementById("prep-estimation");
       if (typeof estimateEurPerMwh !== "number") {
-        node.textContent = "Unavailable";
+        node.textContent = "Indisponible";
+        setValueColor(node, "inherit");
         return;
       }
       var cents = toCentsPerKwh(estimateEurPerMwh);
       node.textContent = cents.toFixed(2) + " c€/kWh" + sentimentBadge(cents);
+      setValueColor(node, cents < 0 ? "#c62828" : cents > 0 ? "#2e7d32" : "inherit");
     }
 
     // ─── Main load / init ──────────────────────────────────────────────────────
@@ -860,7 +870,7 @@ permalink: /prep/
       var profileDay = profileInfo.profileDay;
       var profileLabel = profileInfo.profileLabel;
 
-      setStatus("Loading data for " + day + " with PRD3 profile " + profileLabel + " (" + profileDay + ")...");
+      setStatus("Chargement des données pour " + day + " avec le profil PRD3 " + profileLabel + " (" + profileDay + ")...");
 
       fetchDayBundle(day)
         .then(function (bundleResult) {
@@ -897,7 +907,7 @@ permalink: /prep/
           setStatus("");
         })
         .catch(function (error) {
-          setStatus(error.message || "Failed to load data", true);
+          setStatus(error.message || "Échec du chargement des données", true);
         });
     }
 
@@ -925,7 +935,7 @@ permalink: /prep/
       });
       document.getElementById("prep-clear-cache").addEventListener("click", function () {
         clearPrepCache();
-        setStatus("Cache cleared. Reloading...");
+        setStatus("Cache vidé. Rechargement...");
         load();
       });
       window.addEventListener("resize", function () {
