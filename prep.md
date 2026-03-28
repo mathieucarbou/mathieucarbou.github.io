@@ -7,7 +7,58 @@ permalink: /prep/
 
 <style>
   body.prep-page {
+    --prep-bg: #ffffff;
+    --prep-panel-bg: #ffffff;
+    --prep-card-bg: #ffffff;
+    --prep-explainer-bg: #fafafa;
+    --prep-border: #d9d9d9;
+    --prep-text: #444444;
+    --prep-heading: #222222;
+    --prep-muted: #727272;
+    --prep-link: #0a4ea3;
+    --prep-control-bg: #ffffff;
+    --prep-control-text: #222222;
+    --prep-plot-paper: #ffffff;
+    --prep-plot-panel: #ffffff;
+    --prep-plot-text: #444444;
+    --prep-plot-grid: #e5e7eb;
+    --prep-plot-zero: #9ca3af;
+    --prep-prep-positive: deepskyblue;
+    --prep-prep-negative: #ff0000;
+    --prep-spot: #1e3a8a;
+    --prep-prd3: #ff9800;
+    --prep-estimate: #7ee787;
+    --prep-positive-text: #2e7d32;
+    --prep-negative-text: #c62828;
+    background-color: var(--prep-bg);
+    color: var(--prep-text);
     overflow-x: hidden;
+  }
+
+  body.prep-page[data-theme="dark"] {
+    --prep-bg: #0f172a;
+    --prep-panel-bg: #111827;
+    --prep-card-bg: #111827;
+    --prep-explainer-bg: #111827;
+    --prep-border: #334155;
+    --prep-text: #e5e7eb;
+    --prep-heading: #f8fafc;
+    --prep-muted: #94a3b8;
+    --prep-link: #7dd3fc;
+    --prep-control-bg: #0f172a;
+    --prep-control-text: #f8fafc;
+    --prep-plot-paper: #0f172a;
+    --prep-plot-panel: #111827;
+    --prep-plot-text: #e5e7eb;
+    --prep-plot-grid: #334155;
+    --prep-plot-zero: #64748b;
+    --prep-prep-positive: #38bdf8;
+    --prep-prep-negative: #f87171;
+    --prep-spot: #93c5fd;
+    --prep-prd3: #fbbf24;
+    --prep-estimate: #86efac;
+    --prep-positive-text: #86efac;
+    --prep-negative-text: #fca5a5;
   }
 
   body.prep-page .wrapper,
@@ -40,6 +91,38 @@ permalink: /prep/
 
   #prep-page-title {
     text-align: center;
+    color: var(--prep-heading);
+  }
+
+  .prep-theme-floating {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.4rem;
+    border: 1px solid var(--prep-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--prep-panel-bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  }
+
+  .prep-theme-floating label {
+    font-size: 0.72rem;
+    line-height: 1;
+    color: var(--prep-muted);
+  }
+
+  .prep-theme-floating select {
+    font-size: 0.72rem;
+    line-height: 1;
+    padding: 0.2rem 1.2rem 0.2rem 0.35rem;
+    min-height: 1.7rem;
+    max-width: 5.5rem;
   }
 
   .prep-controls {
@@ -63,6 +146,10 @@ permalink: /prep/
   .prep-control-row button {
     font: inherit;
     padding: 0.35rem 0.55rem;
+    color: var(--prep-control-text);
+    background: var(--prep-control-bg);
+    border: 1px solid var(--prep-border);
+    border-radius: 6px;
   }
 
   .prep-meta {
@@ -74,14 +161,16 @@ permalink: /prep/
   }
 
   .prep-card {
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--prep-border);
     border-radius: 6px;
     padding: 0.6rem 0.75rem;
+    background: var(--prep-card-bg);
   }
 
   .prep-label {
     font-size: 0.85rem;
     opacity: 0.8;
+    color: var(--prep-muted);
   }
 
   .prep-value {
@@ -123,6 +212,7 @@ permalink: /prep/
     opacity: 0.8;
     min-height: 1.2rem;
     text-align: center;
+    color: var(--prep-muted);
   }
 
   #prep-footer span {
@@ -141,18 +231,20 @@ permalink: /prep/
     width: 100%;
     margin-top: 0.6rem;
     padding: 0.75rem 0.9rem;
-    border: 1px solid #d9d9d9;
+    border: 1px solid var(--prep-border);
     border-radius: 8px;
-    background: #fafafa;
+    background: var(--prep-explainer-bg);
     font-size: 0.86rem;
     line-height: 1.45;
     text-align: left;
     max-width: 1000px;
+    color: var(--prep-text);
   }
 
   #prep-explainer h3 {
     margin: 0 0 0.45rem;
     font-size: 0.95rem;
+    color: var(--prep-heading);
   }
 
   #prep-explainer p {
@@ -169,7 +261,7 @@ permalink: /prep/
   }
 
   #prep-explainer a {
-    color: #0a4ea3;
+    color: var(--prep-link);
   }
 
   @media screen and (max-width: 960px) {
@@ -189,6 +281,23 @@ permalink: /prep/
     body.prep-page {
       padding: 12px;
     }
+
+    .prep-theme-floating {
+      top: 8px;
+      right: 8px;
+      padding: 0.2rem 0.35rem;
+    }
+
+    .prep-theme-floating label {
+      display: none;
+    }
+
+    .prep-theme-floating select {
+      font-size: 0.68rem;
+      max-width: 4.8rem;
+      min-height: 1.55rem;
+      padding-right: 1rem;
+    }
   }
 
   @media screen and (max-width: 640px) {
@@ -205,6 +314,15 @@ permalink: /prep/
     }
   }
 </style>
+
+<div class="prep-theme-floating">
+  <label for="theme-mode">Thème</label>
+  <select id="theme-mode" aria-label="Choix du thème">
+    <option value="auto">Auto</option>
+    <option value="light">Clair</option>
+    <option value="dark">Sombre</option>
+  </select>
+</div>
 
 <h2 id="prep-page-title">Estimation PRE+ du jour</h2>
 
@@ -274,11 +392,15 @@ permalink: /prep/
     var LOOKBACK_DAYS = 30;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
+    var THEME_STORAGE_KEY = "prep_theme";
     var CACHE_PREFIX = "prep_" + VERSION + ":";
     var API_BASE_URL = "https://prep-api.carbou.me/api";
     var resizeTimer = null;
     var refreshTimer = null;
     var nextRefreshAt = null;
+    var latestGraphState = null;
+    var themePreference = "auto";
+    var themeMediaQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 
     // ─── localStorage timed cache ─────────────────────────────────────────────
 
@@ -327,6 +449,72 @@ permalink: /prep/
       } catch (e) {
         // localStorage unavailable — fail silently
       }
+    }
+
+    function getSavedThemePreference() {
+      try {
+        var saved = localStorage.getItem(THEME_STORAGE_KEY);
+        return saved === "light" || saved === "dark" || saved === "auto" ? saved : "auto";
+      } catch (e) {
+        return "auto";
+      }
+    }
+
+    function saveThemePreference(value) {
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, value);
+      } catch (e) {
+        // localStorage unavailable — fail silently
+      }
+    }
+
+    function resolveTheme(value) {
+      if (value === "dark" || value === "light") {
+        return value;
+      }
+      return themeMediaQuery && themeMediaQuery.matches ? "dark" : "light";
+    }
+
+    function getThemePalette() {
+      var styles = getComputedStyle(document.body);
+      return {
+        plotPaper: styles.getPropertyValue("--prep-plot-paper").trim(),
+        plotPanel: styles.getPropertyValue("--prep-plot-panel").trim(),
+        plotText: styles.getPropertyValue("--prep-plot-text").trim(),
+        plotGrid: styles.getPropertyValue("--prep-plot-grid").trim(),
+        plotZero: styles.getPropertyValue("--prep-plot-zero").trim(),
+        prepPositive: styles.getPropertyValue("--prep-prep-positive").trim(),
+        prepNegative: styles.getPropertyValue("--prep-prep-negative").trim(),
+        spot: styles.getPropertyValue("--prep-spot").trim(),
+        prd3: styles.getPropertyValue("--prep-prd3").trim(),
+        estimate: styles.getPropertyValue("--prep-estimate").trim(),
+        positiveText: styles.getPropertyValue("--prep-positive-text").trim(),
+        negativeText: styles.getPropertyValue("--prep-negative-text").trim(),
+      };
+    }
+
+    function rerenderGraph() {
+      if (!latestGraphState) {
+        return;
+      }
+      renderGraph(
+        latestGraphState.day,
+        latestGraphState.profileDay,
+        latestGraphState.profileLabel,
+        latestGraphState.merged,
+        latestGraphState.estimateSeries,
+        latestGraphState.estimateLast
+      );
+    }
+
+    function applyThemePreference(value) {
+      themePreference = value === "light" || value === "dark" ? value : "auto";
+      document.body.setAttribute("data-theme", resolveTheme(themePreference));
+      var selector = document.getElementById("theme-mode");
+      if (selector) {
+        selector.value = themePreference;
+      }
+      rerenderGraph();
     }
 
     // ─── Date / Paris timezone helpers ────────────────────────────────────────
@@ -675,13 +863,14 @@ permalink: /prep/
       var trendNode = document.getElementById("trend");
       var bridageNode = document.getElementById("bridage");
       var bridageCdcNode = document.getElementById("bridage-cdc");
+      var palette = getThemePalette();
 
       trendNode.textContent = formatTrend(data.PREP_Profile) + " (" + (data.PREP_Profile || "?") + ")";
       bridageNode.textContent = (data.Bridage ? "ON" : "OFF") + sentimentBadge(data.Bridage ? -1 : 1);
       bridageCdcNode.textContent = (data.Bridage_CDC ? "ON" : "OFF") + sentimentBadge(data.Bridage_CDC ? -1 : 1);
       setValueColor(trendNode, "inherit");
-      setValueColor(bridageNode, data.Bridage ? "#c62828" : "#2e7d32");
-      setValueColor(bridageCdcNode, data.Bridage_CDC ? "#c62828" : "#2e7d32");
+      setValueColor(bridageNode, data.Bridage ? palette.negativeText : palette.positiveText);
+      setValueColor(bridageCdcNode, data.Bridage_CDC ? palette.negativeText : palette.positiveText);
     }
 
     function mergeByTimeslot(day, prep, spot, prd3) {
@@ -776,6 +965,7 @@ permalink: /prep/
       });
       var estimateCents = typeof estimateLastEurPerMwh === "number" ? toCentsPerKwh(estimateLastEurPerMwh) : null;
       var isMobile = window.matchMedia("(max-width: 640px)").matches;
+      var palette = getThemePalette();
 
       var traces = [
         {
@@ -783,7 +973,7 @@ permalink: /prep/
           x: x,
           y: prepPositive,
           name: "PRE+ positif",
-          marker: { color: "deepskyblue" },
+          marker: { color: palette.prepPositive },
           yaxis: "y",
         },
         {
@@ -791,7 +981,7 @@ permalink: /prep/
           x: x,
           y: prepNegative,
           name: "PRE+ négatif",
-          marker: { color: "red" },
+          marker: { color: palette.prepNegative },
           yaxis: "y",
         },
         {
@@ -801,7 +991,7 @@ permalink: /prep/
           y: spotValues,
           name: "Prix SPOT",
           legendrank: 2,
-          line: { color: "#1e3a8a", width: isMobile ? 1 : 2, shape: "hv" },
+          line: { color: palette.spot, width: isMobile ? 1 : 2, shape: "hv" },
           yaxis: "y",
         },
         {
@@ -811,7 +1001,7 @@ permalink: /prep/
           y: prd3Values,
           name: "Facteurs PRD3",
           legendrank: 1,
-          line: { color: "orange", width: isMobile ? 1 : 2, shape: "hv" },
+          line: { color: palette.prd3, width: isMobile ? 1 : 2, shape: "hv" },
           yaxis: "y2",
         },
       ];
@@ -823,7 +1013,7 @@ permalink: /prep/
           x: x,
           y: estimateCentsSeries,
           name: "Estimation journalière PRE+",
-          line: { color: "lightgreen", width: isMobile ? 2 : 4 },
+          line: { color: palette.estimate, width: isMobile ? 2 : 4 },
           yaxis: "y",
         });
       }
@@ -831,6 +1021,9 @@ permalink: /prep/
       var layout = {
         barmode: "overlay",
         bargap: 0.15,
+        paper_bgcolor: palette.plotPaper,
+        plot_bgcolor: palette.plotPanel,
+        font: { color: palette.plotText },
         legend: {
           orientation: "v",
           x: 0.5,
@@ -842,11 +1035,15 @@ permalink: /prep/
         xaxis: {
           type: "date",
           tickformat: "%H:%M",
+          color: palette.plotText,
+          gridcolor: palette.plotGrid,
         },
         yaxis: {
           title: "c€/kWh",
           zeroline: true,
-          zerolinecolor: "#999",
+          zerolinecolor: palette.plotZero,
+          gridcolor: palette.plotGrid,
+          color: palette.plotText,
           domain: [0, 0.86],
         },
         yaxis2: {
@@ -854,6 +1051,8 @@ permalink: /prep/
           overlaying: "y",
           side: "right",
           rangemode: "tozero",
+          gridcolor: palette.plotGrid,
+          color: palette.plotText,
         },
       };
 
@@ -883,8 +1082,9 @@ permalink: /prep/
         return;
       }
       var cents = toCentsPerKwh(estimateEurPerMwh);
+      var palette = getThemePalette();
       node.textContent = cents.toFixed(2) + " c€/kWh" + sentimentBadge(cents);
-      setValueColor(node, cents < 0 ? "#c62828" : cents > 0 ? "#2e7d32" : "inherit");
+      setValueColor(node, cents < 0 ? palette.negativeText : cents > 0 ? palette.positiveText : "inherit");
     }
 
     // ─── Main load / init ──────────────────────────────────────────────────────
@@ -932,6 +1132,14 @@ permalink: /prep/
 
           var merged = mergeByTimeslot(day, prepRows, spotRows, prd3Rows);
           var estimate = estimateDailyPrepSeries(merged);
+          latestGraphState = {
+            day: day,
+            profileDay: effectiveProfileDay,
+            profileLabel: effectiveProfileLabel,
+            merged: merged,
+            estimateSeries: estimate.series,
+            estimateLast: estimate.last,
+          };
           setEstimationValue(estimate.last);
           renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
           setLastUpdateNow();
@@ -949,6 +1157,7 @@ permalink: /prep/
 
     function init() {
       document.body.classList.add("prep-page");
+      applyThemePreference(getSavedThemePreference());
 
       var dayInput = document.getElementById("day");
       var maxDate = todayParis();
@@ -956,6 +1165,23 @@ permalink: /prep/
       dayInput.min = minDate;
       dayInput.max = maxDate;
       dayInput.value = getInitialDay(minDate, maxDate);
+      document.getElementById("theme-mode").addEventListener("change", function (event) {
+        var value = event.target.value;
+        saveThemePreference(value);
+        applyThemePreference(value);
+      });
+      if (themeMediaQuery) {
+        var onThemeMediaChange = function () {
+          if (themePreference === "auto") {
+            applyThemePreference("auto");
+          }
+        };
+        if (typeof themeMediaQuery.addEventListener === "function") {
+          themeMediaQuery.addEventListener("change", onThemeMediaChange);
+        } else if (typeof themeMediaQuery.addListener === "function") {
+          themeMediaQuery.addListener(onThemeMediaChange);
+        }
+      }
 
       document.getElementById("today").addEventListener("click", function () {
         var dayInput = document.getElementById("day");
