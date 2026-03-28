@@ -6,8 +6,22 @@ permalink: /prep/
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
 <style>
+  body.prep-page .wrapper,
+  body.prep-page section,
+  .prep-meta,
+  .prep-card,
+  #prep-plot,
+  #prep-footer,
+  #prep-explainer {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
   body.prep-page .wrapper {
     width: min(1800px, 96vw);
+    max-width: 96vw;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   body.prep-page header {
@@ -16,6 +30,7 @@ permalink: /prep/
 
   body.prep-page section {
     width: 100%;
+    max-width: 100%;
     float: none;
   }
 
@@ -47,6 +62,7 @@ permalink: /prep/
   }
 
   .prep-meta {
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 0.5rem;
@@ -77,6 +93,13 @@ permalink: /prep/
     overflow: hidden;
   }
 
+  #prep-plot .js-plotly-plot,
+  #prep-plot .plot-container,
+  #prep-plot .svg-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
   #prep-plot .modebar {
     top: 105px !important;
     right: 8px !important;
@@ -84,6 +107,7 @@ permalink: /prep/
   }
 
   #prep-footer {
+    width: 100%;
     margin-top: 0.6rem;
     display: flex;
     flex-direction: column;
@@ -110,6 +134,7 @@ permalink: /prep/
   }
 
   #prep-explainer {
+    width: 100%;
     margin-top: 0.6rem;
     padding: 0.75rem 0.9rem;
     border: 1px solid #d9d9d9;
@@ -146,6 +171,7 @@ permalink: /prep/
   @media screen and (max-width: 960px) {
     body.prep-page .wrapper {
       width: 96vw;
+      max-width: 96vw;
     }
 
     body.prep-page header,
