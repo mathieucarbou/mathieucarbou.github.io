@@ -205,6 +205,7 @@ permalink: /prep/
 <div id="prep-plot"></div>
 <div id="prep-footer">
   <div id="prep-last-update">Dernière mise à jour: -</div>
+  <div id="prep-next-refresh">Prochain auto-refresh: -</div>
   <div id="prep-timeslot-info"></div>
   <div><button id="prep-clear-cache" type="button">Clear cache</button></div>
   <div id="prep-explainer">
@@ -235,12 +236,13 @@ permalink: /prep/
     var VERSION = "v8";
     var TIMEZONE = "Europe/Paris";
     var LOOKBACK_DAYS = 30;
-    var AUTO_REFRESH_MS = 5 * 60 * 1000;
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
     var CACHE_PREFIX = "prep_" + VERSION + ":";
     var API_BASE_URL = "https://prep-api.carbou.me/api";
     var resizeTimer = null;
+    var refreshTimer = null;
+    var nextRefreshAt = null;
 
     // ─── localStorage timed cache ─────────────────────────────────────────────
 
@@ -400,6 +402,63 @@ permalink: /prep/
 
       dayInput.value = next;
       load();
+    }
+
+    function nextRefreshDate(now) {
+      var slots = [5, 20, 35, 50];
+      for (var i = 0; i < slots.length; i += 1) {
+        var candidate = new Date(now.getTime());
+        candidate.setMinutes(slots[i], 0, 0);
+        if (candidate.getTime() > now.getTime()) {
+          return candidate;
+        }
+      }
+      var nextHour = new Date(now.getTime());
+      nextHour.setHours(nextHour.getHours() + 1, slots[0], 0, 0);
+      return nextHour;
+    }
+
+    function setNextRefreshInfo(targetDate) {
+      var node = document.getElementById("prep-next-refresh");
+      if (!node) {
+        return;
+      }
+
+      if (!targetDate) {
+        node.textContent = "Prochain auto-refresh: -";
+        return;
+      }
+
+      var p = partsInParis(targetDate);
+      var nextSlot = p.hour + ":" + p.minute;
+      var selectedDay = (document.getElementById("day") || {}).value;
+      if (selectedDay && selectedDay !== todayParis()) {
+        node.textContent = "Auto-refresh actif uniquement sur Today (prochain créneau: " + nextSlot + ")";
+        return;
+      }
+
+      node.textContent = "Prochain auto-refresh: " + nextSlot;
+    }
+
+    function scheduleAlignedRefresh() {
+      if (refreshTimer) {
+        clearTimeout(refreshTimer);
+      }
+      var now = new Date();
+      var target = nextRefreshDate(now);
+      var delay = Math.max(0, target.getTime() - now.getTime());
+      nextRefreshAt = target;
+      setNextRefreshInfo(nextRefreshAt);
+
+      refreshTimer = setTimeout(function () {
+        if (document.visibilityState === "visible") {
+          var selectedDay = document.getElementById("day").value;
+          if (selectedDay === todayParis()) {
+            load();
+          }
+        }
+        scheduleAlignedRefresh();
+      }, delay);
     }
 
     // ─── PRD3 profile day logic ────────────────────────────────────────────────
@@ -790,6 +849,7 @@ permalink: /prep/
       var maxDate = dayInput.max || todayParis();
       var day = clampDay(dayInput.value, minDate, maxDate);
       dayInput.value = day;
+      setNextRefreshInfo(nextRefreshAt);
       if (!day) {
         return;
       }
@@ -881,18 +941,10 @@ permalink: /prep/
         if (selectedDay === todayParis()) {
           load();
         }
+        scheduleAlignedRefresh();
       });
 
-      setInterval(function () {
-        if (document.visibilityState !== "visible") {
-          return;
-        }
-        var selectedDay = document.getElementById("day").value;
-        if (selectedDay !== todayParis()) {
-          return;
-        }
-        load();
-      }, AUTO_REFRESH_MS);
+      scheduleAlignedRefresh();
 
       load();
     }
