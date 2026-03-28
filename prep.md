@@ -205,7 +205,7 @@ permalink: /prep/
   }
 
   #prep-plot .modebar {
-    top: 90px !important;
+    top: 30px !important;
     right: 8px !important;
     z-index: 20;
   }
