@@ -8,7 +8,7 @@
 //
 // Caching layers:
 //   1. Zone cache (CF cache API): full /api/day response for past days (24 h).
-//   2. Per-source worker cache: PREP/SPOT today=until next slot (05/20/35/50, max 15 min), past=24 h; PRD3 always 24 h.
+//   2. Per-source worker cache: PREP/SPOT today=keyed by refresh slot (05/20/35/50) and capped at 15 min, past=24 h; PRD3 always 24 h.
 // =============================================================================
 
 // ─── Configuration ────────────────────────────────────────────────────────────
@@ -153,6 +153,11 @@ function ttlTodayAlignedSeconds(now = new Date()) {
   return Math.max(1, Math.min(TTL_TODAY_MAX, alignedTtl));
 }
 
+function todayRefreshSlotKey(now = new Date()) {
+  const slot = nextRefreshDate(now);
+  return slot.toISOString().slice(0, 16);
+}
+
 // ─── PRD3 profile day logic ────────────────────────────────────────────────────
 //
 // RTE publishes PRD3 profiles with a publication lag:
@@ -175,13 +180,14 @@ function getPrd3ProfileInfo(day) {
 // ─── Per-source data fetchers ──────────────────────────────────────────────────
 //
 // Each returns { rows: [{ts: "HH:MM", value}], fetchedAt: ISO, cache: "HIT"|"MISS" }
-// TTL policy: today=next refresh slot (max 15 min), past=24 h, PRD3=24 h.
+// TTL policy: today=refresh-slot keyed cache (max 15 min), past=24 h, PRD3=24 h.
 
 async function fetchPrepSeries(day) {
   const [y, m, d] = day.split("-");
+  const isPast = isPastParisDay(day);
   const result = await fetchTextWithWorkerCache({
-    cacheKey: "prep:" + day,
-    ttlSeconds: isPastParisDay(day) ? TTL_PAST : ttlTodayAlignedSeconds(),
+    cacheKey: isPast ? "prep:" + day : "prep:" + day + ":slot:" + todayRefreshSlotKey(),
+    ttlSeconds: isPast ? TTL_PAST : ttlTodayAlignedSeconds(),
     target: `https://www.services-rte.com/cms/open_data/v1/price/table?startDate=${encodeURIComponent(`${d}/${m}/${y}`)}`,
     fetchOptions: { method: "GET" },
     errorLabel: "PREP",
@@ -191,9 +197,10 @@ async function fetchPrepSeries(day) {
 
 async function fetchSpotSeries(day) {
   const [y, m, d] = day.split("-");
+  const isPast = isPastParisDay(day);
   const result = await fetchTextWithWorkerCache({
-    cacheKey: "spot:" + day,
-    ttlSeconds: isPastParisDay(day) ? TTL_PAST : ttlTodayAlignedSeconds(),
+    cacheKey: isPast ? "spot:" + day : "spot:" + day + ":slot:" + todayRefreshSlotKey(),
+    ttlSeconds: isPast ? TTL_PAST : ttlTodayAlignedSeconds(),
     target: `https://eco2mix.rte-france.com/curves/getDonneesMarche?dateDeb=${d}/${m}/${y}&dateFin=${d}/${m}/${y}&mode=NORM`,
     fetchOptions: { method: "GET" },
     errorLabel: "SPOT",
