@@ -205,7 +205,7 @@ permalink: /prep/
   }
 
   #prep-plot .modebar {
-    top: 105px !important;
+    top: 90px !important;
     right: 8px !important;
     z-index: 20;
   }
@@ -345,7 +345,7 @@ permalink: /prep/
     }
 
     #prep-plot .modebar {
-      top: 200px !important;
+      top: 92px !important;
       right: 6px !important;
       transform: scale(0.9);
       transform-origin: top right;
@@ -1069,7 +1069,7 @@ permalink: /prep/
           y: 0.94,
           yanchor: "bottom",
         },
-        margin: { t: 20, r: 60, l: 60, b: 20 },
+        margin: { t: 0, r: 60, l: 60, b: 20 },
         xaxis: {
           type: "date",
           tickformat: "%H:%M",
@@ -1098,7 +1098,7 @@ permalink: /prep/
         responsive: true,
         displaylogo: false,
         displayModeBar: true,
-        displayModeBar: !isMobile,
+        displayModeBar: true,
       };
 
       Plotly.newPlot("prep-plot", traces, layout, config);
