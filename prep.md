@@ -484,6 +484,12 @@ permalink: /prep/
       return Math.min(nextAlignedRefresh, savedAtMs + TODAY_CACHE_MAX_MS);
     }
 
+    function todayRefreshSlotKey(now) {
+      var target = nextRefreshDate(now || new Date());
+      var p = partsInParis(target);
+      return p.year + p.month + p.day + p.hour + p.minute;
+    }
+
     function getSavedThemePreference() {
       try {
         var saved = localStorage.getItem(THEME_STORAGE_KEY);
@@ -846,7 +852,8 @@ permalink: /prep/
       var cacheKey = "day:" + day;
 
       if (isToday) {
-        var cachedToday = cacheGetTimed("day-live:" + day, TODAY_CACHE_MAX_MS);
+        var todayCacheKey = "day-live:" + day + ":slot:" + todayRefreshSlotKey();
+        var cachedToday = cacheGetTimed(todayCacheKey, TODAY_CACHE_MAX_MS);
         if (cachedToday) {
           return Promise.resolve({ data: cachedToday, fromCache: true });
         }
@@ -869,7 +876,7 @@ permalink: /prep/
           var result = payload && typeof payload === "object" ? payload : {};
 
           if (isToday) {
-            cacheSetTimed("day-live:" + day, result, getTodayCacheExpiry(Date.now()));
+            cacheSetTimed(todayCacheKey, result, getTodayCacheExpiry(Date.now()));
           } else {
             cacheSetTimed(cacheKey, result);
           }
