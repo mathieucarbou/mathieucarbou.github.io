@@ -191,8 +191,8 @@ permalink: /prep/
 
   #prep-plot {
     width: 100%;
-    height: 520px;
-    min-height: 520px;
+    height: clamp(400px, 75vh, 1200px);
+    min-height: clamp(400px, 75vh, 1200px);
     max-width: 100%;
     overflow: hidden;
   }
@@ -340,8 +340,8 @@ permalink: /prep/
     }
 
     #prep-plot {
-      height: 640px;
-      min-height: 640px;
+      height: clamp(350px, 70vh, 900px);
+      min-height: clamp(350px, 70vh, 900px);
     }
 
     #prep-plot .modebar {
@@ -1068,10 +1068,10 @@ permalink: /prep/
           orientation: "v",
           x: 0.5,
           xanchor: "center",
-          y: isMobile ? 1.1 : 1.15,
+          y: isMobile ? 1 : 1,
           yanchor: "top",
         },
-        margin: { t: 30, r: 60, l: 60, b: 30 },
+        margin: { t: 10, r: 60, l: 60, b: 30 },
         xaxis: {
           type: "date",
           tickformat: "%H:%M",
