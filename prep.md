@@ -109,6 +109,40 @@ permalink: /prep/
     opacity: 1;
   }
 
+  #prep-explainer {
+    margin-top: 0.6rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    background: #fafafa;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    text-align: left;
+    max-width: 1000px;
+  }
+
+  #prep-explainer h3 {
+    margin: 0 0 0.45rem;
+    font-size: 0.95rem;
+  }
+
+  #prep-explainer p {
+    margin: 0.45rem 0;
+  }
+
+  #prep-explainer ul {
+    margin: 0.4rem 0 0.6rem 1.1rem;
+    padding: 0;
+  }
+
+  #prep-explainer li {
+    margin: 0.25rem 0;
+  }
+
+  #prep-explainer a {
+    color: #0a4ea3;
+  }
+
   @media screen and (max-width: 960px) {
     body.prep-page .wrapper {
       width: 96vw;
@@ -173,6 +207,27 @@ permalink: /prep/
   <div id="prep-last-update">Dernière mise à jour: -</div>
   <div id="prep-timeslot-info"></div>
   <div><button id="prep-clear-cache" type="button">Clear cache</button></div>
+  <div id="prep-explainer">
+    <h3>Comment lire ce graphe</h3>
+    <p>Le graphe superpose 3 signaux quart-horaires et une estimation journalière:</p>
+    <ul>
+      <li><strong>PRE+</strong> (barres bleu/rouge): prix de règlement des écarts positifs en €/MWh (converti ici en c€/kWh). Bleu = prix positif, rouge = prix négatif. Source: <a href="https://www.services-rte.com/fr/visualisez-les-donnees-publiees-par-rte/equilibrage.html" target="_blank" rel="noopener noreferrer">Infos PRE+ (RTE)</a>.</li>
+      <li><strong>SPOT</strong> (courbe bleue): prix marché day-ahead FR (€/MWh, converti en c€/kWh). Source: <a href="https://www.rte-france.com/donnees-publications/eco2mix-donnees-temps-reel/donnees-marche" target="_blank" rel="noopener noreferrer">Prix SPOT (RTE eco2mix)</a>.</li>
+      <li><strong>PRD3</strong> (courbe orange): coefficient dynamique d'ensoleillement utilisé comme facteur de pondération. Source: <a href="https://data.enedis.fr/pages/coefficients-de-profils-dynamiques-jplus1-contenu/" target="_blank" rel="noopener noreferrer">Profil PRD3 (Enedis)</a>.</li>
+      <li><strong>Status 3ERL</strong> (cartes en haut): indicateurs de contexte du marché (trend/bridage). Source: <a href="https://3erl.fr/PREP_Profile.php" target="_blank" rel="noopener noreferrer">Status 3ERL</a>.</li>
+    </ul>
+    <p><strong>PRE+ Daily Estimation</strong> (courbe verte) est calculé en moyenne pondérée cumulative par PRD3:</p>
+    <p><em>estimation(t) = sum(PRE+(i) * PRD3(i)) / sum(PRD3(i))</em>, pour tous les points disponibles jusqu'au créneau <em>t</em>.</p>
+    <p>La valeur affichée dans la carte « PRE+ Daily Estimation » correspond au dernier point disponible de cette série. C'est cette valeur journalière qui sert de référence de valorisation du surplus en ACI (autoconsommation individuelle) utilisée par Enedis.</p>
+    <p><strong>Cette valeur reste une estimation</strong>, car la courbe PRD3 du jour n'est pas encore connue en temps réel, et les prix PRE+ peuvent être ajustés a posteriori par Enedis.</p>
+    <p>Règle PRD3 utilisée dans ce graphe:</p>
+    <ul>
+      <li>pour le jour actuel: profil PRD3 de J-2;</li>
+      <li>pour hier: profil PRD3 de J-1 (ce qui revient aussi a J-2 par rapport à aujourd'hui);</li>
+      <li>pour avant-hier et les jours antérieurs: profil PRD3 du jour (J0).</li>
+    </ul>
+    <p>Cette logique vient du fait que la courbe PRD3 de la veille n'est disponible que le matin.</p>
+  </div>
 </div>
 
 <script>
