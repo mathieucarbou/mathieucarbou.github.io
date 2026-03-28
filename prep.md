@@ -345,7 +345,7 @@ permalink: /prep/
     }
 
     #prep-plot .modebar {
-      top: 80px !important;
+      top: 100px !important;
       right: 6px !important;
       transform: scale(0.9);
       transform-origin: top right;
