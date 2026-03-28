@@ -292,9 +292,35 @@ permalink: /prep/
     body.prep-page {
       padding: 12px;
     }
+  }
+
+  @media screen and (max-width: 640px) {
+    .prep-page-topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 0.5rem;
+      align-items: start;
+      min-height: 0;
+      padding-right: 0;
+    }
+
+    #prep-page-title {
+      width: auto;
+      max-width: none;
+      font-size: 1.45rem;
+      line-height: 1.15;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      text-align: center;
+    }
 
     .prep-theme-floating {
-      right: 0;
+      position: static;
+      top: auto;
+      right: auto;
+      transform: none;
+      justify-self: end;
+      max-width: 4.8rem;
       padding: 0.2rem 0.35rem;
     }
 
@@ -303,34 +329,10 @@ permalink: /prep/
     }
 
     .prep-theme-floating select {
+      width: 100%;
       font-size: 0.68rem;
-      max-width: 4.8rem;
       min-height: 1.55rem;
       padding-right: 1rem;
-    }
-  }
-
-  @media screen and (max-width: 640px) {
-    .prep-page-topbar {
-      min-height: 3.6rem;
-      padding-right: 5.4rem;
-    }
-
-    #prep-page-title {
-      width: calc(100% - 5.4rem);
-      max-width: calc(100% - 5.4rem);
-      font-size: 1.45rem;
-      line-height: 1.15;
-      white-space: normal;
-      overflow-wrap: anywhere;
-    }
-
-    .prep-theme-floating {
-      max-width: 5rem;
-    }
-
-    .prep-theme-floating select {
-      width: 100%;
     }
 
     #prep-plot {
