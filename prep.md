@@ -1063,13 +1063,13 @@ permalink: /prep/
         plot_bgcolor: palette.plotPanel,
         font: { color: palette.plotText },
         legend: {
-          orientation: "v",
+          orientation: "h",
           x: 0.5,
           xanchor: "center",
-          y: isMobile ? 1.1 : 1,
-          yanchor: "top",
+          y: 1,
+          yanchor: "bottom",
         },
-        margin: { t: 10, r: 60, l: 60, b: 30 },
+        margin: { t: 30, r: 60, l: 60, b: 30 },
         xaxis: {
           type: "date",
           tickformat: "%H:%M",
