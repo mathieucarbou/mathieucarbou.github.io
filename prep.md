@@ -6,6 +6,10 @@ permalink: /prep/
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
 <style>
+  body.prep-page {
+    overflow-x: hidden;
+  }
+
   body.prep-page .wrapper,
   body.prep-page section,
   .prep-meta,
@@ -18,8 +22,8 @@ permalink: /prep/
   }
 
   body.prep-page .wrapper {
-    width: min(1800px, 96vw);
-    max-width: 96vw;
+    width: 100%;
+    max-width: 1800px;
     margin-left: auto;
     margin-right: auto;
   }
@@ -170,14 +174,20 @@ permalink: /prep/
 
   @media screen and (max-width: 960px) {
     body.prep-page .wrapper {
-      width: 96vw;
-      max-width: 96vw;
+      width: 100%;
+      max-width: 100%;
     }
 
     body.prep-page header,
     body.prep-page section {
       width: 100%;
       float: none;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    body.prep-page {
+      padding: 12px;
     }
   }
 
