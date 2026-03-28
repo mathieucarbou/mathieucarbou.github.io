@@ -345,7 +345,7 @@ permalink: /prep/
     }
 
     #prep-plot .modebar {
-      top: 120px !important;
+      top: 90px !important;
       right: 6px !important;
       transform: scale(0.9);
       transform-origin: top right;
@@ -1066,7 +1066,7 @@ permalink: /prep/
           orientation: "h",
           x: 0.5,
           xanchor: "center",
-          y: isMobile ? 1 : 0.94,
+          y: 0.94,
           yanchor: "bottom",
         },
         margin: { t: 0, r: 0, l: 0, b: 20 },
