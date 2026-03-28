@@ -8,7 +8,7 @@
 //
 // Caching layers:
 //   1. Zone cache (CF cache API): full /api/day response for past days (24 h).
-//   2. Per-source worker cache: PREP/SPOT today=5 min, past=24 h; PRD3 always 24 h.
+//   2. Per-source worker cache: PREP/SPOT today=until next slot (05/20/35/50, max 15 min), past=24 h; PRD3 always 24 h.
 // =============================================================================
 
 // ─── Configuration ────────────────────────────────────────────────────────────
@@ -17,7 +17,7 @@ const TIMEZONE        = "Europe/Paris";
 const ALLOWED_ORIGIN  = "https://mathieu.carbou.me";
 const ALLOWED_HOST_RE = /^prep-api(?:-[a-z0-9]+)?\.carbou\.me$/;
 const TTL_PAST        = 86400; // seconds — past days (immutable data)
-const TTL_TODAY       = 300;   // seconds — today: PREP & SPOT
+const TTL_TODAY_MAX   = 900;   // seconds — today: PREP & SPOT, capped at 15 min
 const TTL_PRD3        = 86400; // seconds — PRD3 profile (always 24 h)
 const TTL_3ERL        = 300;   // seconds — 3ERL CF edge cache
 const DEV             = false; // if true, bypasses CORS and client checks for easier testing
@@ -134,6 +134,25 @@ function addDaysIso(day, offset) {
   return utc.toISOString().slice(0, 10);
 }
 
+function nextRefreshDate(now = new Date()) {
+  const slots = [5, 20, 35, 50];
+  for (const minute of slots) {
+    const candidate = new Date(now.getTime());
+    candidate.setMinutes(minute, 0, 0);
+    if (candidate.getTime() > now.getTime()) {
+      return candidate;
+    }
+  }
+  const nextHour = new Date(now.getTime());
+  nextHour.setHours(nextHour.getHours() + 1, slots[0], 0, 0);
+  return nextHour;
+}
+
+function ttlTodayAlignedSeconds(now = new Date()) {
+  const alignedTtl = Math.ceil((nextRefreshDate(now).getTime() - now.getTime()) / 1000);
+  return Math.max(1, Math.min(TTL_TODAY_MAX, alignedTtl));
+}
+
 // ─── PRD3 profile day logic ────────────────────────────────────────────────────
 //
 // RTE publishes PRD3 profiles with a publication lag:
@@ -156,13 +175,13 @@ function getPrd3ProfileInfo(day) {
 // ─── Per-source data fetchers ──────────────────────────────────────────────────
 //
 // Each returns { rows: [{ts: "HH:MM", value}], fetchedAt: ISO, cache: "HIT"|"MISS" }
-// TTL policy: TTL_TODAY / TTL_PAST / TTL_PRD3 (see configuration block above).
+// TTL policy: today=next refresh slot (max 15 min), past=24 h, PRD3=24 h.
 
 async function fetchPrepSeries(day) {
   const [y, m, d] = day.split("-");
   const result = await fetchTextWithWorkerCache({
     cacheKey: "prep:" + day,
-    ttlSeconds: isPastParisDay(day) ? TTL_PAST : TTL_TODAY,
+    ttlSeconds: isPastParisDay(day) ? TTL_PAST : ttlTodayAlignedSeconds(),
     target: `https://www.services-rte.com/cms/open_data/v1/price/table?startDate=${encodeURIComponent(`${d}/${m}/${y}`)}`,
     fetchOptions: { method: "GET" },
     errorLabel: "PREP",
@@ -174,7 +193,7 @@ async function fetchSpotSeries(day) {
   const [y, m, d] = day.split("-");
   const result = await fetchTextWithWorkerCache({
     cacheKey: "spot:" + day,
-    ttlSeconds: isPastParisDay(day) ? TTL_PAST : TTL_TODAY,
+    ttlSeconds: isPastParisDay(day) ? TTL_PAST : ttlTodayAlignedSeconds(),
     target: `https://eco2mix.rte-france.com/curves/getDonneesMarche?dateDeb=${d}/${m}/${y}&dateFin=${d}/${m}/${y}&mode=NORM`,
     fetchOptions: { method: "GET" },
     errorLabel: "SPOT",
