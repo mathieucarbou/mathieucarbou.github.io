@@ -166,7 +166,7 @@ permalink: /prep/
   .prep-meta {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 0.5rem;
     margin-bottom: 1rem;
   }
@@ -345,7 +345,7 @@ permalink: /prep/
     }
 
     #prep-plot .modebar {
-      top: 92px !important;
+      top: 80px !important;
       right: 6px !important;
       transform: scale(0.9);
       transform-origin: top right;
