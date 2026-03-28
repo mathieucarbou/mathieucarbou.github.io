@@ -435,11 +435,10 @@ permalink: /prep/
         : "<span style=\"color:#c62828;font-weight:700;\">no</span>";
     }
 
-    function setTimeslotInfo({ prep, spot, prd3, mergedCount }) {
+    function setTimeslotInfo({ prep, spot, prd3 }) {
       document.getElementById("prep-timeslot-info").innerHTML =
-        mergedCount + " aligned timeslots" +
-        "<br>PREP: " + prep.count + " | local cache: " + yesNo(prep.fromCache) + " | worker: " + formatDataFetchTime(prep.fetchedAt) +
-        "<br>SPOT FR: " + spot.count + " | local cache: " + yesNo(spot.fromCache) + " | worker: " + formatDataFetchTime(spot.fetchedAt) +
+        "PREP: " + prep.count + " | local cache: " + yesNo(prep.fromCache) + " | worker: " + formatDataFetchTime(prep.fetchedAt) +
+        "<br>SPOT: " + spot.count + " | local cache: " + yesNo(spot.fromCache) + " | worker: " + formatDataFetchTime(spot.fetchedAt) +
         "<br>PRD3: " + prd3.count + " | local cache: " + yesNo(prd3.fromCache) + " | worker: " + formatDataFetchTime(prd3.fetchedAt);
     }
 
@@ -633,7 +632,7 @@ permalink: /prep/
           mode: "lines",
           x: x,
           y: spotValues,
-          name: "France SPOT Prices",
+          name: "SPOT Prices",
           legendrank: 2,
           line: { color: "#1e3a8a", width: isMobile ? 1 : 2, shape: "hv" },
           yaxis: "y",
@@ -779,7 +778,6 @@ permalink: /prep/
             prep: { count: prepRows.length, fromCache: bundleResult.fromCache, fetchedAt: prepFetchedAt },
             spot: { count: spotRows.length, fromCache: bundleResult.fromCache, fetchedAt: spotFetchedAt },
             prd3: { count: prd3Rows.length, fromCache: bundleResult.fromCache, fetchedAt: prd3FetchedAt },
-            mergedCount: merged.length,
           });
           setStatus("");
         })
