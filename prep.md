@@ -184,7 +184,7 @@ permalink: /prep/
     var PREP_TODAY_CACHE_MS = 5 * 60 * 1000;
     var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
     var CACHE_PREFIX = "prep_" + VERSION + ":";
-    var API_BASE_URL = "https://prep-api-1.carbou.me/api";
+    var API_BASE_URL = "https://prep-api.carbou.me/api";
     var resizeTimer = null;
 
     // ─── localStorage timed cache ─────────────────────────────────────────────
