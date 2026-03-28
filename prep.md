@@ -345,7 +345,7 @@ permalink: /prep/
     }
 
     #prep-plot .modebar {
-      top: 110px !important;
+      top: 120px !important;
       right: 6px !important;
       transform: scale(0.9);
       transform-origin: top right;
@@ -1069,7 +1069,7 @@ permalink: /prep/
           y: isMobile ? 1 : 0.94,
           yanchor: "bottom",
         },
-        margin: { t: 0, r: 60, l: 60, b: 20 },
+        margin: { t: 0, r: 0, l: 0, b: 20 },
         xaxis: {
           type: "date",
           tickformat: "%H:%M",
