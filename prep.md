@@ -313,15 +313,24 @@ permalink: /prep/
   @media screen and (max-width: 640px) {
     .prep-page-topbar {
       min-height: 3.6rem;
-      padding-right: 5.2rem;
+      padding-right: 5.4rem;
     }
 
     #prep-page-title {
-      max-width: 100%;
+      width: calc(100% - 5.4rem);
+      max-width: calc(100% - 5.4rem);
       font-size: 1.45rem;
       line-height: 1.15;
       white-space: normal;
-      text-wrap: balance;
+      overflow-wrap: anywhere;
+    }
+
+    .prep-theme-floating {
+      max-width: 5rem;
+    }
+
+    .prep-theme-floating select {
+      width: 100%;
     }
 
     #prep-plot {
@@ -364,7 +373,7 @@ permalink: /prep/
     <div id="bridage-cdc" class="prep-value">-</div>
   </div>
   <div class="prep-card">
-    <div class="prep-label">Estimation journalière PRE+</div>
+    <div class="prep-label">Estimation PRE+ du jour</div>
     <div id="prep-estimation" class="prep-value">-</div>
   </div>
 </div>
