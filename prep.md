@@ -1066,10 +1066,10 @@ permalink: /prep/
           orientation: "h",
           x: 0.5,
           xanchor: "center",
-          y: 1,
+          y: 0.94,
           yanchor: "bottom",
         },
-        margin: { t: 30, r: 60, l: 60, b: 30 },
+        margin: { t: 20, r: 60, l: 60, b: 20 },
         xaxis: {
           type: "date",
           tickformat: "%H:%M",
