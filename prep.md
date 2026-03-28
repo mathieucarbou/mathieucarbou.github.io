@@ -396,7 +396,6 @@ permalink: /prep/
   <div id="prep-last-update">Dernière mise à jour: -</div>
   <div id="prep-next-refresh">Prochaine actualisation automatique: -</div>
   <div id="prep-timeslot-info"></div>
-  <div><button id="prep-clear-cache" type="button">Vider le cache</button></div>
   <div id="prep-explainer">
     <h3>Comment lire ce graphe</h3>
     <p>Le graphe superpose 3 signaux quart-horaires et une estimation journalière:</p>
@@ -479,23 +478,6 @@ permalink: /prep/
     function getTodayCacheExpiry(savedAtMs) {
       var nextAlignedRefresh = nextRefreshDate(new Date(savedAtMs)).getTime();
       return Math.min(nextAlignedRefresh, savedAtMs + TODAY_CACHE_MAX_MS);
-    }
-
-    function clearPrepCache() {
-      try {
-        var keysToRemove = [];
-        for (var i = 0; i < localStorage.length; i += 1) {
-          var key = localStorage.key(i);
-          if (key && key.indexOf(CACHE_PREFIX) === 0) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(function (key) {
-          localStorage.removeItem(key);
-        });
-      } catch (e) {
-        // localStorage unavailable — fail silently
-      }
     }
 
     function getSavedThemePreference() {
@@ -1241,11 +1223,6 @@ permalink: /prep/
       });
       document.getElementById("next-day").addEventListener("click", function () {
         shiftDay(1);
-      });
-      document.getElementById("prep-clear-cache").addEventListener("click", function () {
-        clearPrepCache();
-        setStatus("Cache vidé. Rechargement...");
-        load();
       });
       window.addEventListener("resize", function () {
         clearTimeout(resizeTimer);
