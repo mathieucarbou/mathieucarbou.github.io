@@ -275,6 +275,10 @@ permalink: /prep/
     color: var(--prep-link);
   }
 
+  #prep-explainer strong {
+    color: var(--prep-heading);
+  }
+
   @media screen and (max-width: 960px) {
     body.prep-page .wrapper {
       width: 100%;
