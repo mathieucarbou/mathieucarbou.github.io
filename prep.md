@@ -431,15 +431,15 @@ permalink: /prep/
 
     function yesNo(flag) {
       return flag
-        ? "<span style=\"color:#2e7d32;font-weight:700;\">yes</span>"
-        : "<span style=\"color:#c62828;font-weight:700;\">no</span>";
+        ? "<span style=\"color:#2e7d32;font-weight:700;font-family:monospace;\"> HIT</span>"
+        : "<span style=\"color:#c62828;font-weight:700;font-family:monospace;\">MISS</span>";
     }
 
     function setTimeslotInfo({ prep, spot, prd3 }) {
       document.getElementById("prep-timeslot-info").innerHTML =
-        "PREP: " + prep.count + " | local cache: " + yesNo(prep.fromCache) + " | worker: " + formatDataFetchTime(prep.fetchedAt) +
-        "<br>SPOT: " + spot.count + " | local cache: " + yesNo(spot.fromCache) + " | worker: " + formatDataFetchTime(spot.fetchedAt) +
-        "<br>PRD3: " + prd3.count + " | local cache: " + yesNo(prd3.fromCache) + " | worker: " + formatDataFetchTime(prd3.fetchedAt);
+        "PREP: " + prep.count + " | " + formatDataFetchTime(prep.fetchedAt) +  " | cache: " + yesNo(prep.fromCache) +
+        "<br>SPOT: " + spot.count + " | " + formatDataFetchTime(spot.fetchedAt) + " | cache: " + yesNo(spot.fromCache) +
+        "<br>PRD3: " + prd3.count + " | " + formatDataFetchTime(prd3.fetchedAt) + " | cache: " + yesNo(prd3.fromCache);
     }
 
     // ─── Series data helpers ───────────────────────────────────────────────────
