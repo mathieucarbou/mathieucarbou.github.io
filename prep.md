@@ -676,10 +676,10 @@ permalink: /prep/
           orientation: "v",
           x: 0.5,
           xanchor: "center",
-          y: isMobile ? 1.05 : 1.12,
+          y: isMobile ? 1.15 : 1.30,
           yanchor: "top",
         },
-        margin: { t: 120, r: 60, l: 60, b: 60 },
+        margin: { t: 80, r: 60, l: 60, b: 60 },
         xaxis: {
           title: "Timeslot",
           type: "date",
