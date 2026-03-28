@@ -311,6 +311,19 @@ permalink: /prep/
   }
 
   @media screen and (max-width: 640px) {
+    .prep-page-topbar {
+      min-height: 3.6rem;
+      padding-right: 5.2rem;
+    }
+
+    #prep-page-title {
+      max-width: 100%;
+      font-size: 1.45rem;
+      line-height: 1.15;
+      white-space: normal;
+      text-wrap: balance;
+    }
+
     #prep-plot {
       height: 640px;
       min-height: 640px;
