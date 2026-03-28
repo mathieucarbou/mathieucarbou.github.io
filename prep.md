@@ -90,15 +90,26 @@ permalink: /prep/
   }
 
   #prep-page-title {
+    margin: 0;
     text-align: center;
     color: var(--prep-heading);
   }
 
+  .prep-page-topbar {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.1rem;
+    margin-bottom: 0.75rem;
+  }
+
   .prep-theme-floating {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 50;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     gap: 0.35rem;
@@ -283,8 +294,7 @@ permalink: /prep/
     }
 
     .prep-theme-floating {
-      top: 8px;
-      right: 8px;
+      right: 0;
       padding: 0.2rem 0.35rem;
     }
 
@@ -315,16 +325,17 @@ permalink: /prep/
   }
 </style>
 
-<div class="prep-theme-floating">
-  <label for="theme-mode">Thème</label>
-  <select id="theme-mode" aria-label="Choix du thème">
-    <option value="auto">Auto</option>
-    <option value="light">Clair</option>
-    <option value="dark">Sombre</option>
-  </select>
+<div class="prep-page-topbar">
+  <h2 id="prep-page-title">Estimation PRE+ du jour</h2>
+  <div class="prep-theme-floating">
+    <label for="theme-mode">Thème</label>
+    <select id="theme-mode" aria-label="Choix du thème">
+      <option value="auto">Auto</option>
+      <option value="light">Clair</option>
+      <option value="dark">Sombre</option>
+    </select>
+  </div>
 </div>
-
-<h2 id="prep-page-title">Estimation PRE+ du jour</h2>
 
 <div class="prep-meta">
   <div class="prep-card">
