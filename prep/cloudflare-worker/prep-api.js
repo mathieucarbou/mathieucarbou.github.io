@@ -16,14 +16,50 @@
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
+// Fuseau de référence pour tout le worker :
+// - calcul de "today" et distinction passé/présent,
+// - formatage des créneaux horaires,
+// - cohérence des comparaisons de dates côté API.
+// A changer uniquement si la logique métier doit suivre un autre fuseau.
 const TIMEZONE        = "Europe/Paris";
+
+// Origine frontend autorisée pour les requêtes cross-origin.
+// Le worker renvoie cette valeur dans Access-Control-Allow-Origin et compare
+// les en-têtes Origin/Referer entrants pour bloquer les appels non prévus.
+// Doit correspondre exactement au domaine public de la page PRE+.
 const ALLOWED_ORIGIN  = "https://mathieu.carbou.me";
+
+// Validation stricte de l'hôte API ciblé par la requête.
+// Autorise "prep-api.carbou.me" et des variantes suffixées (ex: prep-api-dev.carbou.me)
+// tout en interdisant les sous-domaines inattendus.
+// A adapter en cas de changement de domaine ou de convention de nommage.
 const ALLOWED_HOST_RE = /^prep-api(?:-[a-z0-9]+)?\.carbou\.me$/;
-const TTL_PAST        = 86400; // seconds — past days (immutable data)
-const TTL_TODAY_MAX   = 900;   // seconds — today: PREP & SPOT, capped at 15 min
-const TTL_PRD3        = 86400; // seconds — PRD3 profile (always 24 h)
-const TTL_3ERL        = 300;   // seconds — 3ERL CF edge cache
-const DEV             = false; // if true, bypasses CORS and client checks for easier testing
+
+// TTL (en secondes) du cache Cloudflare pour les jours passés.
+// Les données historiques étant considérées immuables, on peut les cacher 24 h
+// sans risque de divergence fonctionnelle.
+const TTL_PAST        = 86400;
+
+// TTL maximal (en secondes) pour les données du jour (PREP/SPOT).
+// Le cache est aligné sur des slots de rafraîchissement intra-heure (05/20/35/50),
+// puis plafonné à cette valeur pour garantir une fraîcheur raisonnable.
+const TTL_TODAY_MAX   = 900;
+
+// TTL (en secondes) du cache PRD3.
+// Les profils PRD3 sont consommés comme données journalières stables,
+// donc un cache 24 h est approprié.
+const TTL_PRD3        = 86400;
+
+// TTL (en secondes) pour l'appel externe 3ERL (données d'activation temps réel).
+// Court par design pour limiter la charge upstream tout en gardant une donnée
+// quasi temps réel côté client.
+const TTL_3ERL        = 300;
+
+// Mode développement :
+// - true  => assouplit les contrôles d'accès (CORS / host / origin) pour tests locaux,
+// - false => applique toutes les règles de sécurité en production.
+// Doit rester à false pour un déploiement public.
+const DEV             = false;
 
 export default {
   async fetch(request, env, ctx) {
