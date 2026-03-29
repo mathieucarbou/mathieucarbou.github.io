@@ -367,15 +367,15 @@ permalink: /prep/
 
 <div class="prep-meta">
   <div class="prep-card">
-    <div class="prep-label">Tendance 3ERL</div>
+    <div class="prep-label">Tendance</div>
     <div id="trend" class="prep-value">-</div>
   </div>
   <div class="prep-card">
-    <div class="prep-label">3ERL Bridage</div>
+    <div class="prep-label">Bridage</div>
     <div id="bridage" class="prep-value">-</div>
   </div>
   <div class="prep-card">
-    <div class="prep-label">3ERL Bridage CDC</div>
+    <div class="prep-label">Bridage CDC</div>
     <div id="bridage-cdc" class="prep-value">-</div>
   </div>
   <div class="prep-card">
@@ -407,7 +407,7 @@ permalink: /prep/
       <li><strong>PRE+</strong> (barres bleu/rouge): prix de règlement des écarts positifs en €/MWh (converti ici en c€/kWh). Bleu = prix positif, rouge = prix négatif. Source: <a href="https://www.services-rte.com/fr/visualisez-les-donnees-publiees-par-rte/equilibrage.html" target="_blank" rel="noopener noreferrer">Infos PRE+ (RTE)</a>.</li>
       <li><strong>SPOT</strong> (courbe bleue): prix marché day-ahead FR (€/MWh, converti en c€/kWh). Source: <a href="https://www.rte-france.com/donnees-publications/eco2mix-donnees-temps-reel/donnees-marche" target="_blank" rel="noopener noreferrer">Prix SPOT (RTE eco2mix)</a>.</li>
       <li><strong>PRD3</strong> (courbe orange): coefficient dynamique d'ensoleillement utilisé comme facteur de pondération. Source: <a href="https://data.enedis.fr/pages/coefficients-de-profils-dynamiques-jplus1-contenu/" target="_blank" rel="noopener noreferrer">Profil PRD3 (Enedis)</a>.</li>
-      <li><strong>Statut 3ERL</strong> (cartes en haut): indicateurs de contexte du marché (tendance/bridage). Source: <a href="https://3erl.fr/PREP_Profile.php" target="_blank" rel="noopener noreferrer">Statut 3ERL</a>.</li>
+      <li><strong>Statut 3ERL</strong> (cartes en haut): indicateurs de tendance et bridage. Source: <a href="https://3erl.fr/PREP_Profile.php" target="_blank" rel="noopener noreferrer">Statut 3ERL</a>.</li>
     </ul>
     <p><strong>Estimation journalière PRE+</strong> (courbe verte) est calculée en moyenne pondérée cumulative par PRD3:</p>
     <p><em>estimation(t) = sum(PRE+(i) * PRD3(i)) / sum(PRD3(i))</em>, pour tous les points disponibles jusqu'au créneau <em>t</em>.</p>
