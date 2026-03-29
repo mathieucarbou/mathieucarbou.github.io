@@ -3,6 +3,9 @@ title: Estimation PRE+ du jour
 permalink: /prep/
 ---
 
+<!-- SPDX-FileCopyrightText: Copyright (c) Mathieu Carbou -->
+<!-- SPDX-License-Identifier: MIT -->
+
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 
 <style>

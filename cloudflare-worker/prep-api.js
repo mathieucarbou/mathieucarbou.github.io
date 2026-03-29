@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (c) Mathieu Carbou
+// SPDX-License-Identifier: MIT
+
 // =============================================================================
 // Cloudflare Worker — PRE+/SPOT/PRD3 aggregation API
 //
