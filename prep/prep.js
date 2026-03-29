@@ -633,8 +633,14 @@
   // ─── Plotly graph ──────────────────────────────────────────────────────────
 
   function renderGraph(day, profileDay, profileLabel, merged, estimateSeriesEurPerMwh, estimateLastEurPerMwh) {
+    var SLOT_MS = 15 * 60 * 1000;
+    var BAR_WIDTH_MS = SLOT_MS * 0.85;
+    var BAR_X_SHIFT_MS = BAR_WIDTH_MS / 2;
     var x = merged.map(function (p) {
       return p.key;
+    });
+    var xBars = x.map(function (timestamp) {
+      return new Date(timestamp).getTime() + BAR_X_SHIFT_MS;
     });
 
     var prepPositive = merged.map(function (p) {
@@ -665,18 +671,24 @@
     var traces = [
       {
         type: "bar",
-        x: x,
+        x: xBars,
         y: prepPositive,
         name: "PRE+ positif",
         marker: { color: palette.prepPositive },
+        width: BAR_WIDTH_MS,
+        customdata: x,
+        hovertemplate: "%{customdata|%H:%M}, %{y:.3f}<extra>%{fullData.name}</extra>",
         yaxis: "y",
       },
       {
         type: "bar",
-        x: x,
+        x: xBars,
         y: prepNegative,
         name: "PRE+ négatif",
         marker: { color: palette.prepNegative },
+        width: BAR_WIDTH_MS,
+        customdata: x,
+        hovertemplate: "%{customdata|%H:%M}, %{y:.3f}<extra>%{fullData.name}</extra>",
         yaxis: "y",
       },
       {
