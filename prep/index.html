@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!-- SPDX-FileCopyrightText: Copyright (c) Mathieu Carbou -->
+<!-- SPDX-License-Identifier: MIT -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estimation PRE+ du jour</title>
+  <link rel="stylesheet" href="prep.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body class="prep-page">
+  <script>
+    // Apply theme before first paint to avoid flash of wrong background
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('prep_theme'); } catch (e) {}
+      var isDark = saved === 'dark' || ((!saved || saved === 'auto') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    })();
+  </script>
+  <div class="wrapper">
+    <section>
+
+<div class="prep-page-topbar">
+  <h2 id="prep-page-title">Estimation PRE+ du jour</h2>
+  <div class="prep-theme-floating">
+    <label for="theme-mode">Thème</label>
+    <select id="theme-mode" aria-label="Choix du thème">
+      <option value="auto">Auto</option>
+      <option value="light">Clair</option>
+      <option value="dark">Sombre</option>
+    </select>
+  </div>
+</div>
+
+<div class="prep-meta">
+  <div class="prep-card">
+    <div class="prep-label">Tendance</div>
+    <div id="trend" class="prep-value">-</div>
+  </div>
+  <div class="prep-card">
+    <div class="prep-label">Bridage</div>
+    <div id="bridage" class="prep-value">-</div>
+  </div>
+  <div class="prep-card">
+    <div class="prep-label">Bridage CDC</div>
+    <div id="bridage-cdc" class="prep-value">-</div>
+  </div>
+  <div class="prep-card">
+    <div class="prep-label">Estimation PRE+ du jour</div>
+    <div id="prep-estimation" class="prep-value">-</div>
+  </div>
+</div>
+
+<div class="prep-controls">
+  <div class="prep-control-row">
+    <label for="day">Jour:</label>
+    <button id="prev-day" type="button" aria-label="Jour précédent">←</button>
+    <input id="day" type="date" />
+    <button id="next-day" type="button" aria-label="Jour suivant">→</button>
+    <button id="today" type="button">Aujourd'hui</button>
+  </div>
+</div>
+
+<div id="prep-status"></div>
+<div id="prep-plot"></div>
+<div id="prep-footer">
+  <div id="prep-last-update">Dernière mise à jour: -</div>
+  <div id="prep-next-refresh">Prochaine actualisation automatique: -</div>
+  <div id="prep-timeslot-info"></div>
+  <div id="prep-explainer">
+    <h3>Comment lire ce graphe</h3>
+    <p>Le graphe superpose 3 signaux quart-horaires et une estimation journalière:</p>
+    <ul>
+      <li><strong>PRE+</strong> (barres bleu/rouge): prix de règlement des écarts positifs en €/MWh (converti ici en c€/kWh). Bleu = prix positif, rouge = prix négatif. Source: <a href="https://www.services-rte.com/fr/visualisez-les-donnees-publiees-par-rte/equilibrage.html" target="_blank" rel="noopener noreferrer">Infos PRE+ (RTE)</a>.</li>
+      <li><strong>SPOT</strong> (courbe bleue): prix marché day-ahead FR (€/MWh, converti en c€/kWh). Source: <a href="https://www.rte-france.com/donnees-publications/eco2mix-donnees-temps-reel/donnees-marche" target="_blank" rel="noopener noreferrer">Prix SPOT (RTE eco2mix)</a>.</li>
+      <li><strong>PRD3</strong> (courbe orange): coefficient dynamique d'ensoleillement utilisé comme facteur de pondération. Source: <a href="https://data.enedis.fr/pages/coefficients-de-profils-dynamiques-jplus1-contenu/" target="_blank" rel="noopener noreferrer">Profil PRD3 (Enedis)</a>.</li>
+      <li><strong>Statut 3ERL</strong> (cartes en haut): indicateurs de tendance et bridage. Source: <a href="https://3erl.fr/PREP_Profile.php" target="_blank" rel="noopener noreferrer">Statut 3ERL</a>.</li>
+    </ul>
+    <p><strong>Estimation journalière PRE+</strong> (courbe verte) est calculée en moyenne pondérée cumulative par PRD3:</p>
+    <p><em>estimation(t) = sum(PRE+(i) * PRD3(i)) / sum(PRD3(i))</em>, pour tous les points disponibles jusqu'au créneau <em>t</em>.</p>
+    <p>La valeur affichée dans la carte « Estimation journalière PRE+ » correspond au dernier point disponible de cette série. C'est cette valeur journalière qui sert de référence de valorisation du surplus en ACI (autoconsommation individuelle) utilisée par Enedis.</p>
+    <p><strong>Cette valeur reste une estimation</strong>, car la courbe PRD3 du jour n'est pas encore connue en temps réel, et les prix PRE+ peuvent être ajustés a posteriori par Enedis.</p>
+    <p>Règle PRD3 utilisée dans ce graphe:</p>
+    <ul>
+      <li>pour le jour actuel: profil PRD3 de J-2;</li>
+      <li>pour hier: profil PRD3 de J-1 (ce qui revient aussi a J-2 par rapport à aujourd'hui);</li>
+      <li>pour avant-hier et les jours antérieurs: profil PRD3 du jour (J0).</li>
+    </ul>
+    <p>Cette logique vient du fait que la courbe PRD3 de la veille n'est disponible que le matin.</p>
+  </div>
+</div>
+
+    </section>
+  </div>
+  <footer style="text-align:center; margin-top: 2rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--prep-muted);">
+    <em>Made with ❤️ by <a href="https://mathieu.carbou.me/" target="_blank" rel="noopener noreferrer" style="color: var(--prep-link);">Mathieu Carbou</a></em>
+  </footer>
+  <script src="prep.js"></script>
+</body>
+</html>
