@@ -28,18 +28,22 @@
 
   function cacheGetTimed(key, maxAgeMs) {
     try {
-      var raw = localStorage.getItem(CACHE_PREFIX + key);
+      var storageKey = CACHE_PREFIX + key;
+      var raw = localStorage.getItem(storageKey);
       if (!raw) {
         return null;
       }
       var parsed = JSON.parse(raw);
       if (!parsed || typeof parsed.savedAt !== "number" || !("data" in parsed)) {
+        localStorage.removeItem(storageKey);
         return null;
       }
       if (typeof parsed.expiresAt === "number" && Date.now() > parsed.expiresAt) {
+        localStorage.removeItem(storageKey);
         return null;
       }
       if (Date.now() - parsed.savedAt > maxAgeMs) {
+        localStorage.removeItem(storageKey);
         return null;
       }
       return parsed.data;
@@ -66,6 +70,73 @@
   function getTodayCacheExpiry(savedAtMs) {
     var nextAlignedRefresh = nextRefreshDate(new Date(savedAtMs)).getTime();
     return Math.min(nextAlignedRefresh, savedAtMs + TODAY_CACHE_MAX_MS);
+  }
+
+  function cleanupLocalCache() {
+    try {
+      var now = Date.now();
+      var keysToDelete = [];
+
+      for (var i = 0; i < localStorage.length; i += 1) {
+        var key = localStorage.key(i);
+        if (typeof key !== "string") {
+          continue;
+        }
+
+        if (key === THEME_STORAGE_KEY) {
+          continue;
+        }
+
+        if (!key.startsWith("prep_")) {
+          continue;
+        }
+
+        // Purge toutes les anciennes versions (ex: prep_v7:*) pour éviter l'accumulation.
+        if (!key.startsWith(CACHE_PREFIX)) {
+          keysToDelete.push(key);
+          continue;
+        }
+
+        var raw = localStorage.getItem(key);
+        if (!raw) {
+          keysToDelete.push(key);
+          continue;
+        }
+
+        var parsed;
+        try {
+          parsed = JSON.parse(raw);
+        } catch (_e) {
+          keysToDelete.push(key);
+          continue;
+        }
+
+        if (!parsed || typeof parsed.savedAt !== "number" || !("data" in parsed)) {
+          keysToDelete.push(key);
+          continue;
+        }
+
+        if (typeof parsed.expiresAt === "number" && now > parsed.expiresAt) {
+          keysToDelete.push(key);
+          continue;
+        }
+
+        var maxAgeMs = key.indexOf(":day-live:") !== -1 ? TODAY_CACHE_MAX_MS : PAST_CACHE_MS;
+        if (now - parsed.savedAt > maxAgeMs) {
+          keysToDelete.push(key);
+        }
+      }
+
+      keysToDelete.forEach(function (key) {
+        try {
+          localStorage.removeItem(key);
+        } catch (_e) {
+          // ignore remove errors
+        }
+      });
+    } catch (e) {
+      // localStorage unavailable — skip cleanup
+    }
   }
 
   function todayRefreshSlotKey(now) {
@@ -779,6 +850,7 @@
 
   function init() {
     document.body.classList.add("prep-page");
+    cleanupLocalCache();
     applyThemePreference(getSavedThemePreference());
 
     var dayInput = document.getElementById("day");
