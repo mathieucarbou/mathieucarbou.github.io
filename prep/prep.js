@@ -643,14 +643,15 @@
       return new Date(timestamp).getTime() + BAR_X_SHIFT_MS;
     });
 
-    var prepPositive = merged.map(function (p) {
-      if (typeof p.prep !== "number") return null;
-      return p.prep >= 0 ? toCentsPerKwh(p.prep) : 0;
-    });
+    var isMobile = window.matchMedia("(max-width: 640px)").matches;
+    var palette = getThemePalette();
 
-    var prepNegative = merged.map(function (p) {
+    var prepValues = merged.map(function (p) {
       if (typeof p.prep !== "number") return null;
-      return p.prep < 0 ? toCentsPerKwh(p.prep) : 0;
+      return toCentsPerKwh(p.prep);
+    });
+    var prepColors = merged.map(function (p) {
+      return typeof p.prep === "number" && p.prep < 0 ? palette.prepNegative : palette.prepPositive;
     });
 
     var prd3Values = merged.map(function (p) {
@@ -665,39 +666,16 @@
       return typeof value === "number" ? toCentsPerKwh(value) : null;
     });
     var estimateCents = typeof estimateLastEurPerMwh === "number" ? toCentsPerKwh(estimateLastEurPerMwh) : null;
-    var isMobile = window.matchMedia("(max-width: 640px)").matches;
-    var palette = getThemePalette();
 
     var traces = [
       {
         type: "bar",
         x: xBars,
-        y: prepPositive,
-        name: "PRE+ positif",
-        marker: { color: palette.prepPositive },
+        y: prepValues,
+        name: "PRE+",
+        marker: { color: prepColors },
         width: BAR_WIDTH_MS,
-        customdata: x,
-        hovertemplate: "%{customdata|%H:%M}, %{y:.3f}<extra>%{fullData.name}</extra>",
-        yaxis: "y",
-      },
-      {
-        type: "bar",
-        x: xBars,
-        y: prepNegative,
-        name: "PRE+ négatif",
-        marker: { color: palette.prepNegative },
-        width: BAR_WIDTH_MS,
-        customdata: x,
-        hovertemplate: "%{customdata|%H:%M}, %{y:.3f}<extra>%{fullData.name}</extra>",
-        yaxis: "y",
-      },
-      {
-        type: "scatter",
-        mode: "lines",
-        x: x,
-        y: spotValues,
-        name: "Prix SPOT",
-        line: { color: palette.spot, width: isMobile ? 1 : 2, shape: "hv" },
+        hovertemplate: "PRE+: %{y:.1f}<extra></extra>",
         yaxis: "y",
       },
       {
@@ -707,7 +685,18 @@
         y: prd3Values,
         name: "Facteurs PRD3",
         line: { color: palette.prd3, width: isMobile ? 1 : 2, shape: "hv" },
+        hovertemplate: "PRD3: %{y:.1f}<extra></extra>",
         yaxis: "y2",
+      },
+      {
+        type: "scatter",
+        mode: "lines",
+        x: x,
+        y: spotValues,
+        name: "Prix SPOT",
+        line: { color: palette.spot, width: isMobile ? 1 : 2, shape: "hv" },
+        hovertemplate: "SPOT: %{y:.1f}<extra></extra>",
+        yaxis: "y",
       },
     ];
 
@@ -719,6 +708,7 @@
         y: estimateCentsSeries,
         name: "Estimation PRE+ du jour",
         line: { color: palette.estimate, width: isMobile ? 2 : 4 },
+        hovertemplate: "Est: %{y:.1f}<extra></extra>",
         yaxis: "y",
       });
     }
@@ -726,6 +716,7 @@
     var layout = {
       barmode: "overlay",
       bargap: 0.15,
+      hovermode: "x unified",
       paper_bgcolor: palette.plotPaper,
       plot_bgcolor: palette.plotPanel,
       font: { color: palette.plotText },
@@ -736,15 +727,17 @@
         y: 0.94,
         yanchor: "bottom",
       },
-      margin: { t: 0, r: 0, l: 0, b: 20 },
+      margin: { t: 0, r: 40, l: 40, b: 20 },
       xaxis: {
         type: "date",
         tickformat: "%H:%M",
+        automargin: true,
         color: palette.plotText,
         gridcolor: palette.plotGrid,
       },
       yaxis: {
         title: "c€/kWh",
+        automargin: true,
         zeroline: true,
         zerolinecolor: palette.plotZero,
         gridcolor: palette.plotGrid,
@@ -753,6 +746,7 @@
       },
       yaxis2: {
         title: "Facteur PRD3",
+        automargin: true,
         overlaying: "y",
         side: "right",
         rangemode: "tozero",
