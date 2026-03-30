@@ -278,6 +278,17 @@
     return day;
   }
 
+  function syncDayInputBounds(dayInput) {
+    var maxDate = todayParis();
+    var minDate = addDays(maxDate, -LOOKBACK_DAYS);
+    dayInput.min = minDate;
+    dayInput.max = maxDate;
+    return {
+      minDate: minDate,
+      maxDate: maxDate,
+    };
+  }
+
   function getInitialDay(minDate, maxDate) {
     try {
       var url = new URL(window.location.href);
@@ -306,10 +317,11 @@
 
   function shiftDay(delta) {
     var dayInput = document.getElementById("day");
+    var bounds = syncDayInputBounds(dayInput);
     var current = dayInput.value || todayParis();
     var next = addDays(current, delta);
-    var minDate = dayInput.min || addDays(todayParis(), -LOOKBACK_DAYS);
-    var maxDate = dayInput.max || todayParis();
+    var minDate = bounds.minDate;
+    var maxDate = bounds.maxDate;
 
     if (next < minDate) {
       next = minDate;
@@ -790,8 +802,9 @@
 
   function load() {
     var dayInput = document.getElementById("day");
-    var minDate = dayInput.min || addDays(todayParis(), -LOOKBACK_DAYS);
-    var maxDate = dayInput.max || todayParis();
+    var bounds = syncDayInputBounds(dayInput);
+    var minDate = bounds.minDate;
+    var maxDate = bounds.maxDate;
     var day = clampDay(dayInput.value, minDate, maxDate);
     dayInput.value = day;
     setNextRefreshInfo(nextRefreshAt);
@@ -860,10 +873,9 @@
     applyThemePreference(getSavedThemePreference());
 
     var dayInput = document.getElementById("day");
-    var maxDate = todayParis();
-    var minDate = addDays(maxDate, -LOOKBACK_DAYS);
-    dayInput.min = minDate;
-    dayInput.max = maxDate;
+    var bounds = syncDayInputBounds(dayInput);
+    var maxDate = bounds.maxDate;
+    var minDate = bounds.minDate;
     dayInput.value = getInitialDay(minDate, maxDate);
     document.getElementById("theme-mode").addEventListener("change", function (event) {
       var value = event.target.value;
@@ -885,6 +897,7 @@
 
     document.getElementById("today").addEventListener("click", function () {
       var dayInput = document.getElementById("day");
+      syncDayInputBounds(dayInput);
       dayInput.value = todayParis();
       load();
     });
