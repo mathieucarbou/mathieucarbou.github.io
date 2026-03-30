@@ -21,6 +21,7 @@
   var refreshTimer = null;
   var nextRefreshAt = null;
   var latestGraphState = null;
+  var autoFollowToday = true;
   var themePreference = "auto";
   var themeMediaQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 
@@ -331,7 +332,29 @@
     }
 
     dayInput.value = next;
+    autoFollowToday = next >= todayParis();
     load();
+  }
+
+  function updateAutoFollowFromDay(day) {
+    autoFollowToday = day >= todayParis();
+  }
+
+  function refreshSelectedDayIfNeeded() {
+    var dayInput = document.getElementById("day");
+    syncDayInputBounds(dayInput);
+    var selectedDay = dayInput.value;
+    var today = todayParis();
+
+    if (autoFollowToday && selectedDay !== today) {
+      dayInput.value = today;
+      load();
+      return;
+    }
+
+    if (selectedDay === today) {
+      load();
+    }
   }
 
   function nextRefreshDate(now) {
@@ -382,10 +405,7 @@
 
     refreshTimer = setTimeout(function () {
       if (document.visibilityState === "visible") {
-        var selectedDay = document.getElementById("day").value;
-        if (selectedDay === todayParis()) {
-          load();
-        }
+        refreshSelectedDayIfNeeded();
       }
       scheduleAlignedRefresh();
     }, delay);
@@ -877,6 +897,7 @@
     var maxDate = bounds.maxDate;
     var minDate = bounds.minDate;
     dayInput.value = getInitialDay(minDate, maxDate);
+    updateAutoFollowFromDay(dayInput.value);
     document.getElementById("theme-mode").addEventListener("change", function (event) {
       var value = event.target.value;
       saveThemePreference(value);
@@ -899,9 +920,13 @@
       var dayInput = document.getElementById("day");
       syncDayInputBounds(dayInput);
       dayInput.value = todayParis();
+      autoFollowToday = true;
       load();
     });
-    dayInput.addEventListener("change", load);
+    dayInput.addEventListener("change", function () {
+      updateAutoFollowFromDay(dayInput.value);
+      load();
+    });
     document.getElementById("prev-day").addEventListener("click", function () {
       shiftDay(-1);
     });
@@ -917,10 +942,7 @@
       if (document.visibilityState !== "visible") {
         return;
       }
-      var selectedDay = document.getElementById("day").value;
-      if (selectedDay === todayParis()) {
-        load();
-      }
+      refreshSelectedDayIfNeeded();
       scheduleAlignedRefresh();
     });
 
