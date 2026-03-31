@@ -277,16 +277,19 @@ async function fetchTextWithWorkerCache({ cacheKey, ttlSeconds, target, fetchOpt
   if (ttlSeconds > 0) {
     const hit = await caches.default.match(cacheRequest);
     if (hit) {
+      // console.log("CACHE HIT", target);
       return { text: await hit.text(), fetchedAt: hit.headers.get("X-Source-Fetched-At") || new Date().toISOString(), cache: "HIT" };
     }
   }
 
+  // console.log("FETCH", target);
   const upstream = await fetch(target, fetchOptions);
   const text = await upstream.text();
   if (!upstream.ok) throw new Error((errorLabel || "Upstream") + " error: " + upstream.status);
 
   const fetchedAt = new Date().toISOString();
   if (ttlSeconds > 0) {
+    // console.log("CACHE PUT", target);
     await caches.default.put(cacheRequest, new Response(text, {
       status: 200,
       headers: {
