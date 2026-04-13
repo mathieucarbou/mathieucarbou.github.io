@@ -306,11 +306,22 @@
   function syncDayInUrl(day) {
     try {
       var url = new URL(window.location.href);
-      if (url.searchParams.get("day") === day) {
-        return;
+      var isToday = day === todayParis();
+      var current = url.searchParams.get("day");
+      if (isToday) {
+        if (!current) {
+          return;
+        }
+        url.searchParams.delete("day");
+        var search = url.searchParams.toString();
+        history.replaceState(null, "", url.pathname + (search ? "?" + search : "") + url.hash);
+      } else {
+        if (current === day) {
+          return;
+        }
+        url.searchParams.set("day", day);
+        history.replaceState(null, "", url.pathname + "?" + url.searchParams.toString() + url.hash);
       }
-      url.searchParams.set("day", day);
-      history.replaceState(null, "", url.pathname + "?" + url.searchParams.toString() + url.hash);
     } catch (e) {
       // ignore URL sync errors
     }
@@ -505,7 +516,7 @@
 
   function setTimeslotInfo({ prep, spot, prd3 }) {
     document.getElementById("prep-timeslot-info").innerHTML =
-      "PREP: " + prep.count + " | " + formatDataFetchTime(prep.fetchedAt) +  " | cache: " + yesNo(prep.fromCache) +
+      "PREP: " + prep.count + " | " + formatDataFetchTime(prep.fetchedAt) + " | cache: " + yesNo(prep.fromCache) +
       "<br>SPOT: " + spot.count + " | " + formatDataFetchTime(spot.fetchedAt) + " | cache: " + yesNo(spot.fromCache) +
       "<br>PRD3: " + prd3.count + " | " + formatDataFetchTime(prd3.fetchedAt) + " | cache: " + yesNo(prd3.fromCache);
   }
