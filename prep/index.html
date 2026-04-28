@@ -80,7 +80,7 @@
     </ul>
     <p><strong>Estimation journalière PRE+</strong> (courbe verte) est calculée en moyenne pondérée cumulative par PRD3:</p>
     <p><em>estimation(t) = sum(PRE+(i) * PRD3(i)) / sum(PRD3(i))</em>, pour tous les points disponibles jusqu'au créneau <em>t</em>.</p>
-    <p>La valeur affichée dans la carte « Estimation journalière PRE+ » correspond au dernier point disponible de cette série. C'est cette valeur journalière qui sert de référence de valorisation du surplus en ACI (autoconsommation individuelle) utilisée par Enedis.</p>
+    <p>La valeur affichée dans la carte « Estimation journalière PRE+ » correspond au dernier point disponible de cette série. C'est la valeur obtenue à la fin de la journée qui sera utilisée pour valoriser le surplus en ACI (autoconsommation individuelle). Donc si on injecte le matin alors que le PREP et estimation sont positifs, mais qu'en fin de journée, l'estimation journalière devient négative, alors le surplus injecté sera valorisé au prix négatif de la fin de la journée. Donc attention à bien suivre les recommendations de bridage de 3ERL.</p>
     <p><strong>Cette valeur reste une estimation</strong>, car la courbe PRD3 du jour n'est pas encore connue en temps réel, et les prix PRE+ peuvent être ajustés a posteriori par Enedis.</p>
     <p>Règle PRD3 utilisée dans ce graphe:</p>
     <ul>
