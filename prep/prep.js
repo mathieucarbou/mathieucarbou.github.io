@@ -829,6 +829,49 @@
     setValueColor(node, cents < 0 ? palette.negativeText : cents > 0 ? palette.positiveText : "inherit");
   }
 
+  function findLastPrepPoint(merged) {
+    for (var i = merged.length - 1; i >= 0; i -= 1) {
+      if (typeof merged[i].prep === "number") {
+        return merged[i];
+      }
+    }
+    return null;
+  }
+
+  function quarterHourRangeLabel(timestamp) {
+    var slot = String(timestamp || "").slice(11, 16);
+    if (!/^\d{2}:\d{2}$/.test(slot)) {
+      return "-";
+    }
+
+    var parts = slot.split(":");
+    var hour = Number(parts[0]);
+    var minute = Number(parts[1]);
+    if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+      return "-";
+    }
+
+    var endTotalMinutes = hour * 60 + minute + 15;
+    var endHour = String(Math.floor(endTotalMinutes / 60) % 24).padStart(2, "0");
+    var endMinute = String(endTotalMinutes % 60).padStart(2, "0");
+
+    return parts[0] + "h" + parts[1] + "-" + endHour + "h" + endMinute;
+  }
+
+  function setLastPrepValue(point) {
+    var node = document.getElementById("prep-last");
+    if (!point || typeof point.prep !== "number") {
+      node.textContent = "Indisponible";
+      setValueColor(node, "inherit");
+      return;
+    }
+
+    var cents = toCentsPerKwh(point.prep);
+    var palette = getThemePalette();
+    node.textContent = quarterHourRangeLabel(point.key) + ": " + cents.toFixed(2) + " c€/kWh" + sentimentBadge(cents);
+    setValueColor(node, cents < 0 ? palette.negativeText : cents > 0 ? palette.positiveText : "inherit");
+  }
+
   // ─── Main load / init ──────────────────────────────────────────────────────
 
   function load() {
@@ -874,6 +917,7 @@
         apply3ErlStatus(bundle.erl || null);
 
         var merged = mergeByTimeslot(day, prepRows, spotRows, prd3Rows);
+        setLastPrepValue(findLastPrepPoint(merged));
         var estimate = estimateDailyPrepSeries(merged);
         latestGraphState = {
           day: day,

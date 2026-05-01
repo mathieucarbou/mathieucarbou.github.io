@@ -180,7 +180,7 @@ body[data-theme="dark"] .prep-control-row input[type="date"] {
 .prep-meta {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
@@ -201,6 +201,10 @@ body[data-theme="dark"] .prep-control-row input[type="date"] {
 .prep-value {
   font-weight: 700;
   margin-top: 0.2rem;
+}
+
+.prep-value-multiline {
+  white-space: pre-line;
 }
 
 #prep-plot {
@@ -303,6 +307,18 @@ body[data-theme="dark"] .prep-control-row input[type="date"] {
   body section {
     width: 100%;
     float: none;
+  }
+
+  .prep-meta {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .prep-meta > .prep-card:nth-child(-n+3) {
+    grid-column: span 2;
+  }
+
+  .prep-meta > .prep-card:nth-child(n+4) {
+    grid-column: span 3;
   }
 }
 
