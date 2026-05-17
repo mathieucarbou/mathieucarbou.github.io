@@ -142,7 +142,7 @@ I am actively maintaining these libraries as part of [ESP32Async](https://github
 | [MycilaTaskManager](https://mathieu.carbou.me/MycilaTaskManager) | ESP32 | Arduino / ESP32 Task Manager Library                                                                                                                |
 | [MycilaTaskMonitor](https://mathieu.carbou.me/MycilaTaskMonitor) | ESP32 | Arduino / ESP32 library to monitor task priority and stack high watermark                                                                           |
 | [MycilaTrial](https://mathieu.carbou.me/MycilaTrial)             | ESP32 | Arduino / ESP32 library to add a trial duration in your app                                                                                         |
-| [MycilaUtilities](https://mathieu.carbou.me/MycilaUtilities)     | ESP32 | Utils stuff for Arduino / ESP32 like Time, String functions, CircularBuffer, etc                                                                    |
+| [MycilaUtilities](https://mathieu.carbou.me/MycilaUtilities)     | ESP32 | Utils stuff for Arduino / ESP32 like Time, String functions, etc                                                                    |
 
 ## Java Libraries
 
