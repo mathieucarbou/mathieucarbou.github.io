@@ -1,7 +1,7 @@
 (function () {
 
   // Version du cache : à incrémenter pour invalider toutes les entrées localStorage existantes (dans le navigateur)
-  var VERSION = "v8";
+  var VERSION = "v9";
   // Fuseau horaire utilisé pour l'affichage des dates et heures
   var TIMEZONE = "Europe/Paris";
   // Nombre de jours affichés dans le graphe (à partir d'aujourd'hui en remontant)
@@ -667,9 +667,32 @@
       }
     }
 
+    // Break-even PRE: what constant PRE value applied to all remaining slots
+    // (weighted by their PRD3) would bring the daily weighted average to 0?
+    // Formula: breakEven = -weighted / remainingPrd3
+    // Only meaningful when the current daily estimate is positive and future slots remain.
+    var lastPrepIdx = -1;
+    for (var j = merged.length - 1; j >= 0; j--) {
+      if (typeof merged[j].prep === "number") {
+        lastPrepIdx = j;
+        break;
+      }
+    }
+    var remainingPrd3 = 0;
+    for (var j = lastPrepIdx + 1; j < merged.length; j++) {
+      if (typeof merged[j].prd3 === "number") {
+        remainingPrd3 += merged[j].prd3;
+      }
+    }
+    var breakEven = null;
+    if (typeof last === "number" && last > 0 && remainingPrd3 > 0) {
+      breakEven = -weighted / remainingPrd3;
+    }
+
     return {
       series: series,
       last: last,
+      breakEven: breakEven,
     };
   }
 
@@ -829,6 +852,32 @@
     setValueColor(node, cents < 0 ? palette.negativeText : cents > 0 ? palette.positiveText : "inherit");
   }
 
+  // Returns a risk level 0–3 based on how close the break-even PRE is to 0.
+  // cents is always negative when this is called.
+  // Thresholds (c€/kWh): > -2 → 3, > -5 → 2, > -8 → 1, else → 0
+  function breakEvenRisk(cents) {
+    if (cents > -2) return 3;
+    if (cents > -5) return 2;
+    if (cents > -8) return 1;
+    return 0;
+  }
+
+  function setBreakEvenValue(breakEvenEurPerMwh) {
+    var node = document.getElementById("prep-breakeven");
+    if (typeof breakEvenEurPerMwh !== "number") {
+      node.textContent = "-";
+      setValueColor(node, "inherit");
+      return;
+    }
+    var cents = toCentsPerKwh(breakEvenEurPerMwh);
+    var palette = getThemePalette();
+    var risk = breakEvenRisk(cents);
+    var badge = risk > 0 ? " " + "⚠️".repeat(risk) : "";
+    // breakEven is always negative when shown — the more negative, the safer the daily estimate
+    node.textContent = cents.toFixed(2) + " c€/kWh" + badge;
+    setValueColor(node, palette.negativeText);
+  }
+
   function findLastPrepPoint(merged) {
     for (var i = merged.length - 1; i >= 0; i -= 1) {
       if (typeof merged[i].prep === "number") {
@@ -928,6 +977,7 @@
           estimateLast: estimate.last,
         };
         setEstimationValue(estimate.last);
+        setBreakEvenValue(estimate.breakEven);
         renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
         setLastUpdateNow();
         setTimeslotInfo({
