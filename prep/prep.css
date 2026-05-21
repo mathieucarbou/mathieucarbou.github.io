@@ -72,6 +72,7 @@ body section,
 .prep-meta,
 .prep-card,
 #prep-plot,
+#prep-source-warnings,
 #prep-footer,
 #prep-explainer {
   box-sizing: border-box;
@@ -83,6 +84,28 @@ body .wrapper {
   max-width: 1800px;
   margin-left: auto;
   margin-right: auto;
+}
+
+#prep-source-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.prep-source-warning {
+  padding: 8px 12px;
+  border-left: 4px solid #e65100;
+  background: #fff3e0;
+  color: #92400e;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+body[data-theme="dark"] .prep-source-warning {
+  background: #1c1206;
+  color: #fbbf24;
+  border-left-color: #f97316;
 }
 
 body header {

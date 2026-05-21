@@ -80,7 +80,7 @@ export default {
     }
 
     try {
-      if (url.pathname === "/api/day") return handleDayRequest(request, ctx, url);
+      if (url.pathname === "/api/day") return await handleDayRequest(request, ctx, url);
       return json({ error: "Not found" }, 404);
     } catch (e) {
       return json({ error: e.message || "Worker error" }, 500);
@@ -118,23 +118,27 @@ async function handleDayRequest(request, ctx, url) {
     }
   }
 
-  // Fetch all three sources in parallel
+  // Fetch all three sources in parallel — individual errors yield empty rows (partial resilience)
   const { profileDay, profileLabel } = getPrd3ProfileInfo(day);
+  const errSeries = (e) => ({ rows: [], fetchedAt: null, cache: "ERROR", error: e.message });
   const [prep, spot, prd3, erl] = await Promise.all([
-    fetchPrepSeries(day),
-    fetchSpotSeries(day),
-    fetchPrd3Series(profileDay),
+    fetchPrepSeries(day).catch(errSeries),
+    fetchSpotSeries(day).catch(errSeries),
+    fetchPrd3Series(profileDay).catch(errSeries),
     day === parisTodayDay() ? fetch3ErlData() : Promise.resolve(null),
   ]);
+
+  // Don't cache past-day responses when one or more sources failed (incomplete data)
+  const hasErrors = [prep, spot, prd3].some((s) => s && s.cache === "ERROR");
 
   const response = json(
     { day, profileDay, profileLabel, prep, spot, prd3, erl },
     200,
-    { "Cache-Control": isPast ? `public, max-age=${TTL_PAST}, immutable` : "no-store", "X-Proxy-Cache": isPast ? "MISS" : "BYPASS-TODAY" }
+    { "Cache-Control": isPast && !hasErrors ? `public, max-age=${TTL_PAST}, immutable` : "no-store", "X-Proxy-Cache": isPast ? "MISS" : "BYPASS-TODAY" }
   );
 
-  // Store past-day response in zone cache for future requests
-  if (isPast) {
+  // Store past-day response in zone cache for future requests (only when all sources are complete)
+  if (isPast && !hasErrors) {
     const cacheKey = new Request(request.url, { method: "GET" });
     if (ctx && typeof ctx.waitUntil === "function") {
       ctx.waitUntil(caches.default.put(cacheKey, response.clone()));

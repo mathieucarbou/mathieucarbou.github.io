@@ -486,6 +486,24 @@
     node.style.color = isError ? "#b00020" : "inherit";
   }
 
+  function setSourceWarnings(bundle) {
+    var node = document.getElementById("prep-source-warnings");
+    var sources = [
+      { key: "prep", label: "PRE+ (RTE)" },
+      { key: "spot", label: "SPOT (RTE eco2mix)" },
+      { key: "prd3", label: "PRD3 (Enedis)" },
+    ];
+    var html = "";
+    sources.forEach(function (s) {
+      var series = bundle && bundle[s.key];
+      if (series && series.cache === "ERROR") {
+        var detail = series.error ? " (" + series.error + ")" : "";
+        html += "<div class=\"prep-source-warning\">&#9888; Source " + s.label + " indisponible" + detail + "</div>";
+      }
+    });
+    node.innerHTML = html;
+  }
+
   function setValueColor(node, tone) {
     node.style.color = tone || "inherit";
   }
@@ -942,6 +960,7 @@
     var profileLabel = profileInfo.profileLabel;
 
     setStatus("Chargement des données pour " + day + " avec le profil PRD3 " + profileLabel + " (" + profileDay + ")...");
+    setSourceWarnings({});
 
     fetchDayBundle(day)
       .then(function (bundleResult) {
@@ -985,9 +1004,11 @@
           spot: { count: spotRows.length, fromCache: bundleResult.fromCache, fetchedAt: spotFetchedAt },
           prd3: { count: prd3Rows.length, fromCache: bundleResult.fromCache, fetchedAt: prd3FetchedAt },
         });
+        setSourceWarnings(bundle);
         setStatus("");
       })
       .catch(function (error) {
+        setSourceWarnings({});
         setStatus(error.message || "Échec du chargement des données", true);
       });
   }
