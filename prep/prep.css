@@ -4,6 +4,8 @@
 /* Base reset */
 *, *::before, *::after { box-sizing: border-box; }
 
+html { scroll-behavior: smooth; }
+
 body {
   margin: 0;
   padding: 16px;
@@ -209,10 +211,40 @@ body[data-theme="dark"] .prep-control-row input[type="date"] {
 }
 
 .prep-card {
+  position: relative;
   border: 1px solid var(--prep-border);
   border-radius: 6px;
   padding: 0.6rem 0.75rem;
   background: var(--prep-card-bg);
+}
+
+.prep-card-info {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.35rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-style: italic;
+  font-family: Georgia, serif;
+  line-height: 1;
+  border-radius: 50%;
+  border: 1px solid var(--prep-muted);
+  color: var(--prep-muted);
+  text-decoration: none;
+  opacity: 0.45;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.prep-card-info:hover {
+  opacity: 1;
+  color: var(--prep-link);
+  border-color: var(--prep-link);
 }
 
 .prep-label {
@@ -318,6 +350,24 @@ body[data-theme="dark"] .prep-control-row input[type="date"] {
 
 #prep-explainer strong {
   color: var(--prep-heading);
+}
+
+#prep-explainer h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  color: var(--prep-heading);
+}
+
+#prep-explainer section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--prep-border);
+}
+
+#prep-explainer section + section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--prep-border);
 }
 
 @media screen and (max-width: 960px) {

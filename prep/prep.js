@@ -790,7 +790,7 @@
         mode: "lines",
         x: x,
         y: estimateCentsSeries,
-        name: "PRE+ du jour estimé ",
+        name: "Estimation du jour",
         line: { color: palette.estimate, width: isMobile ? 2 : 4 },
         hovertemplate: "Est: %{y:.1f}<extra></extra>",
         yaxis: "y",
@@ -1079,3 +1079,11 @@
 
   init();
 })();
+
+document.querySelectorAll(".prep-card-info").forEach(function (link) {
+  link.addEventListener("click", function (e) {
+    e.preventDefault();
+    var target = document.querySelector(this.getAttribute("href"));
+    if (target) target.scrollIntoView({ behavior: "smooth" });
+  });
+});

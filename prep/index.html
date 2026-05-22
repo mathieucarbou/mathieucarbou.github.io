@@ -5,8 +5,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Estimation PRE+ du jour</title>
-  <link rel="stylesheet" href="prep.css?v=4" />
+  <title>Estimation du jour</title>
+  <link rel="stylesheet" href="prep.css?v=6" />
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body class="prep-page">
@@ -23,7 +23,7 @@
     <section>
 
 <div class="prep-page-topbar">
-  <h2 id="prep-page-title">Estimation PRE+ du jour</h2>
+  <h2 id="prep-page-title">Estimation du jour</h2>
   <div class="prep-theme-floating">
     <label for="theme-mode">Thème</label>
     <select id="theme-mode" aria-label="Choix du thème">
@@ -36,26 +36,32 @@
 
 <div class="prep-meta">
   <div class="prep-card">
+    <a href="#explain-3erl" class="prep-card-info" aria-label="Aide Tendance">i</a>
     <div class="prep-label">Tendance</div>
     <div id="trend" class="prep-value">-</div>
   </div>
   <div class="prep-card">
+    <a href="#explain-3erl" class="prep-card-info" aria-label="Aide Bridage">i</a>
     <div class="prep-label">Bridage</div>
     <div id="bridage" class="prep-value">-</div>
   </div>
   <div class="prep-card">
+    <a href="#explain-3erl" class="prep-card-info" aria-label="Aide Bridage CDC">i</a>
     <div class="prep-label">Bridage CDC</div>
     <div id="bridage-cdc" class="prep-value">-</div>
   </div>
   <div class="prep-card">
-    <div class="prep-label">Dernier PRE+</div>
+    <a href="#explain-prep" class="prep-card-info" aria-label="Aide Dernier PRE+">i</a>
+    <div class="prep-label">Dernier PRE+ (c€/kWh)</div>
     <div id="prep-last" class="prep-value prep-value-multiline">-</div>
   </div>
   <div class="prep-card">
-    <div class="prep-label">Estimation PRE+ du jour</div>
+    <a href="#explain-estimation" class="prep-card-info" aria-label="Aide Estimation PRE+">i</a>
+    <div class="prep-label">Estimation du jour (c€/kWh)</div>
     <div id="prep-estimation" class="prep-value">-</div>
   </div>
   <div class="prep-card">
+    <a href="#explain-risque" class="prep-card-info" aria-label="Aide Risque négatif">i</a>
     <div class="prep-label">Risque négatif</div>
     <div id="prep-breakeven" class="prep-value">-</div>
   </div>
@@ -80,32 +86,50 @@
   <div id="prep-timeslot-info"></div>
   <div id="prep-explainer">
     <h3>Comment lire ce graphe</h3>
-    <p>Le graphe superpose 3 signaux quart-horaires et une estimation journalière:</p>
+    <p>Le graphe superpose 3 signaux quart-horaires (PRE+, SPOT, PRD3) et une estimation journalière pondérée :</p>
     <ul>
-      <li><strong>PRE+</strong> (barres bleu/rouge): prix de règlement des écarts positifs en €/MWh (converti ici en c€/kWh). Bleu = prix positif, rouge = prix négatif. Source: <a href="https://www.services-rte.com/fr/visualisez-les-donnees-publiees-par-rte/equilibrage.html" target="_blank" rel="noopener noreferrer">Infos PRE+ (RTE)</a>.</li>
-      <li><strong>SPOT</strong> (courbe bleue): prix marché day-ahead FR (€/MWh, converti en c€/kWh). Sources: <a href="https://www.rte-france.com/donnees-publications/eco2mix-donnees-temps-reel/donnees-marche" target="_blank" rel="noopener noreferrer">Prix SPOT (RTE eco2mix)</a> et <a href="https://www.services-rte.com/fr/visualisez-les-donnees-publiees-par-rte/bourses-de-lelectricite-spot-france.html" target="_blank" rel="noopener noreferrer">Bourses de l'électricité Spot France (Portail Services RTE)</a>.</li>
-      <li><strong>PRD3</strong> (courbe orange): coefficient dynamique d'ensoleillement utilisé comme facteur de pondération. Source: <a href="https://data.enedis.fr/pages/coefficients-de-profils-dynamiques-jplus1-contenu/" target="_blank" rel="noopener noreferrer">Profil PRD3 (Enedis)</a>.</li>
-      <li><strong>Statut 3ERL</strong> (cartes en haut): indicateurs de tendance et bridage. Source: <a href="https://3erl.fr/PREP_Profile.php" target="_blank" rel="noopener noreferrer">Statut 3ERL</a>.</li>
+      <li><strong>PRE+</strong> (barres bleu/rouge) : prix de règlement des écarts positifs en €/MWh, converti en c€/kWh. Bleu = prix positif, rouge = prix négatif. Source : <a href="https://www.services-rte.com/fr/visualisez-les-donnees-publiees-par-rte/equilibrage.html" target="_blank" rel="noopener noreferrer">Infos PRE+ (RTE)</a>.</li>
+      <li><strong>SPOT</strong> (courbe bleue) : prix marché day-ahead FR (€/MWh, converti en c€/kWh). Sources : <a href="https://www.rte-france.com/donnees-publications/eco2mix-donnees-temps-reel/donnees-marche" target="_blank" rel="noopener noreferrer">Prix SPOT (RTE eco2mix)</a>. Voir aussi pour le lendemain: <a href="https://www.services-rte.com/fr/visualisez-les-donnees-publiees-par-rte/bourses-de-lelectricite-spot-france.html" target="_blank" rel="noopener noreferrer">Bourses de l'électricité Spot France (Portail Services RTE)</a>.</li>
+      <li><strong>PRD3</strong> (courbe orange) : coefficient dynamique d'ensoleillement utilisé comme facteur de pondération. Source : <a href="https://data.enedis.fr/pages/coefficients-de-profils-dynamiques-jplus1-contenu/" target="_blank" rel="noopener noreferrer">Profil PRD3 (Enedis)</a>.</li>
+      <li><strong>Estimation journalière</strong> (courbe verte) : moyenne pondérée PRE+ × PRD3 jusqu'au dernier créneau connu.</li>
     </ul>
-    <p><strong>Estimation journalière PRE+</strong> (courbe verte) est calculée en moyenne pondérée cumulative par PRD3:</p>
-    <p><em>estimation(t) = sum(PRE+(i) * PRD3(i)) / sum(PRD3(i))</em>, pour tous les points disponibles jusqu'au créneau <em>t</em>.</p>
-    <p>La valeur affichée dans la carte « Estimation journalière PRE+ » correspond au dernier point disponible de cette série. C'est la valeur obtenue <strong>à la fin de la journée</strong> qui sera utilisée pour valoriser le surplus en ACI (autoconsommation individuelle). Donc si du surplus est injecté le matin alors que le PREP et estimation sont positifs, mais qu'en fin de journée, l'estimation journalière devient négative, alors le surplus injecté sera valorisé au prix négatif de la fin de la journée. <strong>Donc attention à bien suivre les recommendations de bridage de 3ERL.</strong></p>
-    <p><strong>Cette valeur reste une estimation</strong>, car la courbe PRD3 du jour n'est pas encore connue en temps réel, et les prix PRE+ peuvent être ajustés a posteriori par Enedis.</p>
-    <p><strong>Risque négatif</strong> indique la probabilité que la moyenne journalière PRE+ bascule en négatif d'ici la fin de la journée. Il est calculé à partir du seuil PRE+ qu'il faudrait appliquer à <em>tous</em> les créneaux restants (pondérés par PRD3) pour que la moyenne tombe à 0. Ce seuil devient naturellement plus extrême au fil de la journée (moins de créneaux restants), ce qui est cohérent avec la stabilisation observée entre 12h et 15h. Il n'est affiché que lorsque l'estimation journalière est positive et qu'il reste des créneaux à venir.</p>
-    <p>L'indicateur est calibré sur la plage réaliste du PRE+ français (en dessous de −3 c€/kWh les valeurs sont inhabituelles, en dessous de −10 c€/kWh quasi impossibles) :</p>
-    <ul>
-      <li><strong>✅</strong> : seuil ≤ −10 c€/kWh — risque virtuellement nul ;</li>
-      <li><strong>⚠️</strong> : seuil entre −10 et −5 c€/kWh — risque faible, uniquement un spike PRE+ exceptionnel ;</li>
-      <li><strong>⚠️⚠️</strong> : seuil entre −5 et −3 c€/kWh — risque modéré, des valeurs PRE+ très négatives (inhabituelles) pourraient faire basculer la journée ;</li>
-      <li><strong>⚠️⚠️⚠️</strong> : seuil entre −3 et 0 c€/kWh — risque élevé, un PRE+ légèrement négatif (courant) suffit à inverser la moyenne.</li>
-    </ul>
-    <p><strong>Règle utilisée pour le choix du profil d'ensoleillement PRD3:</strong></p>
-    <ul>
-      <li>pour le jour actuel: profil PRD3 de J-2;</li>
-      <li>pour hier: profil PRD3 de J-1 (ce qui revient aussi a J-2 par rapport à aujourd'hui);</li>
-      <li>pour avant-hier et les jours antérieurs: profil PRD3 du jour (J0).</li>
-    </ul>
-    <p>Cette logique vient du fait que la courbe PRD3 de la veille n'est disponible que le matin.</p>
+
+    <section id="explain-3erl">
+      <h4>Tendance / Bridage / Bridage CDC</h4>
+      <p><strong>Statut 3ERL</strong> : indicateurs de tendance et bridage publiés par 3ERL. La tendance donne une indication sur l'évolution probable du PRE+ dans la journée. Le bridage indique si 3ERL recommande de couper l'injection du surplus solaire. <strong>Attention à bien suivre les recommandations de bridage de 3ERL.</strong> Source : <a href="https://3erl.fr/api.json" target="_blank" rel="noopener noreferrer">API 3ERL</a> et <a href="https://3erl.fr/PREP_Profile.php" target="_blank" rel="noopener noreferrer">Statut 3ERL</a>.</p>
+    </section>
+
+    <section id="explain-prep">
+      <h4>Dernier PRE+</h4>
+      <p>Valeur du dernier créneau quart-horaire PRE+ publié par RTE. Bleu = prix positif, rouge = prix négatif.</p>
+    </section>
+
+    <section id="explain-estimation">
+      <h4>Estimation du jour</h4>
+      <p><strong>Estimation du jour</strong> (courbe verte) est calculée en moyenne pondérée cumulative par PRD3 :</p>
+      <p><em>estimation(t) = sum(PRE+(i) × PRD3(i)) / sum(PRD3(i))</em>, pour tous les points disponibles jusqu'au créneau <em>t</em>.</p>
+      <p>La valeur affichée correspond au dernier point disponible de cette série. C'est la valeur obtenue <strong>à la fin de la journée</strong> qui sera utilisée pour valoriser le surplus en ACI (autoconsommation individuelle). Donc si du surplus est injecté le matin alors que le PRE+ et l'estimation sont positifs, mais qu'en fin de journée l'estimation devient négative, le surplus injecté sera valorisé au prix négatif de fin de journée. <strong>Attention à bien suivre les recommandations de bridage de 3ERL.</strong></p>
+      <p><strong>Cette valeur reste une estimation</strong>, car la courbe PRD3 du jour n'est pas encore connue en temps réel, et les prix PRE+ peuvent être ajustés a posteriori par Enedis.</p>
+      <p><strong>Règle de choix du profil PRD3 :</strong></p>
+      <ul>
+        <li>pour le jour actuel : profil PRD3 de J−2 ;</li>
+        <li>pour hier : profil PRD3 de J−1 (ce qui revient aussi à J−2 par rapport à aujourd'hui) ;</li>
+        <li>pour avant-hier et les jours antérieurs : profil PRD3 du jour (J0).</li>
+      </ul>
+      <p>Cette logique vient du fait que la courbe PRD3 de la veille n'est disponible que le matin.</p>
+    </section>
+
+    <section id="explain-risque">
+      <h4>Risque négatif</h4>
+      <p><strong>Risque négatif</strong> indique la probabilité que la moyenne journalière PRE+ bascule en négatif d'ici la fin de la journée. Il est calculé à partir du seuil PRE+ qu'il faudrait appliquer à <em>tous</em> les créneaux restants (pondérés par PRD3) pour que la moyenne tombe à 0. Ce seuil devient naturellement plus extrême au fil de la journée (moins de créneaux restants), ce qui est cohérent avec la stabilisation observée entre 12h et 15h. Il n'est affiché que lorsque l'estimation journalière est positive et qu'il reste des créneaux à venir.</p>
+      <p>L'indicateur est calibré sur la plage réaliste du PRE+ français (en dessous de −3 c€/kWh les valeurs sont inhabituelles, en dessous de −10 c€/kWh quasi impossibles) :</p>
+      <ul>
+        <li><strong>✅</strong> : seuil ≤ −10 c€/kWh — risque virtuellement nul ;</li>
+        <li><strong>⚠️</strong> : seuil entre −10 et −5 c€/kWh — risque faible, uniquement un spike PRE+ exceptionnel ;</li>
+        <li><strong>⚠️⚠️</strong> : seuil entre −5 et −3 c€/kWh — risque modéré, des valeurs PRE+ très négatives (inhabituelles) pourraient faire basculer la journée ;</li>
+        <li><strong>⚠️⚠️⚠️</strong> : seuil entre −3 et 0 c€/kWh — risque élevé, un PRE+ légèrement négatif (courant) suffit à inverser la moyenne.</li>
+      </ul>
+    </section>
   </div>
 </div>
 
@@ -114,6 +138,6 @@
   <footer style="text-align:center; margin-top: 2rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--prep-muted);">
     <em>Made with ❤️ by <a href="https://mathieu.carbou.me/" target="_blank" rel="noopener noreferrer" style="color: var(--prep-link);">Mathieu Carbou</a></em>
   </footer>
-  <script src="prep.js?v=6"></script>
+  <script src="prep.js?v=8"></script>
 </body>
 </html>
