@@ -866,7 +866,7 @@
     }
     var cents = toCentsPerKwh(estimateEurPerMwh);
     var palette = getThemePalette();
-    node.textContent = cents.toFixed(2) + " c€/kWh" + sentimentBadge(cents);
+    node.textContent = cents.toFixed(2) + sentimentBadge(cents);
     setValueColor(node, cents < 0 ? palette.negativeText : cents > 0 ? palette.positiveText : "inherit");
   }
 
@@ -935,7 +935,7 @@
 
     var cents = toCentsPerKwh(point.prep);
     var palette = getThemePalette();
-    node.textContent = quarterHourRangeLabel(point.key) + ": " + cents.toFixed(2) + " c€/kWh" + sentimentBadge(cents);
+    node.textContent = quarterHourRangeLabel(point.key) + ": " + cents.toFixed(2) + sentimentBadge(cents);
     setValueColor(node, cents < 0 ? palette.negativeText : cents > 0 ? palette.positiveText : "inherit");
   }
 
