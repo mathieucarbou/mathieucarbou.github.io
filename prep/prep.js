@@ -711,7 +711,41 @@
       series: series,
       last: last,
       breakEven: breakEven,
+      trend: estimationTrend(series, merged),
     };
+  }
+
+  // Returns ↑, ↓ or → based on the linear regression slope of the last
+  // TREND_WINDOW slots where a real PRE+ value was received (ignoring the
+  // frozen plateau that fills future slots with the last cumulative average).
+  // Uses the cumulative estimation value at each of those slots (oldest→newest,
+  // x=0..N-1) so a declining series yields a negative slope.
+  function estimationTrend(series, merged) {
+    var TREND_WINDOW = 8;
+    var THRESHOLD = 1.5; // €/MWh per slot — ≈ ±1 c€/kWh over 8 slots before triggering
+    // Collect latest-first, then reverse so index 0 = oldest
+    var yVals = [];
+    for (var i = series.length - 1; i >= 0 && yVals.length < TREND_WINDOW; i--) {
+      if (typeof series[i] === "number" && typeof merged[i].prep === "number") {
+        yVals.push(series[i]);
+      }
+    }
+    yVals.reverse(); // oldest first → x=0 is oldest, x=N-1 is latest
+    var n = yVals.length;
+    if (n < 2) return "→";
+    var sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    for (var k = 0; k < n; k++) {
+      sumX += k;
+      sumY += yVals[k];
+      sumXY += k * yVals[k];
+      sumXX += k * k;
+    }
+    var denom = n * sumXX - sumX * sumX;
+    if (!denom) return "→";
+    var slope = (n * sumXY - sumX * sumY) / denom;
+    if (slope > THRESHOLD) return "↑";
+    if (slope < -THRESHOLD) return "↓";
+    return "→";
   }
 
   // ─── Plotly graph ──────────────────────────────────────────────────────────
@@ -857,7 +891,7 @@
     Plotly.Plots.resize(plot);
   }
 
-  function setEstimationValue(estimateEurPerMwh) {
+  function setEstimationValue(estimateEurPerMwh, trend) {
     var node = document.getElementById("prep-estimation");
     if (typeof estimateEurPerMwh !== "number") {
       node.textContent = "Indisponible";
@@ -866,8 +900,11 @@
     }
     var cents = toCentsPerKwh(estimateEurPerMwh);
     var palette = getThemePalette();
-    node.textContent = cents.toFixed(2) + sentimentBadge(cents);
-    setValueColor(node, cents < 0 ? palette.negativeText : cents > 0 ? palette.positiveText : "inherit");
+    var priceColor = cents < 0 ? palette.negativeText : cents > 0 ? palette.positiveText : "inherit";
+    var arrowColor = trend === "↑" ? palette.positiveText : trend === "↓" ? palette.negativeText : "inherit";
+    var arrowHtml = trend ? ' <span style="color:' + arrowColor + '">' + trend + "</span>" : "";
+    node.innerHTML = '<span style="color:' + priceColor + '">' + cents.toFixed(2) + "</span>" + arrowHtml;
+    setValueColor(node, "inherit");
   }
 
   // Returns a risk level 0–3 based on how close the break-even PRE is to 0.
@@ -995,7 +1032,7 @@
           estimateSeries: estimate.series,
           estimateLast: estimate.last,
         };
-        setEstimationValue(estimate.last);
+        setEstimationValue(estimate.last, estimate.trend);
         setBreakEvenValue(estimate.breakEven);
         renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
         setLastUpdateNow();
