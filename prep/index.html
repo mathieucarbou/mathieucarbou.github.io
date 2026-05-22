@@ -42,13 +42,13 @@
   </div>
   <div class="prep-card">
     <a href="#explain-3erl" class="prep-card-info" aria-label="Aide Bridage">i</a>
-    <div class="prep-label">Bridage</div>
-    <div id="bridage" class="prep-value">-</div>
+    <div class="prep-label">Bridage (ACI)</div>
+    <div id="bridage-aci" class="prep-value">-</div>
   </div>
   <div class="prep-card">
     <a href="#explain-3erl" class="prep-card-info" aria-label="Aide Bridage CDC">i</a>
-    <div class="prep-label">Bridage CDC</div>
-    <div id="bridage-cdc" class="prep-value">-</div>
+    <div class="prep-label">Bridage (ACC)</div>
+    <div id="bridage-acc" class="prep-value">-</div>
   </div>
   <div class="prep-card">
     <a href="#explain-prep" class="prep-card-info" aria-label="Aide Dernier PRE+">i</a>
@@ -97,6 +97,10 @@
     <section id="explain-3erl">
       <h4>Tendance / Bridage / Bridage CDC</h4>
       <p><strong>Statut 3ERL</strong> : indicateurs de tendance et bridage publiés par 3ERL. La tendance donne une indication sur l'évolution probable du PRE+ dans la journée. Le bridage indique si 3ERL recommande de couper l'injection du surplus solaire. <strong>Attention à bien suivre les recommandations de bridage de 3ERL.</strong> Source : <a href="https://3erl.fr/api.json" target="_blank" rel="noopener noreferrer">API 3ERL</a> et <a href="https://3erl.fr/PREP_Profile.php" target="_blank" rel="noopener noreferrer">Statut 3ERL</a>.</p>
+      <ul>
+        <li><strong>Bridage (ACI)</strong> : recommandation de bridage pour ceux en auto-consommation individuelle avec 3ERL. Les kWh injectés sont valorisés selon l'estimation journalière du jour.</li>
+        <li><strong>Bridage (ACC)</strong> : recommandation de bridage pour ceux en auto-consommation collective avec 3ERL et <a href="https://sisol.fr/#/" target="_blank" rel="noopener noreferrer">SISOL</a> par exemple. Les kWh non consommés par l'ACC et injectés sur le réseau sont valorisés selon le PRE+ du quart d'heure en cours.</li>
+      </ul>
     </section>
 
     <section id="explain-prep">
@@ -144,6 +148,6 @@
   <footer style="text-align:center; margin-top: 2rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--prep-muted);">
     <em>Made with ❤️ by <a href="https://mathieu.carbou.me/" target="_blank" rel="noopener noreferrer" style="color: var(--prep-link);">Mathieu Carbou</a></em>
   </footer>
-  <script src="prep.js?v=15"></script>
+  <script src="prep.js?v=16"></script>
 </body>
 </html>

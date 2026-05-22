@@ -606,8 +606,8 @@
   function apply3ErlStatus(data) {
     if (!data) {
       var trendNode = document.getElementById("trend");
-      var bridageNode = document.getElementById("bridage");
-      var bridageCdcNode = document.getElementById("bridage-cdc");
+      var bridageNode = document.getElementById("bridage-aci");
+      var bridageCdcNode = document.getElementById("bridage-acc");
       trendNode.textContent = "Indisponible";
       bridageNode.textContent = "Indisponible";
       bridageCdcNode.textContent = "Indisponible";
@@ -617,8 +617,8 @@
       return;
     }
     var trendNode = document.getElementById("trend");
-    var bridageNode = document.getElementById("bridage");
-    var bridageCdcNode = document.getElementById("bridage-cdc");
+    var bridageNode = document.getElementById("bridage-aci");
+    var bridageCdcNode = document.getElementById("bridage-acc");
     var palette = getThemePalette();
 
     trendNode.textContent = formatTrend(data.PREP_Profile) + " (" + (data.PREP_Profile || "?") + ")";
