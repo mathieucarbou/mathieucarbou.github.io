@@ -91,13 +91,13 @@
     <p><em>estimation(t) = sum(PRE+(i) * PRD3(i)) / sum(PRD3(i))</em>, pour tous les points disponibles jusqu'au créneau <em>t</em>.</p>
     <p>La valeur affichée dans la carte « Estimation journalière PRE+ » correspond au dernier point disponible de cette série. C'est la valeur obtenue <strong>à la fin de la journée</strong> qui sera utilisée pour valoriser le surplus en ACI (autoconsommation individuelle). Donc si du surplus est injecté le matin alors que le PREP et estimation sont positifs, mais qu'en fin de journée, l'estimation journalière devient négative, alors le surplus injecté sera valorisé au prix négatif de la fin de la journée. <strong>Donc attention à bien suivre les recommendations de bridage de 3ERL.</strong></p>
     <p><strong>Cette valeur reste une estimation</strong>, car la courbe PRD3 du jour n'est pas encore connue en temps réel, et les prix PRE+ peuvent être ajustés a posteriori par Enedis.</p>
-    <p><strong>Risque négatif</strong> indique quelle valeur PRE+ constante (négative) il faudrait appliquer à <em>tous</em> les créneaux restants de la journée — pondérés par leur facteur PRD3 — pour que la moyenne journalière tombe exactement à 0. Elle n'est affichée que lorsque l'estimation journalière est positive et qu'il reste des créneaux à venir. Plus cette valeur est basse (très négative), moins il est probable que la journée bascule en négatif, et plus l'estimation est stable. À l'inverse, une valeur proche de 0 signifie qu'un PRE+ légèrement négatif sur les prochains créneaux suffirait à inverser le résultat journalier.</p>
-    <p>Un indicateur de risque ⚠️ est affiché à côté de cette valeur selon les seuils suivants :</p>
+    <p><strong>Risque négatif</strong> indique la probabilité que la moyenne journalière PRE+ bascule en négatif d'ici la fin de la journée. Il est calculé à partir du seuil PRE+ qu'il faudrait appliquer à <em>tous</em> les créneaux restants (pondérés par PRD3) pour que la moyenne tombe à 0. Ce seuil devient naturellement plus extrême au fil de la journée (moins de créneaux restants), ce qui est cohérent avec la stabilisation observée entre 12h et 15h. Il n'est affiché que lorsque l'estimation journalière est positive et qu'il reste des créneaux à venir.</p>
+    <p>L'indicateur est calibré sur la plage réaliste du PRE+ français (en dessous de −3 c€/kWh les valeurs sont inhabituelles, en dessous de −10 c€/kWh quasi impossibles) :</p>
     <ul>
-      <li><strong>(aucun ⚠️)</strong> : seuil ≤ −8 c€/kWh — risque quasi nul, la journée est très stable ;</li>
-      <li><strong>⚠️</strong> : seuil entre −8 et −5 c€/kWh — risque faible, peu probable en conditions normales ;</li>
-      <li><strong>⚠️⚠️</strong> : seuil entre −5 et −2 c€/kWh — risque modéré, des valeurs PRE+ négatives réalistes pourraient faire basculer la journée ;</li>
-      <li><strong>⚠️⚠️⚠️</strong> : seuil entre −2 et 0 c€/kWh — risque élevé, un léger PRE+ négatif suffit à inverser la moyenne journalière.</li>
+      <li><strong>✅</strong> : seuil ≤ −10 c€/kWh — risque virtuellement nul ;</li>
+      <li><strong>⚠️</strong> : seuil entre −10 et −5 c€/kWh — risque faible, uniquement un spike PRE+ exceptionnel ;</li>
+      <li><strong>⚠️⚠️</strong> : seuil entre −5 et −3 c€/kWh — risque modéré, des valeurs PRE+ très négatives (inhabituelles) pourraient faire basculer la journée ;</li>
+      <li><strong>⚠️⚠️⚠️</strong> : seuil entre −3 et 0 c€/kWh — risque élevé, un PRE+ légèrement négatif (courant) suffit à inverser la moyenne.</li>
     </ul>
     <p><strong>Règle utilisée pour le choix du profil d'ensoleillement PRD3:</strong></p>
     <ul>
@@ -114,6 +114,6 @@
   <footer style="text-align:center; margin-top: 2rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--prep-muted);">
     <em>Made with ❤️ by <a href="https://mathieu.carbou.me/" target="_blank" rel="noopener noreferrer" style="color: var(--prep-link);">Mathieu Carbou</a></em>
   </footer>
-  <script src="prep.js?v=5"></script>
+  <script src="prep.js?v=6"></script>
 </body>
 </html>

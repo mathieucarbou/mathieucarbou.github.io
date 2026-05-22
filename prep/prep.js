@@ -872,11 +872,12 @@
 
   // Returns a risk level 0–3 based on how close the break-even PRE is to 0.
   // cents is always negative when this is called.
-  // Thresholds (c€/kWh): > -2 → 3, > -5 → 2, > -8 → 1, else → 0
+  // Calibrated against realistic French PRE+ range: below -3 c€/kWh is rare, below -10 is near-impossible.
+  // Thresholds (c€/kWh): > -3 → 3, > -5 → 2, > -10 → 1, else → 0
   function breakEvenRisk(cents) {
-    if (cents > -2) return 3;
+    if (cents > -3) return 3;
     if (cents > -5) return 2;
-    if (cents > -8) return 1;
+    if (cents > -10) return 1;
     return 0;
   }
 
@@ -890,10 +891,9 @@
     var cents = toCentsPerKwh(breakEvenEurPerMwh);
     var palette = getThemePalette();
     var risk = breakEvenRisk(cents);
-    var badge = risk > 0 ? " " + "⚠️".repeat(risk) : "";
-    // breakEven is always negative when shown — the more negative, the safer the daily estimate
-    node.textContent = cents.toFixed(2) + " c€/kWh" + badge;
-    setValueColor(node, palette.negativeText);
+    // Show only icons: ✅ when safe, ⚠️×1-3 otherwise
+    node.textContent = risk === 0 ? "✅" : "⚠️".repeat(risk);
+    setValueColor(node, risk === 0 ? palette.positiveText : palette.negativeText);
   }
 
   function findLastPrepPoint(merged) {
