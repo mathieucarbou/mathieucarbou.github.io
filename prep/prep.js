@@ -935,7 +935,7 @@
 
     var cents = toCentsPerKwh(point.prep);
     var palette = getThemePalette();
-    node.textContent = quarterHourRangeLabel(point.key) + ": " + cents.toFixed(2) + sentimentBadge(cents);
+    node.textContent = quarterHourRangeLabel(point.key) + ": " + cents.toFixed(2);
     setValueColor(node, cents < 0 ? palette.negativeText : cents > 0 ? palette.positiveText : "inherit");
   }
 
