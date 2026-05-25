@@ -131,13 +131,13 @@
 
     <section id="explain-risque">
       <h4>Risque négatif</h4>
-      <p><strong>Risque négatif</strong> indique la probabilité que la moyenne journalière PRE+ bascule en négatif d'ici la fin de la journée. Il est calculé à partir du seuil PRE+ qu'il faudrait appliquer à <em>tous</em> les créneaux restants (pondérés par PRD3) pour que la moyenne tombe à 0. Ce seuil devient naturellement plus extrême au fil de la journée (moins de créneaux restants), ce qui est cohérent avec la stabilisation observée entre 12h et 15h. Il n'est affiché que lorsque l'estimation journalière est positive et qu'il reste des créneaux à venir.</p>
-      <p>L'indicateur est calibré sur la plage réaliste du PRE+ français (en dessous de −3 c€/kWh les valeurs sont inhabituelles, en dessous de −10 c€/kWh quasi impossibles) :</p>
+      <p><strong>Risque négatif</strong> indique la probabilité que la moyenne journalière PRE+ bascule en négatif d'ici la fin de la journée. Il est calculé à partir du seuil PRE+ qu'il faudrait appliquer à <em>tous</em> les créneaux restants (pondérés par PRD3) pour que la moyenne tombe à 0. Il n'est affiché que lorsque l'estimation journalière est positive et qu'il reste des créneaux à venir.</p>
+      <p>Les seuils sont <strong>dynamiques</strong> : ils s'adaptent à la fraction de la journée restante. Quand plus de la moitié du poids PRD3 reste à venir, les seuils sont à pleine sensibilité (−3 / −5 / −10 c€/kWh) ; ils se réduisent proportionnellement après, jusqu'à disparaître en fin de journée quand les créneaux solaires sont épuisés. Cette approche évite les fausses alertes en milieu d'après-midi lorsque l'estimation est déjà stabilisée.</p>
       <ul>
-        <li><strong>✅</strong> : seuil ≤ −10 c€/kWh — risque virtuellement nul ;</li>
-        <li><strong>⚠️</strong> : seuil entre −10 et −5 c€/kWh — risque faible, uniquement un spike PRE+ exceptionnel ;</li>
-        <li><strong>⚠️⚠️</strong> : seuil entre −5 et −3 c€/kWh — risque modéré, des valeurs PRE+ très négatives (inhabituelles) pourraient faire basculer la journée ;</li>
-        <li><strong>⚠️⚠️⚠️</strong> : seuil entre −3 et 0 c€/kWh — risque élevé, un PRE+ légèrement négatif (courant) suffit à inverser la moyenne.</li>
+        <li><strong>✅</strong> : risque virtuellement nul (seuil très bas par rapport au temps restant) ;</li>
+        <li><strong>⚠️</strong> : risque faible — un spike PRE+ exceptionnel serait nécessaire ;</li>
+        <li><strong>⚠️⚠️</strong> : risque modéré — des valeurs PRE+ très négatives (inhabituelles) pourraient faire basculer la journée ;</li>
+        <li><strong>⚠️⚠️⚠️</strong> : risque élevé — un PRE+ légèrement négatif (courant) suffit à inverser la moyenne.</li>
       </ul>
     </section>
   </div>
