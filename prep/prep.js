@@ -911,14 +911,30 @@
   // cents is always negative when this is called.
   // Calibrated against realistic French PRE+ range: below -3 c€/kWh is rare, below -10 is near-impossible.
   // Thresholds (c€/kWh): > -3 → 3, > -5 → 2, > -10 → 1, else → 0
-  function breakEvenRisk(cents) {
-    if (cents > -3) return 3;
-    if (cents > -5) return 2;
-    if (cents > -10) return 1;
+  // Returns risk 0–3 for the break-even indicator.
+  // breakEvenCents: what constant PRE+ on remaining slots would flip the daily
+  //   average to 0 (always negative when the estimate is positive).
+  // lastCents: current daily estimate (always positive when this is called).
+  //
+  // Key insight: remainingFraction = last / (last - breakEven)
+  //   tells us how much PRD3-weighted time is still ahead.
+  // Thresholds scale with remainingFraction so the indicator naturally becomes
+  // more lenient late in the day (fewer / lower-PRD3 slots remaining).
+  // Full sensitivity (scale=1) when >= 50% of the day remains; proportionally
+  // reduced after that, reaching 0 when no solar slots are left.
+  function breakEvenRisk(breakEvenCents, lastCents) {
+    var rf = lastCents / (lastCents - breakEvenCents); // remainingFraction ∈ (0,1)
+    var scale = Math.min(1, rf * 2);
+    var t3 = -3 * scale;
+    var t2 = -5 * scale;
+    var t1 = -10 * scale;
+    if (breakEvenCents > t3) return 3;
+    if (breakEvenCents > t2) return 2;
+    if (breakEvenCents > t1) return 1;
     return 0;
   }
 
-  function setBreakEvenValue(breakEvenEurPerMwh) {
+function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh) {
     var node = document.getElementById("prep-breakeven");
     if (typeof breakEvenEurPerMwh !== "number") {
       node.textContent = "-";
@@ -926,13 +942,13 @@
       return;
     }
     var cents = toCentsPerKwh(breakEvenEurPerMwh);
+    var lastCents = toCentsPerKwh(lastEurPerMwh);
     var palette = getThemePalette();
-    var risk = breakEvenRisk(cents);
+    var risk = breakEvenRisk(cents, lastCents);
     // Show only icons: ✅ when safe, ⚠️×1-3 otherwise
     node.textContent = risk === 0 ? "✅" : "⚠️".repeat(risk);
     setValueColor(node, risk === 0 ? palette.positiveText : palette.negativeText);
   }
-
   function findLastPrepPoint(merged) {
     for (var i = merged.length - 1; i >= 0; i -= 1) {
       if (typeof merged[i].prep === "number") {
@@ -1033,7 +1049,7 @@
           estimateLast: estimate.last,
         };
         setEstimationValue(estimate.last, estimate.trend);
-        setBreakEvenValue(estimate.breakEven);
+        setBreakEvenValue(estimate.breakEven, estimate.last);
         renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
         setLastUpdateNow();
         setTimeslotInfo({
