@@ -584,7 +584,10 @@
     return fetch(url)
       .then(function (response) {
         if (!response.ok) {
-          throw new Error("DAY API error: " + response.status);
+          if (response.status === 403) {
+            throw new Error("Accès refusé (403) : cette API est réservée aux visiteurs situés en France. Si vous êtes à l'étranger, utilisez un VPN français pour accéder à ces données.");
+          }
+          throw new Error("API error: " + response.status);
         }
         return response.json();
       })
