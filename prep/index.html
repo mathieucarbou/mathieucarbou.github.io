@@ -132,7 +132,7 @@
     <section id="explain-risque">
       <h4>Risque négatif</h4>
       <p><strong>Risque négatif</strong> indique la probabilité que la moyenne journalière PRE+ bascule en négatif d'ici la fin de la journée. Il est calculé à partir du seuil PRE+ qu'il faudrait appliquer à <em>tous</em> les créneaux restants (pondérés par PRD3) pour que la moyenne tombe à 0. Il n'est affiché que lorsque l'estimation journalière est positive et qu'il reste des créneaux à venir.</p>
-      <p>Les seuils sont <strong>dynamiques</strong> : ils s'adaptent à la fraction de la journée restante. Quand plus de la moitié du poids PRD3 reste à venir, les seuils sont à pleine sensibilité (−3 / −5 / −10 c€/kWh) ; ils se réduisent proportionnellement après, jusqu'à disparaître en fin de journée quand les créneaux solaires sont épuisés. Cette approche évite les fausses alertes en milieu d'après-midi lorsque l'estimation est déjà stabilisée.</p>
+      <p>Les seuils sont <strong>dynamiques</strong> : ils s'adaptent à la fraction de la journée restante. Quand plus de la moitié du poids PRD3 reste à venir, les seuils sont à pleine sensibilité (−3 / −5 / −10 c€/kWh) ; ils se réduisent proportionnellement après, jusqu'à disparaître en fin de journée quand les créneaux solaires sont épuisés. De plus, si la <strong>tendance est en hausse</strong> (↑), le risque affiché est réduit d'un cran — une estimation qui progresse depuis plusieurs heures rend la bascule négative statistiquement moins probable.</p>
       <ul>
         <li><strong>✅</strong> : risque virtuellement nul (seuil très bas par rapport au temps restant) ;</li>
         <li><strong>⚠️</strong> : risque faible — un spike PRE+ exceptionnel serait nécessaire ;</li>
@@ -148,6 +148,6 @@
   <footer style="text-align:center; margin-top: 2rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--prep-muted);">
     <em>Made with ❤️ by <a href="https://mathieu.carbou.me/" target="_blank" rel="noopener noreferrer" style="color: var(--prep-link);">Mathieu Carbou</a></em>
   </footer>
-  <script src="prep.js?v=18"></script>
+  <script src="prep.js?v=19"></script>
 </body>
 </html>

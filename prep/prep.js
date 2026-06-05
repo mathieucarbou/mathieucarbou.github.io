@@ -925,19 +925,23 @@
   // more lenient late in the day (fewer / lower-PRD3 slots remaining).
   // Full sensitivity (scale=1) when >= 50% of the day remains; proportionally
   // reduced after that, reaching 0 when no solar slots are left.
-  function breakEvenRisk(breakEvenCents, lastCents) {
+  function breakEvenRisk(breakEvenCents, lastCents, trend) {
     var rf = lastCents / (lastCents - breakEvenCents); // remainingFraction ∈ (0,1)
     var scale = Math.min(1, rf * 2);
     var t3 = -3 * scale;
     var t2 = -5 * scale;
     var t1 = -10 * scale;
-    if (breakEvenCents > t3) return 3;
-    if (breakEvenCents > t2) return 2;
-    if (breakEvenCents > t1) return 1;
-    return 0;
+    var risk;
+    if (breakEvenCents > t3) risk = 3;
+    else if (breakEvenCents > t2) risk = 2;
+    else if (breakEvenCents > t1) risk = 1;
+    else risk = 0;
+    // A rising trend reduces the probability of a negative flip: lower risk by 1
+    if (trend === "\u2191" && risk > 0) risk -= 1;
+    return risk;
   }
 
-function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh) {
+function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh, trend) {
     var node = document.getElementById("prep-breakeven");
     if (typeof breakEvenEurPerMwh !== "number") {
       node.textContent = "-";
@@ -947,7 +951,7 @@ function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh) {
     var cents = toCentsPerKwh(breakEvenEurPerMwh);
     var lastCents = toCentsPerKwh(lastEurPerMwh);
     var palette = getThemePalette();
-    var risk = breakEvenRisk(cents, lastCents);
+    var risk = breakEvenRisk(cents, lastCents, trend);
     // Show only icons: ✅ when safe, ⚠️×1-3 otherwise
     node.textContent = risk === 0 ? "✅" : "⚠️".repeat(risk);
     setValueColor(node, risk === 0 ? palette.positiveText : palette.negativeText);
@@ -1052,7 +1056,7 @@ function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh) {
           estimateLast: estimate.last,
         };
         setEstimationValue(estimate.last, estimate.trend);
-        setBreakEvenValue(estimate.breakEven, estimate.last);
+        setBreakEvenValue(estimate.breakEven, estimate.last, estimate.trend);
         renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
         setLastUpdateNow();
         setTimeslotInfo({
