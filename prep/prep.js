@@ -1,7 +1,7 @@
 (function () {
 
   // Version du cache : à incrémenter pour invalider toutes les entrées localStorage existantes (dans le navigateur)
-  var VERSION = "v9";
+  var VERSION = "v10";
   // Fuseau horaire utilisé pour l'affichage des dates et heures
   var TIMEZONE = "Europe/Paris";
   // Nombre de jours affichés dans le graphe (à partir d'aujourd'hui en remontant)
@@ -532,11 +532,12 @@
       : "<span style=\"color:#c62828;font-weight:700;font-family:monospace;\">MISS</span>";
   }
 
-  function setTimeslotInfo({ prep, spot, prd3 }) {
+  function setTimeslotInfo({ prep, spot, prd3, erl }) {
     document.getElementById("prep-timeslot-info").innerHTML =
       "PREP: " + prep.count + " | " + formatDataFetchTime(prep.fetchedAt) + " | cache: " + yesNo(prep.fromCache) +
       "<br>SPOT: " + spot.count + " | " + formatDataFetchTime(spot.fetchedAt) + " | cache: " + yesNo(spot.fromCache) +
-      "<br>PRD3: " + prd3.count + " | " + formatDataFetchTime(prd3.fetchedAt) + " | cache: " + yesNo(prd3.fromCache);
+      "<br>PRD3: " + prd3.count + " | " + formatDataFetchTime(prd3.fetchedAt) + " | cache: " + yesNo(prd3.fromCache) +
+      "<br>3ERL: " + (erl ? erl.status + " | " + formatDataFetchTime(erl.fetchedAt) + " | cache: " + yesNo(erl.fromCache) : "-");
   }
 
   // ─── Series data helpers ───────────────────────────────────────────────────
@@ -1063,6 +1064,11 @@ function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh, trend) {
           prep: { count: prepRows.length, fromCache: bundleResult.fromCache, fetchedAt: prepFetchedAt },
           spot: { count: spotRows.length, fromCache: bundleResult.fromCache, fetchedAt: spotFetchedAt },
           prd3: { count: prd3Rows.length, fromCache: bundleResult.fromCache, fetchedAt: prd3FetchedAt },
+          erl: bundle.erl && typeof bundle.erl === "object" ? {
+            status: bundle.erl.cache === "ERROR" ? "Erreur" : (bundle.erl.data ? "OK" : "Vide"),
+            fromCache: bundle.erl.cache === "HIT",
+            fetchedAt: bundle.erl.fetchedAt,
+          } : null,
         });
         setSourceWarnings(bundle);
         setStatus("");

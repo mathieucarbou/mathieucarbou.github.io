@@ -125,7 +125,7 @@ async function handleDayRequest(request, ctx, url) {
     fetchPrepSeries(day).catch(errSeries),
     fetchSpotSeries(day).catch(errSeries),
     fetchPrd3Series(profileDay).catch(errSeries),
-    day === parisTodayDay() ? fetch3ErlData() : Promise.resolve(null),
+    day === parisTodayDay() ? fetch3ErlData().catch((e) => ({ data: null, fetchedAt: null, cache: "ERROR", error: e.message })) : Promise.resolve(null),
   ]);
 
   // Don't cache past-day responses when one or more sources failed (incomplete data)
@@ -309,12 +309,16 @@ async function fetchTextWithWorkerCache({ cacheKey, ttlSeconds, target, fetchOpt
 // ─── 3ERL data (today only, short-lived CF cache) ─────────────────────────────
 
 async function fetch3ErlData() {
-  try {
-    const upstream = await fetch("https://3erl.fr/api.json", { method: "GET", cf: { cacheEverything: true, cacheTtl: TTL_3ERL } });
-    return upstream.ok ? await upstream.json() : null;
-  } catch (_e) {
-    return null;
-  }
+  const result = await fetchTextWithWorkerCache({
+    cacheKey: "3erl:today",
+    ttlSeconds: TTL_3ERL,
+    target: "https://3erl.fr/api.json",
+    fetchOptions: { method: "GET" },
+    errorLabel: "3ERL",
+  });
+  let data = null;
+  try { data = JSON.parse(result.text); } catch (_e) { /* invalid JSON */ }
+  return { data, fetchedAt: result.fetchedAt, cache: result.cache };
 }
 
 // ─── CORS / access-control ────────────────────────────────────────────────────
