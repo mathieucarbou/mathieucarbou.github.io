@@ -1,7 +1,7 @@
 (function () {
 
   // Version du cache : à incrémenter pour invalider toutes les entrées localStorage existantes (dans le navigateur)
-  var VERSION = "v10";
+  var VERSION = "v11";
   // Fuseau horaire utilisé pour l'affichage des dates et heures
   var TIMEZONE = "Europe/Paris";
   // Nombre de jours affichés dans le graphe (à partir d'aujourd'hui en remontant)
@@ -10,6 +10,8 @@
   var TODAY_CACHE_MAX_MS = 15 * 60 * 1000;
   // Durée du cache local (dans le navigateur) pour les jours passés (en ms) — données immuables, conservées 24 h
   var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
+  // Durée du cache local (dans le navigateur) pour les données 3ERL (en ms) — indépendant du bundle jour, rafraîchi toutes les 5 min
+  var ERL_CACHE_MS = 5 * 60 * 1000;
   // Clé localStorage utilisée pour mémoriser la préférence de thème (light / dark / auto)
   var THEME_STORAGE_KEY = "prep_theme";
   // Préfixe de toutes les entrées de cache localStorage — inclut la version pour forcer l'invalidation
@@ -19,8 +21,12 @@
 
   var resizeTimer = null;
   var refreshTimer = null;
+  var erlRefreshTimer = null;
   var nextRefreshAt = null;
   var latestGraphState = null;
+  var latestErlResult = null;
+  var latestErlDay = null;
+  var latestTimeslotInfo = null;
   var autoFollowToday = true;
   var themePreference = "auto";
   var themeMediaQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
@@ -122,7 +128,7 @@
           continue;
         }
 
-        var maxAgeMs = key.indexOf(":day-live:") !== -1 ? TODAY_CACHE_MAX_MS : PAST_CACHE_MS;
+        var maxAgeMs = key.indexOf(":erl:") !== -1 ? ERL_CACHE_MS : key.indexOf(":day-live:") !== -1 ? TODAY_CACHE_MAX_MS : PAST_CACHE_MS;
         if (now - parsed.savedAt > maxAgeMs) {
           keysToDelete.push(key);
         }
@@ -368,6 +374,50 @@
     }
   }
 
+  // Refresh only the 3ERL status (independent 5-min cache, not tied to PRE+ slots)
+  function refresh3ErlIfNeeded() {
+    var dayInput = document.getElementById("day");
+    var selectedDay = dayInput ? dayInput.value : null;
+    if (!selectedDay || selectedDay !== todayParis()) {
+      return;
+    }
+    fetch3ErlData().then(function (erlResult) {
+      var erl = erlResult.data;
+      if (!erl) return;
+      latestErlResult = erlResult;
+      latestErlDay = selectedDay;
+      apply3ErlStatus(erl.data ? erl.data : null);
+      var erlInfo = {
+        status: erl.cache === "ERROR" ? "Erreur" : (erl.data ? "OK" : "Vide"),
+        fromCache: erlResult.fromCache,
+        fetchedAt: erl.fetchedAt,
+      };
+      if (latestTimeslotInfo) {
+        latestTimeslotInfo.erl = erlInfo;
+        setTimeslotInfo(latestTimeslotInfo);
+      } else {
+        setTimeslotInfo({
+          prep: { count: "-", fromCache: false, fetchedAt: null },
+          spot: { count: "-", fromCache: false, fetchedAt: null },
+          prd3: { count: "-", fromCache: false, fetchedAt: null },
+          erl: erlInfo,
+        });
+      }
+    });
+  }
+
+  function scheduleErlRefresh() {
+    if (erlRefreshTimer) {
+      clearTimeout(erlRefreshTimer);
+    }
+    erlRefreshTimer = setTimeout(function () {
+      if (document.visibilityState === "visible") {
+        refresh3ErlIfNeeded();
+      }
+      scheduleErlRefresh();
+    }, ERL_CACHE_MS);
+  }
+
   function nextRefreshDate(now) {
     var slots = [5, 20, 35, 50];
     for (var i = 0; i < slots.length; i += 1) {
@@ -486,7 +536,7 @@
     node.style.color = isError ? "#b00020" : "inherit";
   }
 
-  function setSourceWarnings(bundle) {
+  function setSourceWarnings(bundle, erlError) {
     var node = document.getElementById("prep-source-warnings");
     var sources = [
       { key: "prep", label: "PRE+ (RTE)" },
@@ -501,6 +551,10 @@
         html += "<div class=\"prep-source-warning\">&#9888; Source " + s.label + " indisponible" + detail + "</div>";
       }
     });
+    if (erlError) {
+      var erlDetail = erlError ? " (" + erlError + ")" : "";
+      html += "<div class=\"prep-source-warning\">&#9888; Source 3ERL indisponible" + erlDetail + "</div>";
+    }
     node.innerHTML = html;
   }
 
@@ -563,6 +617,31 @@
   }
 
   // ─── API / cache bundle fetch ──────────────────────────────────────────────
+
+  function fetch3ErlData() {
+    var cacheKey = "erl:today";
+    var cached = cacheGetTimed(cacheKey, ERL_CACHE_MS);
+    if (cached) {
+      return Promise.resolve({ data: cached, fromCache: true });
+    }
+
+    var url = API_BASE_URL + "/erl?v=" + encodeURIComponent(VERSION);
+    return fetch(url)
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("API error: " + response.status);
+        }
+        return response.json();
+      })
+      .then(function (payload) {
+        var result = payload && typeof payload === "object" ? payload : {};
+        cacheSetTimed(cacheKey, result, Date.now() + ERL_CACHE_MS);
+        return { data: result, fromCache: false };
+      })
+      .catch(function () {
+        return { data: null, fromCache: false };
+      });
+  }
 
   function fetchDayBundle(day) {
     var isToday = day === todayParis();
@@ -1021,11 +1100,19 @@ function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh, trend) {
     var profileLabel = profileInfo.profileLabel;
 
     setStatus("Chargement des données pour " + day + " avec le profil PRD3 " + profileLabel + " (" + profileDay + ")...");
-    setSourceWarnings({});
+    setSourceWarnings({}, null);
 
-    fetchDayBundle(day)
-      .then(function (bundleResult) {
+    var isToday = day === todayParis();
+
+    Promise.all([
+      fetchDayBundle(day),
+      isToday ? fetch3ErlData() : Promise.resolve({ data: null, fromCache: false }),
+    ])
+      .then(function (results) {
+        var bundleResult = results[0];
+        var erlResult = results[1];
         var bundle = bundleResult.data || {};
+        var erl = erlResult.data;
         function normalizeSeriesBundle(series) {
           return Array.isArray(series)
             ? { rows: normalizeSeriesRows(series), fetchedAt: null }
@@ -1043,7 +1130,7 @@ function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh, trend) {
         var spotFetchedAt = spotSeries.fetchedAt;
         var prd3FetchedAt = prd3Series.fetchedAt;
 
-        apply3ErlStatus(bundle.erl || null);
+        apply3ErlStatus(erl && erl.data ? erl.data : null);
 
         var merged = mergeByTimeslot(day, prepRows, spotRows, prd3Rows);
         setLastPrepValue(findLastPrepPoint(merged));
@@ -1060,21 +1147,23 @@ function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh, trend) {
         setBreakEvenValue(estimate.breakEven, estimate.last, estimate.trend);
         renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
         setLastUpdateNow();
-        setTimeslotInfo({
+        var timeslotInfo = {
           prep: { count: prepRows.length, fromCache: bundleResult.fromCache, fetchedAt: prepFetchedAt },
           spot: { count: spotRows.length, fromCache: bundleResult.fromCache, fetchedAt: spotFetchedAt },
           prd3: { count: prd3Rows.length, fromCache: bundleResult.fromCache, fetchedAt: prd3FetchedAt },
-          erl: bundle.erl && typeof bundle.erl === "object" ? {
-            status: bundle.erl.cache === "ERROR" ? "Erreur" : (bundle.erl.data ? "OK" : "Vide"),
-            fromCache: bundle.erl.cache === "HIT",
-            fetchedAt: bundle.erl.fetchedAt,
+          erl: isToday && erl ? {
+            status: erl.cache === "ERROR" ? "Erreur" : (erl.data ? "OK" : "Vide"),
+            fromCache: erlResult.fromCache,
+            fetchedAt: erl.fetchedAt,
           } : null,
-        });
-        setSourceWarnings(bundle);
+        };
+        latestTimeslotInfo = timeslotInfo;
+        setTimeslotInfo(timeslotInfo);
+        setSourceWarnings(bundle, erl && erl.cache === "ERROR" ? erl.error : null);
         setStatus("");
       })
       .catch(function (error) {
-        setSourceWarnings({});
+        setSourceWarnings({}, null);
         setStatus(error.message || "Échec du chargement des données", true);
       });
   }
@@ -1136,9 +1225,12 @@ function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh, trend) {
       }
       refreshSelectedDayIfNeeded();
       scheduleAlignedRefresh();
+      refresh3ErlIfNeeded();
+      scheduleErlRefresh();
     });
 
     scheduleAlignedRefresh();
+    scheduleErlRefresh();
 
     load();
   }

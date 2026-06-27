@@ -81,6 +81,7 @@ export default {
 
     try {
       if (url.pathname === "/api/day") return await handleDayRequest(request, ctx, url);
+      if (url.pathname === "/api/erl") return await handleErlRequest(request, ctx);
       return json({ error: "Not found" }, 404);
     } catch (e) {
       return json({ error: e.message || "Worker error" }, 500);
@@ -121,18 +122,17 @@ async function handleDayRequest(request, ctx, url) {
   // Fetch all three sources in parallel — individual errors yield empty rows (partial resilience)
   const { profileDay, profileLabel } = getPrd3ProfileInfo(day);
   const errSeries = (e) => ({ rows: [], fetchedAt: null, cache: "ERROR", error: e.message });
-  const [prep, spot, prd3, erl] = await Promise.all([
+  const [prep, spot, prd3] = await Promise.all([
     fetchPrepSeries(day).catch(errSeries),
     fetchSpotSeries(day).catch(errSeries),
     fetchPrd3Series(profileDay).catch(errSeries),
-    day === parisTodayDay() ? fetch3ErlData().catch((e) => ({ data: null, fetchedAt: null, cache: "ERROR", error: e.message })) : Promise.resolve(null),
   ]);
 
   // Don't cache past-day responses when one or more sources failed (incomplete data)
   const hasErrors = [prep, spot, prd3].some((s) => s && s.cache === "ERROR");
 
   const response = json(
-    { day, profileDay, profileLabel, prep, spot, prd3, erl },
+    { day, profileDay, profileLabel, prep, spot, prd3 },
     200,
     { "Cache-Control": isPast && !hasErrors ? `public, max-age=${TTL_PAST}, immutable` : "no-store", "X-Proxy-Cache": isPast ? "MISS" : "BYPASS-TODAY" }
   );
@@ -148,6 +148,13 @@ async function handleDayRequest(request, ctx, url) {
   }
 
   return response;
+}
+
+// ─── /api/erl handler ────────────────────────────────────────────────────────
+
+async function handleErlRequest(request, ctx) {
+  const erl = await fetch3ErlData().catch((e) => ({ data: null, fetchedAt: null, cache: "ERROR", error: e.message }));
+  return json(erl, 200, { "Cache-Control": "no-store" });
 }
 
 // ─── Date / Paris timezone helpers ────────────────────────────────────────────
