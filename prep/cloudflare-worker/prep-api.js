@@ -53,7 +53,7 @@ const TTL_PRD3        = 86400;
 // TTL (en secondes) pour l'appel externe 3ERL (données d'activation temps réel).
 // Court par design pour limiter la charge upstream tout en gardant une donnée
 // quasi temps réel côté client.
-const TTL_3ERL        = 300;
+const TTL_3ERL        = 180;
 
 // Mode développement :
 // - true  => assouplit les contrôles d'accès (CORS / host / origin) pour tests locaux,

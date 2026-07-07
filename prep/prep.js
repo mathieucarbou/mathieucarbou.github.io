@@ -1,7 +1,7 @@
 (function () {
 
   // Version du cache : à incrémenter pour invalider toutes les entrées localStorage existantes (dans le navigateur)
-  var VERSION = "v11";
+  var VERSION = "v13";
   // Fuseau horaire utilisé pour l'affichage des dates et heures
   var TIMEZONE = "Europe/Paris";
   // Nombre de jours affichés dans le graphe (à partir d'aujourd'hui en remontant)
@@ -11,7 +11,7 @@
   // Durée du cache local (dans le navigateur) pour les jours passés (en ms) — données immuables, conservées 24 h
   var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
   // Durée du cache local (dans le navigateur) pour les données 3ERL (en ms) — indépendant du bundle jour, rafraîchi toutes les 5 min
-  var ERL_CACHE_MS = 5 * 60 * 1000;
+  var ERL_CACHE_MS = 1 * 60 * 1000;
   // Clé localStorage utilisée pour mémoriser la préférence de thème (light / dark / auto)
   var THEME_STORAGE_KEY = "prep_theme";
   // Préfixe de toutes les entrées de cache localStorage — inclut la version pour forcer l'invalidation
