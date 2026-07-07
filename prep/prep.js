@@ -1,7 +1,7 @@
 (function () {
 
   // Version du cache : à incrémenter pour invalider toutes les entrées localStorage existantes (dans le navigateur)
-  var VERSION = "v13";
+  var VERSION = "v24";
   // Fuseau horaire utilisé pour l'affichage des dates et heures
   var TIMEZONE = "Europe/Paris";
   // Nombre de jours affichés dans le graphe (à partir d'aujourd'hui en remontant)
@@ -390,6 +390,7 @@
       var erlInfo = {
         status: erl.cache === "ERROR" ? "Erreur" : (erl.data ? "OK" : "Vide"),
         fromCache: erlResult.fromCache,
+        fromWorkerCache: erl.cache === "HIT",
         fetchedAt: erl.fetchedAt,
       };
       if (latestTimeslotInfo) {
@@ -397,9 +398,9 @@
         setTimeslotInfo(latestTimeslotInfo);
       } else {
         setTimeslotInfo({
-          prep: { count: "-", fromCache: false, fetchedAt: null },
-          spot: { count: "-", fromCache: false, fetchedAt: null },
-          prd3: { count: "-", fromCache: false, fetchedAt: null },
+          prep: { count: "-", fromCache: false, fromWorkerCache: false, fetchedAt: null },
+          spot: { count: "-", fromCache: false, fromWorkerCache: false, fetchedAt: null },
+          prd3: { count: "-", fromCache: false, fromWorkerCache: false, fetchedAt: null },
           erl: erlInfo,
         });
       }
@@ -580,18 +581,28 @@
     return p.year + "-" + p.month + "-" + p.day + " " + p.hour + ":" + p.minute + ":" + p.second;
   }
 
-  function yesNo(flag) {
-    return flag
-      ? "<span style=\"color:#2e7d32;font-weight:700;font-family:monospace;\"> HIT</span>"
-      : "<span style=\"color:#c62828;font-weight:700;font-family:monospace;\">MISS</span>";
+  // Build a cache-status label that distinguishes the origin of the HIT:
+  //   HIT (local)  → served from the browser localStorage cache
+  //   HIT (worker) → fetched from the API, but the worker served it from its CF cache
+  //   MISS         → fetched from the API with a worker cache MISS (fresh upstream)
+  // fromLocal: truthy when the browser served a cached entry (no API call)
+  // fromWorker: truthy when the worker reported a cache HIT in its response
+  function cacheLabel(fromLocal, fromWorker) {
+    if (fromLocal) {
+      return "<span style=\"color:#2e7d32;font-weight:700;font-family:monospace;\">HIT (local)</span>";
+    }
+    if (fromWorker) {
+      return "<span style=\"color:#2e7d32;font-weight:700;font-family:monospace;\">HIT (worker)</span>";
+    }
+    return "<span style=\"color:#c62828;font-weight:700;font-family:monospace;\">MISS</span>";
   }
 
   function setTimeslotInfo({ prep, spot, prd3, erl }) {
     document.getElementById("prep-timeslot-info").innerHTML =
-      "PREP: " + prep.count + " | " + formatDataFetchTime(prep.fetchedAt) + " | cache: " + yesNo(prep.fromCache) +
-      "<br>SPOT: " + spot.count + " | " + formatDataFetchTime(spot.fetchedAt) + " | cache: " + yesNo(spot.fromCache) +
-      "<br>PRD3: " + prd3.count + " | " + formatDataFetchTime(prd3.fetchedAt) + " | cache: " + yesNo(prd3.fromCache) +
-      "<br>3ERL: " + (erl ? erl.status + " | " + formatDataFetchTime(erl.fetchedAt) + " | cache: " + yesNo(erl.fromCache) : "-");
+      "PREP: " + prep.count + " | " + formatDataFetchTime(prep.fetchedAt) + " | cache: " + cacheLabel(prep.fromCache, prep.fromWorkerCache) +
+      "<br>SPOT: " + spot.count + " | " + formatDataFetchTime(spot.fetchedAt) + " | cache: " + cacheLabel(spot.fromCache, spot.fromWorkerCache) +
+      "<br>PRD3: " + prd3.count + " | " + formatDataFetchTime(prd3.fetchedAt) + " | cache: " + cacheLabel(prd3.fromCache, prd3.fromWorkerCache) +
+      "<br>3ERL: " + (erl ? erl.status + " | " + formatDataFetchTime(erl.fetchedAt) + " | cache: " + cacheLabel(erl.fromCache, erl.fromWorkerCache) : "-");
   }
 
   // ─── Series data helpers ───────────────────────────────────────────────────
@@ -1147,13 +1158,21 @@ function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh, trend) {
         setBreakEvenValue(estimate.breakEven, estimate.last, estimate.trend);
         renderGraph(day, effectiveProfileDay, effectiveProfileLabel, merged, estimate.series, estimate.last);
         setLastUpdateNow();
+        // Worker cache status for each series: prep/spot/prd3 each carry their own
+        // cache: "HIT"|"MISS" flag from the worker. 3ERL has no worker cache so it
+        // is always MISS (or ERROR when the upstream fetch failed).
+        var prepWorkerCache = bundle.prep && bundle.prep.cache === "HIT";
+        var spotWorkerCache = bundle.spot && bundle.spot.cache === "HIT";
+        var prd3WorkerCache = bundle.prd3 && bundle.prd3.cache === "HIT";
+        var erlWorkerCache = erl && erl.cache === "HIT";
         var timeslotInfo = {
-          prep: { count: prepRows.length, fromCache: bundleResult.fromCache, fetchedAt: prepFetchedAt },
-          spot: { count: spotRows.length, fromCache: bundleResult.fromCache, fetchedAt: spotFetchedAt },
-          prd3: { count: prd3Rows.length, fromCache: bundleResult.fromCache, fetchedAt: prd3FetchedAt },
+          prep: { count: prepRows.length, fromCache: bundleResult.fromCache, fromWorkerCache: prepWorkerCache, fetchedAt: prepFetchedAt },
+          spot: { count: spotRows.length, fromCache: bundleResult.fromCache, fromWorkerCache: spotWorkerCache, fetchedAt: spotFetchedAt },
+          prd3: { count: prd3Rows.length, fromCache: bundleResult.fromCache, fromWorkerCache: prd3WorkerCache, fetchedAt: prd3FetchedAt },
           erl: isToday && erl ? {
             status: erl.cache === "ERROR" ? "Erreur" : (erl.data ? "OK" : "Vide"),
             fromCache: erlResult.fromCache,
+            fromWorkerCache: erlWorkerCache,
             fetchedAt: erl.fetchedAt,
           } : null,
         };
