@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Estimation du jour</title>
-  <link rel="stylesheet" href="prep.css?v=6" />
+  <link rel="stylesheet" href="prep.css?v=7" />
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body class="prep-page">
@@ -84,6 +84,9 @@
   <div id="prep-last-update">Dernière mise à jour: -</div>
   <div id="prep-next-refresh">Prochaine actualisation automatique: -</div>
   <div id="prep-timeslot-info"></div>
+  <div class="prep-cache-actions">
+    <button id="prep-clear-cache" type="button">Effacer le cache local</button>
+  </div>
   <div id="prep-explainer">
     <h3>Comment lire ce graphe</h3>
     <p>Le graphe superpose 3 signaux quart-horaires (PRE+, SPOT, PRD3) et une estimation journalière pondérée :</p>
@@ -148,6 +151,6 @@
   <footer style="text-align:center; margin-top: 2rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--prep-muted);">
     <em>Made with ❤️ by <a href="https://mathieu.carbou.me/" target="_blank" rel="noopener noreferrer" style="color: var(--prep-link);">Mathieu Carbou</a></em>
   </footer>
-  <script src="prep.js?v=24"></script>
+  <script src="prep.js?v=25"></script>
 </body>
 </html>

@@ -311,6 +311,11 @@ body[data-theme="dark"] .prep-control-row input[type="date"] {
   opacity: 1;
 }
 
+.prep-cache-actions {
+  margin-top: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
 #prep-explainer {
   width: 100%;
   margin-top: 0.6rem;

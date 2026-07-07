@@ -1,7 +1,7 @@
 (function () {
 
   // Version du cache : à incrémenter pour invalider toutes les entrées localStorage existantes (dans le navigateur)
-  var VERSION = "v24";
+  var VERSION = "v25";
   // Fuseau horaire utilisé pour l'affichage des dates et heures
   var TIMEZONE = "Europe/Paris";
   // Nombre de jours affichés dans le graphe (à partir d'aujourd'hui en remontant)
@@ -1233,6 +1233,29 @@ function setBreakEvenValue(breakEvenEurPerMwh, lastEurPerMwh, trend) {
     document.getElementById("next-day").addEventListener("click", function () {
       shiftDay(1);
     });
+
+    // Clear all prep_* localStorage entries (all versions) and reload fresh data
+    var clearBtn = document.getElementById("prep-clear-cache");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        try {
+          var keys = [];
+          for (var i = 0; i < localStorage.length; i += 1) {
+            var k = localStorage.key(i);
+            if (typeof k === "string" && k.startsWith("prep_")) {
+              keys.push(k);
+            }
+          }
+          keys.forEach(function (k) { localStorage.removeItem(k); });
+        } catch (_e) { /* ignore */ }
+        // Reset runtime cache state so the next load is a clean slate
+        latestErlResult = null;
+        latestErlDay = null;
+        latestTimeslotInfo = null;
+        latestGraphState = null;
+        load();
+      });
+    }
     window.addEventListener("resize", function () {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(resizeGraph, 120);
