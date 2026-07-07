@@ -12,6 +12,7 @@
 // Caching layers:
 //   1. Zone cache (CF cache API): full /api/day response for past days (24 h).
 //   2. Per-source worker cache: PREP/SPOT today=keyed by refresh slot (05/20/35/50) and capped at 15 min, past=24 h; PRD3 always 24 h.
+//   3. 3ERL: smart update-slot-aligned cache. 3ERL fetches from RTE at minutes 3/18/33/48; the worker polls upstream during a 5-min window after each slot to detect new Heure_Update, then caches until the next slot.
 // =============================================================================
 
 // ─── Configuration ────────────────────────────────────────────────────────────
@@ -50,10 +51,20 @@ const TTL_TODAY_MAX   = 900;
 // donc un cache 24 h est approprié.
 const TTL_PRD3        = 86400;
 
-// TTL (en secondes) pour l'appel externe 3ERL (données d'activation temps réel).
-// Court par design pour limiter la charge upstream tout en gardant une donnée
-// quasi temps réel côté client.
-const TTL_3ERL        = 180;
+// 3ERL : RTE publie de nouvelles valeurs PREP à chaque quart-d'heure, mais
+// l'API 3ERL ne les récupère qu'aux minutes 3, 18, 33, 48 (avec quelques secondes
+// de traitement supplémentaires). On utilise un cache intelligent qui :
+//   - sert le cache directement en dehors de ces fenêtres de mise à jour,
+//   - poll l'upstream chaque minute pendant la fenêtre (3-8, 18-23, 33-38, 48-53),
+//   - compare Heure_Update : si inchangé → cache 60s et on réessaie,
+//     si changé → cache jusqu'à la prochaine fenêtre de mise à jour.
+
+// Intervalles de poll pendant la fenêtre d'attente de mise à jour
+const ERL_POLL_INTERVAL_SECONDS = 60;
+// Durée de la fenêtre de poll après chaque minute de mise à jour (3, 18, 33, 48)
+const ERL_POLL_WINDOW_SECONDS    = 300;   // 0..5 min après la minute de mise à jour
+// Minutes auxquelles 3ERL met à jour ses données depuis RTE
+const ERL_UPDATE_MINUTES = [3, 18, 33, 48];
 
 // Mode développement :
 // - true  => assouplit les contrôles d'accès (CORS / host / origin) pour tests locaux,
@@ -313,19 +324,120 @@ async function fetchTextWithWorkerCache({ cacheKey, ttlSeconds, target, fetchOpt
   return { text, fetchedAt, cache: "MISS" };
 }
 
-// ─── 3ERL data (today only, short-lived CF cache) ─────────────────────────────
+// ─── 3ERL data (smart update-slot-aligned cache) ───────────────────────────
+//
+// 3ERL fetches new PREP data from RTE at minutes 3, 18, 33, 48 of each hour
+// (with a few seconds of processing). We use a smart cache strategy:
+//
+// 1. Outside the poll window (more than ERL_POLL_WINDOW_SECONDS after the last
+//    update minute): serve from cache with TTL = time until the next poll window.
+// 2. Inside the poll window (0–5 min after the update minute): fetch upstream and
+//    compare Heure_Update:
+//      a. Same Heure_Update → cache for ERL_POLL_INTERVAL_SECONDS, retry later.
+//      b. Different Heure_Update (new data!) → cache until the next poll window.
+//
+// The cache entry stores the last observed Heure_Update so we can detect
+// changes without keeping state in memory.
+
+// Returns the last 3ERL update minute (3, 18, 33, or 48) that has passed, or -1
+// if we are before the first update slot of the hour.
+function lastErlUpdateMinute(parisMinutes) {
+  for (let i = ERL_UPDATE_MINUTES.length - 1; i >= 0; i--) {
+    if (parisMinutes >= ERL_UPDATE_MINUTES[i]) return ERL_UPDATE_MINUTES[i];
+  }
+  return -1;
+}
+
+// Returns the next 3ERL update minute (3, 18, 33, or 48) in the current hour,
+// or the first slot of the next hour if all have passed.
+function nextErlUpdateMinute(parisMinutes) {
+  for (let i = 0; i < ERL_UPDATE_MINUTES.length; i++) {
+    if (parisMinutes < ERL_UPDATE_MINUTES[i]) return ERL_UPDATE_MINUTES[i];
+  }
+  return ERL_UPDATE_MINUTES[0] + 60; // first slot of next hour
+}
+
+// Seconds remaining until the next 3ERL update minute (start of poll window)
+function secondsUntilNextErlUpdate(parisMinutes) {
+  const nextMin = nextErlUpdateMinute(parisMinutes);
+  const remainingMin = nextMin - parisMinutes;
+  return Math.max(ERL_POLL_INTERVAL_SECONDS, Math.ceil(remainingMin * 60));
+}
 
 async function fetch3ErlData() {
-  const result = await fetchTextWithWorkerCache({
-    cacheKey: "3erl:today",
-    ttlSeconds: TTL_3ERL,
-    target: "https://3erl.fr/api.json",
-    fetchOptions: { method: "GET" },
-    errorLabel: "3ERL",
-  });
-  let data = null;
-  try { data = JSON.parse(result.text); } catch (_e) { /* invalid JSON */ }
-  return { data, fetchedAt: result.fetchedAt, cache: result.cache };
+  const now = new Date();
+  const parisParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIMEZONE, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  }).formatToParts(now);
+  let ph = "00", pm = "00", ps = "00";
+  for (const p of parisParts) { if (p.type === "hour") ph = p.value; if (p.type === "minute") pm = p.value; if (p.type === "second") ps = p.value; }
+  const parisMinutes = Number(ph) * 60 + Number(pm) + Number(ps) / 60; // minutes since midnight (Paris)
+
+  const lastUpdate = lastErlUpdateMinute(parisMinutes);
+  const inPollWindow = lastUpdate >= 0 && (parisMinutes - lastUpdate) * 60 < ERL_POLL_WINDOW_SECONDS;
+
+  const cacheRequest = new Request("https://worker-cache.internal/" + encodeURIComponent("3erl:smart"), { method: "GET" });
+
+  // --- Try cache -----------------------------------------------------------
+  const hit = await caches.default.match(cacheRequest);
+  if (hit) {
+    const cachedText = await hit.text();
+    const cachedHeureUpdate = hit.headers.get("X-3ERL-Heure-Update") || "";
+    const cachedAt = hit.headers.get("X-Source-Fetched-At") || new Date().toISOString();
+
+    if (!inPollWindow) {
+      // Stable period: serve cache directly
+      return { data: safeJson(cachedText), fetchedAt: cachedAt, cache: "HIT" };
+    }
+
+    // Poll window: we have a cached entry, but we need to check if 3ERL has
+    // published new data. Fetch upstream and compare Heure_Update.
+    const upstream = await fetch("https://3erl.fr/api.json", { method: "GET" });
+    if (!upstream.ok) throw new Error("3ERL error: " + upstream.status);
+    const upstreamText = await upstream.text();
+    const upstreamData = safeJson(upstreamText);
+    const upstreamHeureUpdate = upstreamData && upstreamData.Heure_Update || "";
+    const fetchedAt = new Date().toISOString();
+
+    if (upstreamHeureUpdate && upstreamHeureUpdate !== cachedHeureUpdate) {
+      // New data! Cache until the next poll window starts.
+      const ttl = secondsUntilNextErlUpdate(parisMinutes);
+      await put3ErlCache(cacheRequest, upstreamText, upstreamHeureUpdate, fetchedAt, ttl);
+      return { data: upstreamData, fetchedAt, cache: "MISS" };
+    }
+
+    // Same data: cache for one poll interval and serve the cached version
+    await put3ErlCache(cacheRequest, cachedText, cachedHeureUpdate, cachedAt, ERL_POLL_INTERVAL_SECONDS);
+    return { data: safeJson(cachedText), fetchedAt: cachedAt, cache: "HIT" };
+  }
+
+  // --- No cache: fetch upstream and store -----------------------------------
+  const upstream = await fetch("https://3erl.fr/api.json", { method: "GET" });
+  if (!upstream.ok) throw new Error("3ERL error: " + upstream.status);
+  const text = await upstream.text();
+  const data = safeJson(text);
+  const heureUpdate = data && data.Heure_Update || "";
+  const fetchedAt = new Date().toISOString();
+
+  const ttl = inPollWindow ? ERL_POLL_INTERVAL_SECONDS : secondsUntilNextErlUpdate(parisMinutes);
+  await put3ErlCache(cacheRequest, text, heureUpdate, fetchedAt, ttl);
+  return { data, fetchedAt, cache: "MISS" };
+}
+
+function put3ErlCache(cacheRequest, text, heureUpdate, fetchedAt, ttlSeconds) {
+  return caches.default.put(cacheRequest, new Response(text, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=" + ttlSeconds,
+      "X-Source-Fetched-At": fetchedAt,
+      "X-3ERL-Heure-Update": heureUpdate,
+    },
+  }));
+}
+
+function safeJson(text) {
+  try { return JSON.parse(text); } catch (_e) { return null; }
 }
 
 // ─── CORS / access-control ────────────────────────────────────────────────────
