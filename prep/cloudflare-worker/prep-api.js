@@ -12,6 +12,7 @@
 // Caching layers:
 //   1. Zone cache (CF cache API): full /api/day response for past days (24 h).
 //   2. Per-source worker cache: PREP/SPOT today=keyed by refresh slot (05/20/35/50) and capped at 15 min, past=24 h; PRD3 always 24 h.
+//   3. 3ERL: NO cache. Real-time activation data is always fetched live from upstream.
 // =============================================================================
 
 // ─── Configuration ────────────────────────────────────────────────────────────
@@ -49,11 +50,6 @@ const TTL_TODAY_MAX   = 900;
 // Les profils PRD3 sont consommés comme données journalières stables,
 // donc un cache 24 h est approprié.
 const TTL_PRD3        = 86400;
-
-// TTL (en secondes) pour l'appel externe 3ERL (données d'activation temps réel).
-// Court par design pour limiter la charge upstream tout en gardant une donnée
-// quasi temps réel côté client.
-const TTL_3ERL        = 300;
 
 // Mode développement :
 // - true  => assouplit les contrôles d'accès (CORS / host / origin) pour tests locaux,
@@ -313,19 +309,20 @@ async function fetchTextWithWorkerCache({ cacheKey, ttlSeconds, target, fetchOpt
   return { text, fetchedAt, cache: "MISS" };
 }
 
-// ─── 3ERL data (today only, short-lived CF cache) ─────────────────────────────
+// ─── 3ERL data (today only, no cache) ────────────────────────────────────────
+//
+// 3ERL exposes real-time activation status: a visitor on the page IS the call,
+// so any cache layer (worker or localStorage) only adds latency to data that
+// is meant to be live. We always hit the upstream directly.
 
 async function fetch3ErlData() {
-  const result = await fetchTextWithWorkerCache({
-    cacheKey: "3erl:today",
-    ttlSeconds: TTL_3ERL,
-    target: "https://3erl.fr/api.json",
-    fetchOptions: { method: "GET" },
-    errorLabel: "3ERL",
-  });
+  const fetchedAt = new Date().toISOString();
+  const response = await fetch("https://3erl.fr/api.json", { method: "GET" });
+  if (!response.ok) throw new Error("3ERL error: " + response.status);
+  const text = await response.text();
   let data = null;
-  try { data = JSON.parse(result.text); } catch (_e) { /* invalid JSON */ }
-  return { data, fetchedAt: result.fetchedAt, cache: result.cache };
+  try { data = JSON.parse(text); } catch (_e) { /* invalid JSON */ }
+  return { data, fetchedAt, cache: "MISS" };
 }
 
 // ─── CORS / access-control ────────────────────────────────────────────────────

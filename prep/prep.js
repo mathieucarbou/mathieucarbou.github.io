@@ -1,7 +1,7 @@
 (function () {
 
   // Version du cache : à incrémenter pour invalider toutes les entrées localStorage existantes (dans le navigateur)
-  var VERSION = "v11";
+  var VERSION = "v12";
   // Fuseau horaire utilisé pour l'affichage des dates et heures
   var TIMEZONE = "Europe/Paris";
   // Nombre de jours affichés dans le graphe (à partir d'aujourd'hui en remontant)
@@ -10,8 +10,6 @@
   var TODAY_CACHE_MAX_MS = 15 * 60 * 1000;
   // Durée du cache local (dans le navigateur) pour les jours passés (en ms) — données immuables, conservées 24 h
   var PAST_CACHE_MS = 24 * 60 * 60 * 1000;
-  // Durée du cache local (dans le navigateur) pour les données 3ERL (en ms) — indépendant du bundle jour, rafraîchi toutes les 5 min
-  var ERL_CACHE_MS = 5 * 60 * 1000;
   // Clé localStorage utilisée pour mémoriser la préférence de thème (light / dark / auto)
   var THEME_STORAGE_KEY = "prep_theme";
   // Préfixe de toutes les entrées de cache localStorage — inclut la version pour forcer l'invalidation
@@ -128,7 +126,7 @@
           continue;
         }
 
-        var maxAgeMs = key.indexOf(":erl:") !== -1 ? ERL_CACHE_MS : key.indexOf(":day-live:") !== -1 ? TODAY_CACHE_MAX_MS : PAST_CACHE_MS;
+        var maxAgeMs = key.indexOf(":day-live:") !== -1 ? TODAY_CACHE_MAX_MS : PAST_CACHE_MS;
         if (now - parsed.savedAt > maxAgeMs) {
           keysToDelete.push(key);
         }
@@ -374,7 +372,9 @@
     }
   }
 
-  // Refresh only the 3ERL status (independent 5-min cache, not tied to PRE+ slots)
+  // 3ERL is real-time activation data: a visitor on the page IS the call,
+  // so caching (worker or localStorage) only adds latency to data that is
+  // meant to be live. We always fetch fresh and refresh periodically.
   function refresh3ErlIfNeeded() {
     var dayInput = document.getElementById("day");
     var selectedDay = dayInput ? dayInput.value : null;
@@ -410,12 +410,13 @@
     if (erlRefreshTimer) {
       clearTimeout(erlRefreshTimer);
     }
+    // Poll 3ERL every 60 s — no cache, so we just need a reasonable refresh cadence.
     erlRefreshTimer = setTimeout(function () {
       if (document.visibilityState === "visible") {
         refresh3ErlIfNeeded();
       }
       scheduleErlRefresh();
-    }, ERL_CACHE_MS);
+    }, 60 * 1000);
   }
 
   function nextRefreshDate(now) {
@@ -591,7 +592,8 @@
       "PREP: " + prep.count + " | " + formatDataFetchTime(prep.fetchedAt) + " | cache: " + yesNo(prep.fromCache) +
       "<br>SPOT: " + spot.count + " | " + formatDataFetchTime(spot.fetchedAt) + " | cache: " + yesNo(spot.fromCache) +
       "<br>PRD3: " + prd3.count + " | " + formatDataFetchTime(prd3.fetchedAt) + " | cache: " + yesNo(prd3.fromCache) +
-      "<br>3ERL: " + (erl ? erl.status + " | " + formatDataFetchTime(erl.fetchedAt) + " | cache: " + yesNo(erl.fromCache) : "-");
+      // 3ERL is real-time: no cache, so no cache column — only fetchedAt is shown
+      "<br>3ERL: " + (erl ? erl.status + " | " + formatDataFetchTime(erl.fetchedAt) : "-");
   }
 
   // ─── Series data helpers ───────────────────────────────────────────────────
@@ -618,13 +620,8 @@
 
   // ─── API / cache bundle fetch ──────────────────────────────────────────────
 
+  // 3ERL data is real-time: always hit the API, no localStorage cache.
   function fetch3ErlData() {
-    var cacheKey = "erl:today";
-    var cached = cacheGetTimed(cacheKey, ERL_CACHE_MS);
-    if (cached) {
-      return Promise.resolve({ data: cached, fromCache: true });
-    }
-
     var url = API_BASE_URL + "/erl?v=" + encodeURIComponent(VERSION);
     return fetch(url)
       .then(function (response) {
@@ -635,7 +632,6 @@
       })
       .then(function (payload) {
         var result = payload && typeof payload === "object" ? payload : {};
-        cacheSetTimed(cacheKey, result, Date.now() + ERL_CACHE_MS);
         return { data: result, fromCache: false };
       })
       .catch(function () {
