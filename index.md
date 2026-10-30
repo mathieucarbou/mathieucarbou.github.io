@@ -12,7 +12,7 @@ I was proud to be both nominated as individual and as ESP32Async by the Arduino 
 I've been involved during 10 years in the [Montreal Java User Group](https://www.montreal-jug.org/) that I've bootstrapped in 2010 with a friend (David). This is now one of the biggest JUG over the world.
 I was also part of the [Devoxx4Kids Quebec](http://www.devoxx4kids.org/quebec/) organization.
 
-I'm also an enthusiast photographer: feel free to visit my [Photography](https://www.mathieu.photography/) website!
+I'm also an enthusiast photographer: feel free to visit my [Photography](https://www.mathieu.photography/) website and my [astrobin](https://app.astrobin.com/u/mathieucarbou)!
 You will find some articles about neutral density filters and infrared photography too.
 
 - [Articles](#articles)
@@ -142,7 +142,7 @@ I am actively maintaining these libraries as part of [ESP32Async](https://github
 | [MycilaTaskManager](https://mathieu.carbou.me/MycilaTaskManager) | ESP32 | Arduino / ESP32 Task Manager Library                                                                                                                |
 | [MycilaTaskMonitor](https://mathieu.carbou.me/MycilaTaskMonitor) | ESP32 | Arduino / ESP32 library to monitor task priority and stack high watermark                                                                           |
 | [MycilaTrial](https://mathieu.carbou.me/MycilaTrial)             | ESP32 | Arduino / ESP32 library to add a trial duration in your app                                                                                         |
-| [MycilaUtilities](https://mathieu.carbou.me/MycilaUtilities)     | ESP32 | Utils stuff for Arduino / ESP32 like Time, String functions, etc                                                                    |
+| [MycilaUtilities](https://mathieu.carbou.me/MycilaUtilities)     | ESP32 | Utils stuff for Arduino / ESP32 like Time, String functions, CircularBuffer, etc                                                                    |
 
 ## Java Libraries
 
