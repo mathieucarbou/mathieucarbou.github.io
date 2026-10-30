@@ -1,167 +1,176 @@
-Hello,
+<div align="center">
+  **Lead Software Engineer @ IBM · Open-source maintainer · ESP32 / Arduino developer · Photographer & astrophotographer**
 
-I am a passionate developer with more than 20 years of XP in several languages, technologies and compagnies.
+  [![GitHub](https://img.shields.io/badge/GitHub-@mathieucarbou-181717?style=for-the-badge&logo=github)](https://github.com/mathieucarbou)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/mathieucarbou/)
+  [![Website](https://img.shields.io/badge/Personal%20website-mathieu.carbou.me-24292f?style=for-the-badge&logo=githubpages)](https://mathieu.carbou.me/)
+  [![Photography](https://img.shields.io/badge/Photography-Portfolio-222222?style=for-the-badge&logo=flickr)](https://www.mathieu.photography/)
+  [![AstroBin](https://img.shields.io/badge/AstroBin-Astrophotography-263B53?style=for-the-badge)](https://app.astrobin.com/u/mathieucarbou)
+  [![Flickr](https://img.shields.io/badge/Flickr-Photostream-0063DC?style=for-the-badge&logo=flickr)](https://www.flickr.com/photos/mathieucarbou/)
 
-I am currently working as a Lead Software Engineer, at [IBM](https://www.ibm.com/) in the [Terracotta](https://www.terracotta.org) R&D team since 2015.
-We built Ehcache and Terracotta Store and provide clustering and management solutions for caching and storing huge amount of data efficiently with no downtime, low latency in a consistency or availability mode.
+  *I build distributed software, work on embedded systems and connected devices, and spend clear nights collecting photons.*
+</div>
 
-I am also an Arduino / ESP32 developer, creator and maintainer of several [Open Source Projects](https://mathieu.carbou.me/) that you will find below.
-With over 30 Arduino / ESP32 projects and 154 releases in 2025, plus over 40 releases in the [ESP32Async](https://github.com/ESP32Async) organization,
-I was proud to be both nominated as individual and as ESP32Async by the Arduino Team as being one of the [top Arduino Library maintainer for the year 2025](https://forum.arduino.cc/t/arduino-open-source-report-2025) ([PDF Report](https://mathieu.carbou.me/ArduinoOpenSourceReport2025.pdf)) !
+---
 
-I've been involved during 10 years in the [Montreal Java User Group](https://www.montreal-jug.org/) that I've bootstrapped in 2010 with a friend (David). This is now one of the biggest JUG over the world.
-I was also part of the [Devoxx4Kids Quebec](http://www.devoxx4kids.org/quebec/) organization.
+## 👋 About me
 
-I'm also an enthusiast photographer: feel free to visit my [Photography](https://www.mathieu.photography/) website and my [astrobin](https://app.astrobin.com/u/mathieucarbou)!
-You will find some articles about neutral density filters and infrared photography too.
+I'm a software engineer with **20+ years of experience** across Java, C++, embedded systems, networking and distributed software.
 
-- [Articles](#articles)
-- [Projects](#projects)
-  - [Solar Routers / Diverter](#solar-routers--diverter)
-  - [Beelance](#beelance)
-  - [License Maven Plugin](#license-maven-plugin)
-- [Arduino / ESP32 Libraries](#arduino--esp32-libraries)
-- [Java Libraries](#java-libraries)
-- [Contributing / collaborating to these projects](#contributing--collaborating-to-these-projects)
-- [Statistics](#statistics)
+- 💼 **[IBM](https://www.ibm.com/) — Terracotta R&D:** Lead Software Engineer since 2015, working on distributed caching and data-storage technologies including [Ehcache](https://github.com/ehcache) and **Terracotta Store** ([Terracotta OSS](https://github.com/Terracotta-OSS)).
+- 🧩 **Open source:** creator and maintainer of a collection of Arduino / ESP32 projects and libraries, and an active maintainer of the [ESP32Async](https://github.com/ESP32Async) ecosystem.
+- ⚡ **Embedded & energy:** asynchronous networking, power metering, solar power diversion, MQTT, Home Assistant and ESPHome.
+- 📷 **Photography:** [my photography portfolio](https://www.mathieu.photography/) and [Flickr photostream](https://www.flickr.com/photos/mathieucarbou/).
+- 🌌 **Astrophotography:** deep-sky, lunar and solar imaging on [AstroBin](https://app.astrobin.com/u/mathieucarbou).
 
-[![](https://img.shields.io/badge/github-mathieucarbou-211F1F?logo=github&logoColor=white&style=flat-square)](https://github.com/mathieucarbou)
-[![](https://img.shields.io/badge/linkedin-mathieucarbou-0072B1?logo=linkedin&style=flat-square)](https://www.linkedin.com/in/mathieucarbou/)
-[![](https://img.shields.io/badge/photography-mathieu.photography-1BC?logo=react&logoColor=white&style=flat-square)](https://www.mathieu.photography/)
-[![](https://img.shields.io/badge/flickr-mathieucarbou-ff69b4?logo=flickr&style=flat-square)](https://www.flickr.com/photos/mathieucarbou/)
+I enjoy moving between low-level firmware and large-scale software systems — and turning practical problems into documented, reusable projects.
 
-## Articles
+## ⭐ Featured projects
 
-**Solar diverters / routers**
+### ☀️ [YaS☀️lR — Yet another Solar Router](https://github.com/mathieucarbou/YaSolR)
 
-- [Shelly Solar Diverter / Router](https://yasolr.carbou.me/blog/2024-07-01_shelly_solar_diverter)
-- [Home Assistant Solar Diverter / Router](https://yasolr.carbou.me/blog/2024-09-05_ha_diverter)
-- [Zero-Cross Pulse Detection](https://yasolr.carbou.me/blog/2024-07-31_zero-cross_pulse_detection)
-- [The Importance of a good ZCD circuit for a solar router](https://yasolr.carbou.me/blog/2024-07-24_the_importance_of_a_good_zcd_circuit)
+An open-source ESP32 solar power diverter. It uses surplus photovoltaic production to drive a resistive load, typically a water heater, with fine-grained power control.
 
-**JSY**
+**Project:** [yasolr.carbou.me](https://yasolr.carbou.me/) · [Source code](https://github.com/mathieucarbou/YaSolR) · [Documentation](https://yasolr.carbou.me/manual)
 
-- [Everything on le JSY](https://yasolr.carbou.me/blog/2024-06-26_everything_on_the_jsy)
-- [The new JSY-MK-194G](https://yasolr.carbou.me/blog/2024-11-07_jsy_mk_194g)
-- [Remote JSY through UDP](https://yasolr.carbou.me/blog/2024-06-25_remote_jsy)
+### 🐝 [Beelance](https://github.com/mathieucarbou/Beelance)
 
-**Home Assistant**
+An autonomous, remotely connected beehive scale. It monitors hive weight and temperature, and sends measurements over LTE-M / NB-IoT or standard LTE / 4G connectivity.
 
-- [Automatically limit inverter outputs based on grid excess with Home Assistant and OpenDTU](https://gist.github.com/mathieucarbou/382556f1279d612962e03232544692d1)
-- [Home Assistant Solar Diverter / Router](https://yasolr.carbou.me/blog/2024-09-05_ha_diverter)
-- [ESPHome with Dallas Temperature Sensor](https://gist.github.com/mathieucarbou/4706cfaa2562207fee1ea48012f4dc5f)
-- [Home Assistant H&T (Hygrostat & Thermostat)](https://gist.github.com/mathieucarbou/ebea1c204bbf88a3b35072f78b60875f)
-- [Home Assistant: % autoconsommation temps réel](https://gist.github.com/mathieucarbou/b841b9c1b7383bbda27569ebe17dad0e)
-- [Home Assistant + Shelly + EDF HP/HC](https://gist.github.com/mathieucarbou/51a4a99be64b11e042a597b8e43ddfb7)
-- [Home Assistant + RTE Tempo + Shelly](https://gist.github.com/mathieucarbou/e1667cd8e4acd93199b8c879b81aa787)
-- [Home Assistant OpenEVSE Integration backed by MQTT](https://gist.github.com/mathieucarbou/92a3d5e0dc38d6b68aa1bdaf153a80c5)
-- [Suivi énergétique](https://gist.github.com/mathieucarbou/290e26605437724d3b70332005e3def6)
+**Project:** [beelance.carbou.me](https://beelance.carbou.me/) · [Source code](https://github.com/mathieucarbou/Beelance)
+
+### 🧰 [License Maven Plugin](https://github.com/mathieucarbou/license-maven-plugin)
+
+The original Maven plugin for managing source-file license headers. It supports checking, formatting and removing headers, reusable templates, custom properties, multi-licensing and dependency-license enforcement.
+
+**Project:** [Documentation](https://mathieu.carbou.me/license-maven-plugin/) · [Source code](https://github.com/mathieucarbou/license-maven-plugin)
+
+### 📸 [MycilaShutterSpeedTester](https://github.com/mathieucarbou/MycilaShutterSpeedTester)
+
+ESP32 firmware for measuring camera shutter speeds — a project where photography and embedded engineering meet.
+
+**Project:** [Documentation](https://mathieu.carbou.me/MycilaShutterSpeedTester) · [Source code](https://github.com/mathieucarbou/MycilaShutterSpeedTester)
+
+### 🧩 The Mycila ecosystem
+
+A collection of reusable ESP32 building blocks, including [MycilaESPConnect](https://github.com/mathieucarbou/MycilaESPConnect) (Wi-Fi / Ethernet connectivity), [MycilaJSY](https://github.com/mathieucarbou/MycilaJSY) (energy metering), [MycilaSafeBoot](https://github.com/mathieucarbou/MycilaSafeBoot) (OTA recovery), and [MycilaDimmer](https://github.com/mathieucarbou/MycilaDimmer) (AC power control). The full catalogue is below.
+
+## 🧵 Open source: ESP32Async
+
+I maintain two widely used asynchronous networking libraries in the **[ESP32Async](https://github.com/ESP32Async)** organization:
+
+- **[ESPAsyncWebServer](https://github.com/ESP32Async/ESPAsyncWebServer)** — asynchronous HTTP and WebSocket server, with support for SSE, middleware, authentication, file serving and more.
+- **[AsyncTCP](https://github.com/ESP32Async/AsyncTCP)** — asynchronous TCP networking for ESP32 Arduino; the networking foundation used by ESPAsyncWebServer.
+
+The repositories under `ESP32Async` are the active upstream projects. My older personal repositories for these libraries are archived.
+
+## 🤝 Other open-source collaborations
+
+### [ESP-DASH](https://github.com/ayushsharma82/ESP-DASH) · [SOFTT](https://softt.io/)
+
+I have contributed extensively to **ESP-DASH** and **ESP-DASH Pro**, the embedded dashboard projects created by [Ayush Sharma](https://github.com/ayushsharma82), founder of [SOFTT](https://softt.io/).
+
+A notable contribution is the **memory-optimized C++ backend introduced in ESP-DASH v5**, which I reworked. Earlier contributions included memory and WebSocket improvements, transfer-performance work, and compatibility fixes for Arduino 3 / ESP-IDF 5.
+
+- [ESP-DASH v5 release notes](https://github.com/ayushsharma82/ESP-DASH/releases/tag/v5.0.0)
+- [ESP-DASH release history](https://github.com/ayushsharma82/ESP-DASH/releases)
+- [ESP-DASH Pro](https://espdash.pro/)
+
+### Other projects
+
+- **[WebSerial](https://github.com/ayushsharma82/WebSerial) / [WebSerial Pro](https://webserial.pro/)** — fixes and performance improvements for browser-based serial monitoring.
+- **[Arduino-ESP32 core](https://github.com/espressif/arduino-esp32)** — fixes and WebServer improvements, including middleware support.
+- **[pioarduino](https://github.com/pioarduino/platform-espressif32)** — contributions and collaboration around the PlatformIO Espressif32 platform.
+
+### 🏅 Arduino Open Source Report 2025
+
+The [Arduino Open Source Report 2025](https://content.arduino.cc/assets/ArduinoOpenSourceReport2025.pdf) lists **Mathieu Carbou with 154 library releases** in 2025 and **ESP32 Asynchronous Networking with 40 releases**. The report's ranking is based on release frequency.
+
+[Read the report](https://content.arduino.cc/assets/ArduinoOpenSourceReport2025.pdf) · [Arduino Forum discussion](https://forum.arduino.cc/t/arduino-open-source-report-2025/1437540)
+
+## 🧩 My Mycila Arduino / ESP32 libraries
+
+A collection of small, focused libraries for building connected ESP32 applications. Most are published under the **Mycila** name.
+
+**⚡ Power, metering & control**
+
+- [MycilaJSY](https://github.com/mathieucarbou/MycilaJSY) — drivers for JSY single-phase and three-phase bidirectional energy meters.
+- [MycilaJSYApp](https://github.com/mathieucarbou/MycilaJSYApp) — web application for JSY energy meters.
+- [MycilaPZEM](https://github.com/mathieucarbou/MycilaPZEM) — PZEM-004T power and energy meter.
+- [MycilaPulseAnalyzer](https://github.com/mathieucarbou/MycilaPulseAnalyzer) — zero-cross pulse analysis.
+- [MycilaDimmer](https://github.com/mathieucarbou/MycilaDimmer) — TRIAC, SSR and voltage-regulator dimming.
+- [MycilaRelay](https://github.com/mathieucarbou/MycilaRelay) — electromagnetic and solid-state relay control.
+
+**🌐 Connectivity & Home Assistant**
+
+- [MycilaESPConnect](https://github.com/mathieucarbou/MycilaESPConnect) — Wi-Fi / Ethernet network manager with captive portal.
+- [MycilaMQTT](https://github.com/mathieucarbou/MycilaMQTT) — MQTT / MQTTS helper based on Espressif's MQTT client.
+- [MycilaHADiscovery](https://github.com/mathieucarbou/MycilaHADiscovery) — Home Assistant MQTT Discovery.
+- [MycilaNTP](https://github.com/mathieucarbou/MycilaNTP) — NTP time synchronization.
+- [MycilaWebSerial](https://github.com/mathieucarbou/MycilaWebSerial) — lightweight browser-based serial monitor.
+
+**🧠 Runtime, diagnostics & system**
+
+- [MycilaConfig](https://github.com/mathieucarbou/MycilaConfig) — application configuration.
+- [MycilaDataLogger](https://github.com/mathieucarbou/MycilaDataLogger) — remote serial logs, crashes and stack traces.
+- [MycilaLogger](https://github.com/mathieucarbou/MycilaLogger) — logging utilities.
+- [MycilaSafeBoot](https://github.com/mathieucarbou/MycilaSafeBoot) — web-based OTA recovery partition.
+- [MycilaSystem](https://github.com/mathieucarbou/MycilaSystem) — system-level helpers.
+- [MycilaTaskManager](https://github.com/mathieucarbou/MycilaTaskManager) — task management utilities.
+- [MycilaTaskMonitor](https://github.com/mathieucarbou/MycilaTaskMonitor) — FreeRTOS task priorities and stack monitoring.
+- [MycilaTrial](https://github.com/mathieucarbou/MycilaTrial) — trial-period support for embedded applications.
+- [MycilaUtilities](https://github.com/mathieucarbou/MycilaUtilities) — time, string, circular-buffer and general utilities.
+
+**🖥️ Hardware & displays**
+
+- [MycilaDS18](https://github.com/mathieucarbou/MycilaDS18) — Dallas / Maxim temperature sensors.
+- [MycilaEasyDisplay](https://github.com/mathieucarbou/MycilaEasyDisplay) — OLED displays, virtual displays and carousels.
+- [MycilaTrafficLight](https://github.com/mathieucarbou/MycilaTrafficLight) — traffic-light LED control.
+
+## 🏡 Home automation & energy
+
+I also publish practical configurations, integrations and technical notes around solar production, energy metering and home automation:
+
+- [Home Assistant + OpenDTU: inverter zero-injection](https://gist.github.com/mathieucarbou/382556f1279d612962e03232544692d1)
+- [3ERL Zero-Inject instructions & daily PRE+ estimate](https://gist.github.com/mathieucarbou/8d83d25247821e85a693dea61fe4f0d2)
 - [Linky Teleinformation (TIC) + ESPHome + Home Assistant](https://gist.github.com/mathieucarbou/886d2a6f5c0b51bb261d6a1329beb08d)
-- [OpenDTU + Home Assistant](https://gist.github.com/mathieucarbou/70539ced8f330be6205a91897ea1c639)
-- [Renault Zoé E-Tech R110 + Home Assistant + Charge auto avec le soleil](https://gist.github.com/mathieucarbou/e54c29c1f6b091c0e69ad1164550502e)
+- [Home Assistant + RTE Tempo + Shelly](https://gist.github.com/mathieucarbou/e1667cd8e4acd93199b8c879b81aa787)
+- [Home Assistant OpenEVSE integration via MQTT](https://gist.github.com/mathieucarbou/92a3d5e0dc38d6b68aa1bdaf153a80c5)
 
-## Projects
+Browse [all my GitHub Gists](https://gist.github.com/mathieucarbou) for more snippets and examples. You can also [explore all my public repositories](https://github.com/mathieucarbou?tab=repositories).
 
-### Solar Routers / Diverter
+## ☕ Java projects
 
-I am specialized in solar routing / diversion. I have created many solar routers and also libraries to help build solar routers.
+- [License Maven Plugin](https://github.com/mathieucarbou/license-maven-plugin) — Maven license-header management.
+- [Mycila Guice](https://github.com/mathieucarbou/guice) — extensions for Google Guice.
+- [Mycila PubSub](https://github.com/mathieucarbou/pubsub) — in-process publish / subscribe event system.
+- [Mycila XML Tool](https://github.com/mathieucarbou/xmltool) — fluent XML manipulation utilities.
 
-|                                                                                           |        |                                                                                                           |
-| :---------------------------------------------------------------------------------------- | :----: | :-------------------------------------------------------------------------------------------------------- |
-| [Shelly Pro Solar Router](https://yasolr.carbou.me/blog/2024-07-01_shelly_solar_diverter) | Shelly | Your Solar Router based on Shelly components and LSA dimmer                                               |
-| [Home Assistant Solar Router](https://yasolr.carbou.me/blog/2024-09-05_ha_diverter)       |   HA   | Solar Router controlled by Home Assistant and using a Shelly Dimmer Gen3 + LSA for the dimmer             |
-| [YaS☀️lR (Yet another Solar Router)](https://yasolr.carbou.me)                            | ESP32  | Heat water with your Solar Production Excess with the more powerful and precise solar diverter out there! |
+## 📷 Photography & astrophotography
 
-Others
+Photography and astrophotography are a big part of my life outside software engineering.
 
-|                                                                                |       |                                                                |
-| :----------------------------------------------------------------------------- | :---: | :------------------------------------------------------------- |
-| [Beelance](https://beelance.carbou.me)                                         | ESP32 | Autonomous and remotely connected weight scale for beehives 🐝 |
-| [MycilaShutterSpeedTester](https://mathieu.carbou.me/MycilaShutterSpeedTester) | ESP32 | ESP32 firmware to mesure camera shutter speeds                 |
+- 📷 **Photography portfolio:** [mathieu.photography](https://www.mathieu.photography/)
+- 🖼️ **Flickr photostream:** [flickr.com/photos/mathieucarbou](https://www.flickr.com/photos/mathieucarbou/)
+- 🌌 **Astrophotography gallery:** [AstroBin — mathieucarbou](https://app.astrobin.com/u/mathieucarbou)
 
-### License Maven Plugin
+## 🗞️ Selected articles
 
-|                                                                        |       |                                                                                |
-| :--------------------------------------------------------------------- | :---: | :----------------------------------------------------------------------------- |
-| [License Maven Plugin](https://mathieu.carbou.me/license-maven-plugin) | Maven | Maven plugin which helps managing license headers in your project source files |
+- **Solar routing:** [Shelly Solar Diverter](https://yasolr.carbou.me/blog/2024-07-01_shelly_solar_diverter) · [Home Assistant Solar Router](https://yasolr.carbou.me/blog/2024-09-05_ha_diverter)
+- **Power electronics:** [Zero-Cross Pulse Detection](https://yasolr.carbou.me/blog/2024-07-31_zero-cross_pulse_detection) · [Why a good ZCD circuit matters](https://yasolr.carbou.me/blog/2024-07-24_the_importance_of_a_good_zcd_circuit)
+- **Energy metering:** [Everything about JSY meters](https://yasolr.carbou.me/blog/2024-06-26_everything_on_the_jsy) · [JSY-MK-194G](https://yasolr.carbou.me/blog/2024-11-07_jsy_mk_194g) · [Remote JSY over UDP](https://yasolr.carbou.me/blog/2024-06-25_remote_jsy)
 
-## Arduino / ESP32 Libraries
+## 🌍 Community
 
-**AsyncTCP and ESPAsyncWebServer**
+- Bootstrap the [Montreal Java User Group](https://www.montreal-jug.org/) in 2010 and was involved for around 10 years.
+- Formerly involved with [Devoxx4Kids Québec](https://www.devoxx4kids.org/quebec/).
 
-I am actively maintaining these libraries as part of [ESP32Async](https://github.com/ESP32Async) organization:
+---
 
-|                                                                      |       |                                                                                                                  |
-| :------------------------------------------------------------------- | :---: | :--------------------------------------------------------------------------------------------------------------- |
-| [AsyncTCP](https://github.com/ESP32Async/AsyncTCP)                   | ESP32 | AsyncTCP is a library for ESP32 Arduino that facilitates the use of TCP connections in an asynchronous way       |
-| [ESPAsyncWebServer](https://github.com/ESP32Async/ESPAsyncWebServer) | ESP32 | WebSocket, SSE, Authentication, Arduino Json 7, File Upload, Static File serving, URL Rewrite, URL Redirect, etc |
+<div align="center">
 
-**Electricity:**
+**Interested in embedded systems, asynchronous networking, distributed software, home automation, energy or photography?**
 
-|                                                                      |       |                                                                                                                                                                                                                             |
-| :------------------------------------------------------------------- | :---: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [MycilaJSY](https://mathieu.carbou.me/MycilaJSY)                     | ESP32 | Arduino / ESP32 library for the JSY1031, JSY-MK-163, JSY-MK-193, JSY-MK-194, JSY-MK-227, JSY-MK-229, JSY-MK-333 families single-phase and three-phase AC bidirectional meters from Shenzhen Jiansiyan Technologies Co, Ltd. |
-| [MycilaJSYApp](https://mathieu.carbou.me/MycilaJSYApp)               | ESP32 | Arduino / ESP32 Web Application for JSY devices                                                                                                                                                                             |
-| [MycilaPulseAnalyzer](https://mathieu.carbou.me/MycilaPulseAnalyzer) | ESP32 | ESP32 / Arduino Library to analyze pulses from a Zero-Cross Detection circuit                                                                                                                                               |
-| [MycilaDimmer](https://mathieu.carbou.me/MycilaDimmer)               | ESP32 | ESP32 / Arduino Library to control TRIAC, Random SSR, Voltage Regulator with DfRobot DAC or PWM                                                                                                                             |
-| [MycilaPZEM](https://mathieu.carbou.me/MycilaPZEM)                   | ESP32 | Arduino / ESP32 library for the PZEM-004T v3 and v4 Power and Energy monitor                                                                                                                                                |
-| [MycilaRelay](https://mathieu.carbou.me/MycilaRelay)                 | ESP32 | Arduino / ESP32 library to control Electromagnetic and Solid State Relays                                                                                                                                                   |
+[GitHub](https://github.com/mathieucarbou) · [LinkedIn](https://www.linkedin.com/in/mathieucarbou/) · [Personal website](https://mathieu.carbou.me/) · [Photography](https://www.mathieu.photography/) · [AstroBin](https://app.astrobin.com/u/mathieucarbou)
 
-**GPIO Components:**
-
-|                                                                    |       |                                                                                   |
-| :----------------------------------------------------------------- | :---: | :-------------------------------------------------------------------------------- |
-| [MycilaDS18](https://mathieu.carbou.me/MycilaDS18)                 | ESP32 | ESP32 / Arduino Library for Dallas / Maxim Temperature Integrated Circuits        |
-| [MycilaEasyDisplay](https://mathieu.carbou.me/MycilaEasyDisplay)   | ESP32 | Easy to use Arduino / ESP32 library for SH1106, SH1107, SSD1306 OLED I2C displays |
-| [MycilaTrafficLight](https://mathieu.carbou.me/MycilaTrafficLight) | ESP32 | ESP32 / Arduino Library for Traffic Light LEDs                                    |
-
-**MQTT / Home Assistant:**
-
-|                                                                  |       |                                                                                     |
-| :--------------------------------------------------------------- | :---: | :---------------------------------------------------------------------------------- |
-| [MycilaHADiscovery](https://mathieu.carbou.me/MycilaHADiscovery) | ESP32 | Simple and efficient Home Assistant Discovery library for Arduino / ESP32           |
-| [MycilaMQTT](https://mathieu.carbou.me/MycilaMQTT)               | ESP32 | A simple and efficient MQTT/MQTTS client for Arduino / ESP32 based on Espressif API |
-
-**Network:**
-
-|                                                                |       |                                                                                         |
-| :------------------------------------------------------------- | :---: | :-------------------------------------------------------------------------------------- |
-| [MycilaESPConnect](https://mathieu.carbou.me/MycilaESPConnect) | ESP32 | Simple & Easy Network Manager with Captive Portal for ESP32 supporting Ethernet         |
-| [MycilaNTP](https://mathieu.carbou.me/MycilaNTP)               | ESP32 | A simple and efficient NTP library for ESP32 / Arduino                                  |
-| [MycilaWebSerial](https://mathieu.carbou.me/MycilaWebSerial)   | ESP32 | WebSerial is a Serial Monitor for ESP32 that can be accessed remotely via a web browser |
-
-**System:**
-
-|                                                                  |       |                                                                                                                                                     |
-| :--------------------------------------------------------------- | :---: | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [MycilaConfig](https://mathieu.carbou.me/MycilaConfig)           | ESP32 | A simple and efficient config library                                                                                                               |
-| [MycilaDataLogger](https://mathieu.carbou.me/MycilaDataLogger)   | ESP32 | ESP32 firmware to connect an ESP32 to an existing ESP32 to view the Serial logs including crashes and stack traces remotely through a web interface |
-| [MycilaLogger](https://mathieu.carbou.me/MycilaLogger)           | ESP32 | A simple and efficient logging library for Arduino / ESP32                                                                                          |
-| [MycilaSafeBoot](https://mathieu.carbou.me/MycilaSafeBoot)       | ESP32 | MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino allowing for a bigger application partition                                      |
-| [MycilaSystem](https://mathieu.carbou.me/MycilaSystem)           | ESP32 | Arduino / ESP32 library for system-related tasks                                                                                                    |
-| [MycilaTaskManager](https://mathieu.carbou.me/MycilaTaskManager) | ESP32 | Arduino / ESP32 Task Manager Library                                                                                                                |
-| [MycilaTaskMonitor](https://mathieu.carbou.me/MycilaTaskMonitor) | ESP32 | Arduino / ESP32 library to monitor task priority and stack high watermark                                                                           |
-| [MycilaTrial](https://mathieu.carbou.me/MycilaTrial)             | ESP32 | Arduino / ESP32 library to add a trial duration in your app                                                                                         |
-| [MycilaUtilities](https://mathieu.carbou.me/MycilaUtilities)     | ESP32 | Utils stuff for Arduino / ESP32 like Time, String functions, CircularBuffer, etc                                                                    |
-
-## Java Libraries
-
-|                                                      |      |                                                 |
-| :--------------------------------------------------- | :--: | :---------------------------------------------- |
-| [Mycila Guice](https://mathieu.carbou.me/guice)      | Java | Google Guice Extensions                         |
-| [Mycila Pub Sub](https://mathieu.carbou.me/pubsub)   | Java | In-JVM Event API                                |
-| [Mycila XML Tool](https://mathieu.carbou.me/xmltool) | Java | Manage XML document through a simple fluent API |
-
-## Contributing / collaborating to these projects
-
-|                                                                                                                                                            |       |                                                                                                                                                                                                           |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :---: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Arduino Core](https://github.com/espressif/arduino-esp32) from [Espressif Systems](https://github.com/espressif)                                          | ESP32 | I have contributed fixes and WebServer improvements such as middleware support                                                                                                                            |
-| [ESP-DASH](https://github.com/ayushsharma82/ESP-DASH) and [ESP-DASH Pro](https://espdash.pro) from [@ayushsharma82](https://github.com/ayushsharma82)      | ESP32 | ESP-DASH is a library for ESP32 Arduino that facilitates the use of a dashboard in an asynchronous way. I have contributed most of the recently newly added fixes and features of the OSS and Pro version |
-| [pioarduino](https://github.com/pioarduino/platform-espressif32) ([Discord](https://discord.gg/GRBX2hXBE3))                                                | ESP32 | PlatformIO replacement with Vscode extension which is compatible with Arduino 3 and new boards                                                                                                            |
-| [WebSerial](https://github.com/ayushsharma82/WebSerial) and [WebSerial Pro](https://webserial.pro) from [@ayushsharma82](https://github.com/ayushsharma82) | ESP32 | WebSerial is a Serial Monitor for ESP32 that can be accessed remotely via a web browser. I have contributing the recent fixes and high performance mode                                                   |
-
-## Statistics
-
-[![](https://github-readme-stats.vercel.app/api/top-langs/?username=mathieucarbou&layout=compact&show_icons=true&theme=dark#gh-dark-mode-only&count_private=true&include_all_commits=true)](https://github.com/mathieucarbou/)
-[![](https://github-readme-stats.vercel.app/api?username=mathieucarbou&show_icons=true&theme=dark#gh-dark-mode-only&count_private=true&include_all_commits=true)](https://github.com/mathieucarbou/)
+</div>
