@@ -1,0 +1,105 @@
+site_name: Mathieu Carbou
+site_url: https://mathieu.carbou.me/
+site_description: Lead Software Engineer in Terracotta R&D @ IBM — embedded systems, asynchronous networking, distributed software and photography.
+site_author: Mathieu Carbou
+repo_url: https://github.com/mathieucarbou/mathieucarbou.github.io
+repo_name: mathieucarbou/mathieucarbou.github.io
+edit_uri: edit/master/docs/
+copyright: Copyright &copy; Mathieu Carbou
+
+exclude_docs: |
+  prep/README.md
+
+theme:
+  name: material
+  language: en
+  logo: assets/img/avatar.png
+  favicon: assets/img/favicon.png
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/mathieucarbou
+      name: GitHub
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/mathieucarbou/
+      name: LinkedIn
+    - icon: fontawesome/brands/flickr
+      link: https://www.flickr.com/photos/mathieucarbou/
+      name: Flickr
+    - icon: material/telescope
+      link: https://app.astrobin.com/u/mathieucarbou
+      name: AstroBin
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+validation:
+  links:
+    not_found: ignore
+    absolute_links: ignore
+
+nav:
+  - 🏠 Home: index.md
+  - 🚀 Projects: projects.md
+  - 🧩 ESP32 / Arduino: arduino.md
+  - ☕ Java: java.md
+  - ⚡ Energy & Home Automation: energy.md
+  - 📷 Photography: photography.md
+  - ✉️ Contact: contact.md

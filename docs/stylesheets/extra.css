@@ -1,0 +1,18 @@
+/* Custom styling for the personal website */
+
+/* Keep the profile picture in the header small and round */
+.md-header__button.md-logo img,
+.md-nav__button.md-logo img {
+  border-radius: 50%;
+}
+
+/* Let wide tables scroll instead of overflowing */
+.md-typeset table:not([class]) {
+  display: table;
+  width: 100%;
+}
+
+/* Slightly tighter vertical rhythm for long lists of links */
+.md-typeset ul li {
+  margin-bottom: 0.25em;
+}
