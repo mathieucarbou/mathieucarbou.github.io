@@ -1,5 +1,6 @@
 <div align="center">
-  **Lead Software Engineer @ IBM · Open-source maintainer · ESP32 / Arduino developer · Photographer & astrophotographer**
+
+ **Lead Software Engineer @ IBM · Open-source maintainer · ESP32 / Arduino developer · Photographer & astrophotographer**
 
   [![GitHub](https://img.shields.io/badge/GitHub-@mathieucarbou-181717?style=for-the-badge&logo=github)](https://github.com/mathieucarbou)
   [![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/mathieucarbou/)
