@@ -1,0 +1,29 @@
+{% set profile = config.extra.profile %}
+{% if profile %}
+  <div class="md-sidecard">
+    {% if profile.avatar %}
+      <img class="md-sidecard__avatar" src="{{ profile.avatar | url }}" alt="{{ config.site_name }}">
+    {% endif %}
+    <div class="md-sidecard__name">
+      <a href="{{ nav.homepage.url | url }}">{{ config.site_name }}</a>
+    </div>
+    {% if profile.title %}
+      <div class="md-sidecard__title">{{ profile.title }}</div>
+    {% endif %}
+    {% if profile.links %}
+      <ul class="md-sidecard__links">
+        {% for link in profile.links %}
+          <li>
+            <a class="md-sidecard__link" href="{{ link.link }}" title="{{ link.name }}"
+               {% if link.link.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %}>
+              <span class="md-sidecard__icon md-icon">
+                {% include ".icons/" ~ link.icon ~ ".svg" %}
+              </span>
+              <span class="md-sidecard__label">{{ link.name }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+{% endif %}

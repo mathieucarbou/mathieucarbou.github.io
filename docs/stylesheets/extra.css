@@ -1,9 +1,83 @@
 /* Custom styling for the personal website */
 
-/* Keep the profile picture in the header small and round */
+/* Round the profile picture used as the site logo */
 .md-header__button.md-logo img,
 .md-nav__button.md-logo img {
   border-radius: 50%;
+}
+
+/* Profile card in the left sidebar (photo + main links) */
+.md-sidecard {
+  margin: 1rem 0 0.4rem;
+  text-align: center;
+}
+
+.md-sidecard__avatar {
+  display: block;
+  width: 70%;
+  max-width: 150px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.22);
+}
+
+.md-sidecard__name {
+  margin: 0.7rem 0 0.15rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.md-sidecard__name a {
+  color: var(--md-default-fg-color);
+}
+
+.md-sidecard__title {
+  font-size: 0.6rem;
+  line-height: 1.45;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-sidecard__links {
+  list-style: none;
+  margin: 0.75rem 0 0.6rem;
+  padding: 0.7rem 0 0;
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+  text-align: left;
+  font-size: 0.68rem;
+}
+
+.md-sidecard__links li {
+  margin: 0;
+  padding: 0;
+}
+
+.md-sidecard__link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.28rem 0.2rem;
+  border-radius: 0.2rem;
+  color: var(--md-default-fg-color--light);
+  transition: background-color 125ms, color 125ms;
+}
+
+.md-sidecard__link:hover,
+.md-sidecard__link:focus {
+  background-color: var(--md-default-fg-color--lightest);
+  color: var(--md-primary-fg-color);
+}
+
+.md-sidecard__icon {
+  flex: 0 0 auto;
+}
+
+/* The GitHub button links to the profile, so star/fork counters are meaningless */
+.md-header__source .md-source__facts,
+.md-nav__source .md-source__facts {
+  display: none;
 }
 
 /* Let wide tables scroll instead of overflowing */
@@ -15,4 +89,46 @@
 /* Slightly tighter vertical rhythm for long lists of links */
 .md-typeset ul li {
   margin-bottom: 0.25em;
+}
+
+/* On desktop the top tabs already provide navigation, so the duplicate
+   single-entry nav tree below the profile links is hidden. */
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--primary .md-nav--primary > .md-nav__title,
+  .md-sidebar--primary .md-nav--primary > .md-nav__source,
+  .md-sidebar--primary .md-nav--primary > .md-nav__list {
+    display: none;
+  }
+}
+
+/* On mobile the left sidebar becomes the drawer nav, which Material
+   positions absolutely over the whole panel. Let the profile card and the
+   nav flow in the drawer instead of overlapping, and drop the drawer header
+   since the profile card already shows the avatar and name. */
+@media screen and (max-width: 76.234375em) {
+  .md-sidebar--primary .md-sidebar__scrollwrap {
+    overflow-y: auto;
+  }
+
+  .md-sidebar--primary .md-sidebar__inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  .md-sidebar--primary .md-nav--primary {
+    position: static;
+    height: auto;
+    flex: 1;
+  }
+
+  .md-sidebar--primary .md-nav--primary > .md-nav__title,
+  .md-sidebar--primary .md-nav--primary > .md-nav__source {
+    display: none;
+  }
+
+  .md-sidebar--primary .md-sidecard {
+    padding: 0 0.6rem;
+    margin-top: 0.6rem;
+  }
 }

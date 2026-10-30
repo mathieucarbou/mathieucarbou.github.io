@@ -4,11 +4,6 @@
 
 *I build distributed software, work on embedded systems and connected devices, and spend clear nights collecting photons.*
 
-[GitHub](https://github.com/mathieucarbou){ .md-button }
-[LinkedIn](https://www.linkedin.com/in/mathieucarbou/){ .md-button }
-[Photography](https://www.mathieu.photography/){ .md-button }
-[AstroBin](https://app.astrobin.com/u/mathieucarbou){ .md-button }
-
 ---
 
 ## 👋 About me

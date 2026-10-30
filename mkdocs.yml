@@ -13,6 +13,7 @@ exclude_docs: |
 theme:
   name: material
   language: en
+  custom_dir: docs/overrides
   logo: assets/img/avatar.png
   favicon: assets/img/favicon.png
   icon:
@@ -50,6 +51,28 @@ extra_css:
 
 extra:
   generator: false
+  # The header GitHub button links to the profile, not to this website's repo
+  repo_link: https://github.com/mathieucarbou/
+  repo_label: mathieucarbou
+  profile:
+    avatar: assets/img/avatar.png
+    title: Lead Software Engineer in Terracotta R&D @ IBM, Arduino / ESP32 developer
+    links:
+      - name: GitHub
+        icon: fontawesome/brands/github
+        link: https://github.com/mathieucarbou
+      - name: LinkedIn
+        icon: fontawesome/brands/linkedin
+        link: https://www.linkedin.com/in/mathieucarbou/
+      - name: Photography
+        icon: material/camera
+        link: https://www.mathieu.photography/
+      - name: AstroBin
+        icon: material/telescope
+        link: https://app.astrobin.com/u/mathieucarbou
+      - name: Flickr
+        icon: fontawesome/brands/flickr
+        link: https://www.flickr.com/photos/mathieucarbou/
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/mathieucarbou
