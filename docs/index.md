@@ -58,6 +58,12 @@ I enjoy moving between low-level firmware and large-scale software systems — a
 
 ## ⭐ Featured projects
 
+### 🏅 Arduino Open Source Report 2025
+
+The [Arduino Open Source Report 2025](ArduinoOpenSourceReport2025.pdf) lists **Mathieu Carbou with 154 library releases** in 2025 and **ESP32 Asynchronous Networking with 40 releases**. The report's ranking is based on release frequency — nominated twice, both as an individual and as part of the [ESP32Async](https://github.com/ESP32Async) organization.
+
+[Read the report](ArduinoOpenSourceReport2025.pdf){ .md-button } [Arduino Forum discussion](https://forum.arduino.cc/t/arduino-open-source-report-2025/1437540){ .md-button }
+
 ### ☀️ [YaS☀️lR — Yet another Solar Router](https://github.com/mathieucarbou/YaSolR)
 
 An open-source ESP32 solar power diverter. It uses surplus photovoltaic production to drive a resistive load, typically a water heater, with fine-grained power control.

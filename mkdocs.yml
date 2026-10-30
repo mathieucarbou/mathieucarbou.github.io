@@ -15,7 +15,7 @@ theme:
   language: en
   custom_dir: docs/overrides
   logo: assets/img/avatar.png
-  favicon: assets/img/favicon.png
+  favicon: assets/img/favicon-32.png
   icon:
     repo: fontawesome/brands/github
   palette:

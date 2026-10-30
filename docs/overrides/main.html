@@ -1,9 +1,19 @@
 {#-
-  Injects the profile card (picture + main links) at the top of the left
-  sidebar, above the navigation tree. The rest mirrors base.html so the
-  default sidebars are rendered exactly once.
+  Customisations:
+  - profile card (picture + main links) at the top of the left sidebar
+  - explicit icon links, because Safari ignores the relative PNG icon for
+    tabs and bookmarks and instead probes /favicon.ico and
+    /apple-touch-icon.png at the site root
 -#}
 {% extends "base.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ 'assets/img/favicon-32.png' | url }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ 'assets/img/favicon-192.png' | url }}">
+  <link rel="icon" type="image/x-icon" href="{{ 'favicon.ico' | url }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ 'apple-touch-icon.png' | url }}">
+{% endblock %}
 
 {% block site_nav %}
   {% if nav %}
